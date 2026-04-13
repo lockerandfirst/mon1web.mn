@@ -1,109 +1,163 @@
-"use client"
+"use client";
 
-import { Apartment, formatPrice } from "@/lib/data"
-import { MapPin } from "lucide-react"
+import { useEffect, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { formatPrice, type Apartment } from "@/lib/data";
 
-interface MapViewProps {
-  apartments: Apartment[]
-  selectedId?: string | null
-  onSelectApartment?: (id: string) => void
-}
+type MapViewProps = {
+  apartments: Apartment[];
+  selectedId: string | null;
+  onSelectApartment: (id: string) => void;
+};
 
-export function MapView({ apartments, selectedId, onSelectApartment }: MapViewProps) {
-  // Calculate center of all apartments
-  const center = {
-    lat: apartments.reduce((sum, apt) => sum + apt.coordinates.lat, 0) / apartments.length || 47.9184,
-    lng: apartments.reduce((sum, apt) => sum + apt.coordinates.lng, 0) / apartments.length || 106.9177
-  }
+export function MapView({
+  apartments,
+  selectedId,
+  onSelectApartment,
+}: MapViewProps) {
+  const [isMounted, setIsMounted] = useState(false);
+  const mapElementRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markerLayerRef = useRef<L.LayerGroup | null>(null);
 
-  // Map dimensions
-  const mapWidth = 100
-  const mapHeight = 100
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-  // Convert lat/lng to x/y positions (simple projection)
-  const getPosition = (apt: Apartment) => {
-    const latRange = { min: 47.85, max: 47.95 }
-    const lngRange = { min: 106.85, max: 106.95 }
-    
-    const x = ((apt.coordinates.lng - lngRange.min) / (lngRange.max - lngRange.min)) * mapWidth
-    const y = ((latRange.max - apt.coordinates.lat) / (latRange.max - latRange.min)) * mapHeight
-    
-    return { x: Math.max(5, Math.min(95, x)), y: Math.max(5, Math.min(95, y)) }
-  }
+  useEffect(() => {
+    if (!isMounted || !mapElementRef.current || mapRef.current) {
+      return;
+    }
+
+    const defaultCenter: [number, number] = [47.9188, 106.9176];
+    const map = L.map(mapElementRef.current, {
+      center: defaultCenter,
+      zoom: 13,
+      zoomControl: false,
+    });
+
+    L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      },
+    ).addTo(map);
+
+    markerLayerRef.current = L.layerGroup().addTo(map);
+    mapRef.current = map;
+
+    return () => {
+      markerLayerRef.current?.clearLayers();
+      markerLayerRef.current = null;
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [isMounted]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const markerLayer = markerLayerRef.current;
+
+    if (!map || !markerLayer) {
+      return;
+    }
+
+    const defaultCenter: [number, number] = [47.9188, 106.9176];
+    const activeApt = apartments.find(
+      (apartment) => apartment.id === selectedId,
+    );
+    const currentCenter: [number, number] = activeApt
+      ? [activeApt.coordinates.lat, activeApt.coordinates.lng]
+      : defaultCenter;
+
+    map.setView(currentCenter, activeApt ? 16 : 13, {
+      animate: true,
+    });
+
+    markerLayer.clearLayers();
+
+    apartments.forEach((apt) => {
+      const customIcon = L.divIcon({
+        className: "custom-div-icon",
+        iconSize: [0, 0],
+        iconAnchor: [0, 0],
+        html: `
+          <div class="marker-wrapper ${selectedId === apt.id ? "is-active" : ""}">
+            <div class="marker-bubble">${formatPrice(apt.price)}</div>
+            <div class="marker-arrow"></div>
+          </div>
+        `,
+      });
+
+      L.marker([apt.coordinates.lat, apt.coordinates.lng], {
+        icon: customIcon,
+      })
+        .on("click", () => onSelectApartment(apt.id))
+        .addTo(markerLayer);
+    });
+  }, [apartments, onSelectApartment, selectedId]);
+
+  if (!isMounted)
+    return <div className="h-full w-full animate-pulse bg-slate-100" />;
 
   return (
-    <div className="relative w-full h-full bg-secondary/5 rounded-lg overflow-hidden">
-      {/* Mapbox-style background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 via-muted to-secondary/5">
-        {/* Grid lines */}
-        <div className="absolute inset-0 opacity-20">
-          {[...Array(10)].map((_, i) => (
-            <div key={`h-${i}`} className="absolute w-full h-px bg-secondary/30" style={{ top: `${(i + 1) * 10}%` }} />
-          ))}
-          {[...Array(10)].map((_, i) => (
-            <div key={`v-${i}`} className="absolute h-full w-px bg-secondary/30" style={{ left: `${(i + 1) * 10}%` }} />
-          ))}
-        </div>
-        
-        {/* Decorative elements to look like a map */}
-        <div className="absolute top-1/4 left-1/4 w-32 h-24 bg-secondary/10 rounded-lg opacity-50" />
-        <div className="absolute bottom-1/3 right-1/3 w-40 h-16 bg-secondary/10 rounded-lg opacity-50" />
-        <div className="absolute top-1/2 left-1/2 w-48 h-1 bg-muted-foreground/20 -rotate-45" />
-        <div className="absolute top-1/3 left-1/3 w-32 h-1 bg-muted-foreground/20 rotate-12" />
-      </div>
+    <div className="relative z-0 h-full w-full">
+      <div ref={mapElementRef} className="h-full w-full" />
 
-      {/* Location label */}
-      <div className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-sm border border-border">
-        <p className="text-sm font-medium text-foreground">Ulaanbaatar, Mongolia</p>
-        <p className="text-xs text-muted-foreground">{apartments.length} properties</p>
-      </div>
+      <style jsx global>{`
+        .custom-div-icon {
+          border: none !important;
+          background: none !important;
+        }
 
-      {/* Map markers */}
-      {apartments.map((apt) => {
-        const pos = getPosition(apt)
-        const isSelected = selectedId === apt.id
-        
-        return (
-          <button
-            key={apt.id}
-            className={`absolute transform -translate-x-1/2 -translate-y-full transition-all duration-200 z-10 group ${
-              isSelected ? "z-20 scale-110" : "hover:z-20 hover:scale-105"
-            }`}
-            style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-            onClick={() => onSelectApartment?.(apt.id)}
-          >
-            {/* Price tag marker */}
-            <div className={`px-2 py-1 rounded-lg shadow-lg whitespace-nowrap transition-colors ${
-              isSelected 
-                ? "bg-primary text-primary-foreground" 
-                : "bg-card text-foreground group-hover:bg-primary group-hover:text-primary-foreground"
-            }`}>
-              <span className="text-xs font-semibold">{formatPrice(apt.price)}</span>
-            </div>
-            {/* Pointer */}
-            <div className={`w-0 h-0 mx-auto border-l-[6px] border-r-[6px] border-t-[8px] border-transparent transition-colors ${
-              isSelected 
-                ? "border-t-primary" 
-                : "border-t-card group-hover:border-t-primary"
-            }`} />
-          </button>
-        )
-      })}
+        .marker-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          transform: translate(-50%, -100%);
+          filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+          transition: all 0.2s ease;
+        }
 
-      {/* Zoom controls placeholder */}
-      <div className="absolute bottom-4 right-4 flex flex-col gap-1">
-        <button className="w-8 h-8 bg-card rounded-lg shadow-sm border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors">
-          +
-        </button>
-        <button className="w-8 h-8 bg-card rounded-lg shadow-sm border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors">
-          -
-        </button>
-      </div>
+        .marker-bubble {
+          background: white;
+          color: #1e293b;
+          width: max-content;
+          white-space: nowrap;
+          border-radius: 12px;
+          border: 1.5px solid #e2e8f0;
+          padding: 6px 12px;
+          font-size: 11px;
+          font-weight: 800;
+          transition: all 0.2s ease;
+        }
 
-      {/* Attribution */}
-      <div className="absolute bottom-4 left-4 text-xs text-muted-foreground/50">
-        Map data preview
-      </div>
+        .marker-arrow {
+          width: 0;
+          height: 0;
+          margin-top: -1px;
+          border-left: 6px solid transparent;
+          border-right: 6px solid transparent;
+          border-top: 6px solid white;
+        }
+
+        .marker-wrapper.is-active {
+          z-index: 999 !important;
+        }
+
+        .marker-wrapper.is-active .marker-bubble {
+          background: var(--brand-start);
+          color: white;
+          border-color: var(--brand-start);
+          transform: scale(1.08);
+        }
+
+        .marker-wrapper.is-active .marker-arrow {
+          border-top-color: var(--brand-start);
+        }
+      `}</style>
     </div>
-  )
+  );
 }

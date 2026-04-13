@@ -15,9 +15,11 @@ import {
   LayoutGrid,
   BriefcaseBusiness,
   LayoutDashboard,
+  Newspaper,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils"; // classNames нэгтгэх функц
+import { clerkAppearance, clerkUserButtonAppearance } from "@/lib/clerk-theme";
 
 export function Header() {
   const { isSignedIn } = useAuth();
@@ -36,6 +38,7 @@ export function Header() {
     { name: "Нүүр", href: "/home", icon: Home },
     { name: "Зарууд", href: "/listings", icon: LayoutGrid },
     { name: "Газрын зураг", href: "/map", icon: Map },
+    { name: "Мэдээ", href: "/news", icon: Newspaper },
     { name: "Агент портал", href: "/agent-portal", icon: BriefcaseBusiness },
     { name: "Хянах самбар", href: "/dashboard", icon: LayoutDashboard },
   ];
@@ -51,30 +54,14 @@ export function Header() {
     >
       <div className="container mx-auto flex items-center justify-between px-4 lg:px-8">
         {/* LOGO */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 group transition-all active:scale-95"
-        >
-          {/* Square Container (W=H) */}
-          <div className="bg-primary rounded-2xl overflow-hidden w-12 h-12 flex items-center justify-center shadow-lg shadow-black/5 p-1 border border-border/50 group-hover:shadow-black/10 transition-shadow">
-            <Image
-              src="/forwebyg.png" // Чиний w=h лого
-              alt="Mon1.mn Real Estate"
-              width={48} // Контейнертэй ижил (w-12 = 48px)
-              height={48}
-              className="w-full h-full object-contain" // Контейнертээ яг таарна
-              priority
-            />
-          </div>
-          {/* Логоны хажууд Брэндийн нэр (Орчин үеийн UX) */}
-          <div className="flex flex-col">
-            <span className="text-xl font-bold tracking-tight text-foreground leading-none">
-              Mon1.mn
-            </span>
-            <span className="text-[11px] uppercase tracking-widest text-muted-foreground font-semibold">
-              apartments & real estate in Mongolia
-            </span>
-          </div>
+        <Link href="/" className="flex items-center gap-3 group">
+          <Image
+            src="/ZAAAA.png"
+            alt="Mon1 logo"
+            width={30}
+            height={30}
+            className="w-25 object-contain " // 'invert grayscale'-ийг устгав
+          />
         </Link>
 
         {/* DESKTOP NAV */}
@@ -84,10 +71,10 @@ export function Header() {
               key={link.href}
               href={link.href}
               className={cn(
-                "px-4 py-2 text-sm font-medium rounded-full transition-all",
+                "px-4 py-2 text-[16px] font-bold rounded-full transition-all",
                 pathname === link.href
-                  ? "bg-background text-primary shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
+                  ? "bg-background text-[#2a00ff] shadow-sm"
+                  : "text-[#ff3bad] hover:text-[#2a00ff]",
               )}
             >
               {link.name}
@@ -99,21 +86,21 @@ export function Header() {
         <div className="hidden md:flex items-center gap-3">
           {!isSignedIn && (
             <>
-              <SignInButton mode="modal">
+              <SignInButton mode="modal" appearance={clerkAppearance}>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="gap-2 hover:bg-muted font-medium"
+                  className="gap-2 hover:bg-muted font-bold text-[#ff3bad] hover:text-[#2a00ff]"
                 >
-                  <User className="h-4 w-4 text-primary" />
+                  <User className="h-4 w-4 text-[#2a00ff] font-bold" />
                   Нэвтрэх
                 </Button>
               </SignInButton>
-              <SignUpButton mode="modal">
+              <SignUpButton mode="modal" appearance={clerkAppearance}>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="font-medium rounded-full px-5"
+                  className="font-bold rounded-full  px-5 text-[#2a00ff] border-[#2a00ff]/30 hover:text-[#ff3bad]"
                 >
                   Бүртгүүлэх
                 </Button>
@@ -123,7 +110,7 @@ export function Header() {
           <Link href="/add-property">
             <Button
               size="sm"
-              className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/10 rounded-full px-5"
+              className="gap-2 bg-primary text-primary-foreground font-bold hover:bg-primary/90 shadow-md shadow-primary/10 rounded-full px-5"
             >
               <Plus className="h-4 w-4" />
               Зар нэмэх
@@ -131,13 +118,7 @@ export function Header() {
           </Link>
           {isSignedIn && (
             <>
-              <UserButton
-                appearance={{
-                  elements: {
-                    avatarBox: "h-10 w-10",
-                  },
-                }}
-              />
+              <UserButton appearance={clerkUserButtonAppearance} />
             </>
           )}
         </div>
@@ -146,7 +127,7 @@ export function Header() {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden rounded-full hover:bg-muted"
+          className="md:hidden rounded-full text-[#ff3bad] hover:bg-muted hover:text-[#2a00ff]"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? (
@@ -169,8 +150,8 @@ export function Header() {
                 className={cn(
                   "flex items-center gap-3 p-3 rounded-xl transition-colors",
                   pathname === link.href
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground",
+                    ? "bg-primary/10 text-[#2a00ff]"
+                    : "text-[#ff3bad]",
                 )}
               >
                 <link.icon className="h-5 w-5" />
@@ -180,18 +161,18 @@ export function Header() {
             <div className="grid grid-cols-2 gap-3 pt-6 border-t border-border mt-2">
               {!isSignedIn && (
                 <>
-                  <SignInButton mode="modal">
+                  <SignInButton mode="modal" appearance={clerkAppearance}>
                     <Button
                       variant="outline"
-                      className="w-full gap-2 rounded-xl"
+                      className="w-full gap-2 rounded-xl text-[#ff3bad] border-[#2a00ff]/30 hover:text-[#2a00ff]"
                     >
                       Нэвтрэх
                     </Button>
                   </SignInButton>
-                  <SignUpButton mode="modal">
+                  <SignUpButton mode="modal" appearance={clerkAppearance}>
                     <Button
                       variant="outline"
-                      className="w-full gap-2 rounded-xl"
+                      className="w-full gap-2 rounded-xl text-[#2a00ff] border-[#2a00ff]/30 hover:text-[#ff3bad]"
                     >
                       Бүртгүүлэх
                     </Button>
@@ -203,19 +184,13 @@ export function Header() {
                   <Link href="/agent-portal" className="w-full">
                     <Button
                       variant="outline"
-                      className="w-full gap-2 rounded-xl"
+                      className="w-full gap-2 rounded-xl text-[#ff3bad] border-[#2a00ff]/30 hover:text-[#2a00ff]"
                     >
                       Хянах самбар
                     </Button>
                   </Link>
                   <div className="flex items-center justify-center">
-                    <UserButton
-                      appearance={{
-                        elements: {
-                          avatarBox: "h-10 w-10",
-                        },
-                      }}
-                    />
+                    <UserButton appearance={clerkUserButtonAppearance} />
                   </div>
                 </>
               )}

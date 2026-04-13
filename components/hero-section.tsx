@@ -1,194 +1,137 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PROPERTY_CATEGORIES } from "@/lib/property-types";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search, MapPin, Home, Banknote, Sparkles } from "lucide-react";
+  Building2,
+  Building,
+  House,
+  Landmark,
+  Warehouse,
+  BriefcaseBusiness,
+  CarFront,
+  KeyRound,
+  ArrowRight,
+  PlusCircle,
+  Search,
+} from "lucide-react";
+
+const categoryIcons = {
+  apartment: Building2,
+  "new-apartment": Building,
+  rent: KeyRound,
+  house: House,
+  land: Landmark,
+  office: BriefcaseBusiness,
+  barter: CarFront,
+  industrial: Warehouse,
+} as const;
 
 export function HeroSection() {
   const router = useRouter();
-  const [location, setLocation] = useState("");
-  const [priceRange, setPriceRange] = useState("");
-  const [rooms, setRooms] = useState("");
-  const selectItemClassName = "text-white data-[highlighted]:text-[#0044ff]";
 
-  const handleSearch = () => {
-    const params = new URLSearchParams();
-
-    if (location.trim()) {
-      params.set("q", location.trim());
-    }
-
-    if (priceRange) {
-      params.set("price", priceRange);
-    }
-
-    if (rooms) {
-      params.set("rooms", rooms);
-    }
-
-    const query = params.toString();
-    router.push(query ? `/listings?${query}` : "/listings");
+  const openCategory = (category: string) => {
+    router.push(`/listings?category=${category}`);
   };
 
   return (
-    <section className="relative h-screen w-full -mt-17 mb-15 flex items-center justify-center overflow-hidden bg-black">
-      {/* Background Overlay */}
-      <div className="absolute inset-0 z-0">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105 animate-slow-zoom"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070')",
-          }}
-        />
-        <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/40 to-black/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)] opacity-70" />
-      </div>
+    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-white py-10 md:py-12">
+      {/* --- BACKGROUND DECOR --- */}
 
-      <div className="relative z-10 container mx-auto px-4">
-        <div className="max-w-6xl mx-auto text-center mb-12">
-          {/* Badge */}
+      <div className="relative z-10 container mx-auto -mt-20 px-4">
+        {/* --- HEADER SECTION --- */}
+        <div className="mx-auto mb-8 max-w-5xl text-center md:mb-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8"
+            className="mb-5 inline-flex w-fit items-center gap-2 italic rounded-full border border-[#2a00ff]/10 bg-[#eeebff] px-3 py-1 text-[12px] font-black uppercase tracking-[0.15em] text-[#2a00ff] shadow-sm"
           >
-            <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-            <span className="text-white/80 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em]">
-              Монголын №1 Үл хөдлөх хөрөнгийн платформ
-            </span>
+            <Building2 className="h-3.5 w-3.5" />
+            <span className="leading-none">Бид авна, бид бас зарна</span>
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 tracking-tighter leading-[0.9]"
+            className="mb-3 text-4xl font-black leading-[0.92] tracking-tighter italic pb-2 text-brand-gradient sm:text-5xl md:text-6xl lg:text-7xl"
           >
-            Мөрөөдлийн <span className="text-primary">гэрээ</span> <br />
-            эндээс олоорой.
+            Зөвхөн <span className="text-[#ff00c8]">1 хувь</span>
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-base md:text-lg text-white/50 max-w-2xl mx-auto font-medium"
+            className="mx-auto max-w-xl text-sm font-medium text-[#ff3ccf] sm:text-base"
           >
-            Улаанбаатар даяарх хамгийн шилдэг, баталгаажсан зарууд.
+            Монголын Үндэсний үл хөдлөх хөрөнгийн агентлаг.
           </motion.p>
         </div>
 
-        {/* --- FIXED SEARCH FORM --- */}
+        {/* --- ACTION BUTTONS (AVNA / ZARNA) --- */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="flex flex-row items-center justify-center gap-3 mb-8"
+        >
+          {" "}
+          <button
+            onClick={() => router.push("/add-property")}
+            className="group flex items-center gap-2 rounded-2xl bg-white border-2 border-[#ff00c8] px-8 py-4 text-sm font-black uppercase tracking-widest text-[#ff00c8] shadow-lg shadow-[#ff00c8]/10 transition-all hover:scale-105 hover:bg-[#fff1f9] active:scale-95"
+          >
+            <PlusCircle className="h-4 w-4 transition-transform group-hover:rotate-90" />
+            Зарна
+          </button>
+          <button
+            onClick={() => router.push("/listings")}
+            className="group flex items-center gap-2 rounded-2xl bg-[#2a00ff] px-8 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-[#2a00ff]/20 transition-all hover:scale-105 hover:bg-[#2000cc] active:scale-95"
+          >
+            <Search className="h-4 w-4 transition-transform group-hover:scale-125" />
+            Авна
+          </button>
+        </motion.div>
+
+        {/* --- CATEGORIES GRID --- */}
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 }}
-          className="max-w-5xl mx-auto"
+          className="relative mx-auto max-w-5xl border-t border-slate-100 pt-10"
         >
-          <div className="bg-white/5 backdrop-blur-2xl rounded-4xl border border-white/10 p-3 shadow-2xl">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 h-full">
-              {/* 1. Location Input */}
-              <div className="relative h-13 w-full">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-20" />
-                <Input
-                  placeholder="Байршил..."
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="h-full w-full pl-12 bg-white/5 border-none focus-visible:ring-1 focus-visible:ring-white/20 text-white rounded-2xl placeholder:text-white/30 text-base"
-                />
-              </div>
-
-              {/* 2. Price Select - FIXED HEIGHT */}
-              <div className="h-13 w-full">
-                <Select value={priceRange} onValueChange={setPriceRange}>
-                  <SelectTrigger className="flex min-h-13 w-full items-center gap-3 bg-white/5 border-none focus:ring-1 focus:ring-white/20 text-white rounded-2xl px-6 text-base shadow-none">
-                    <Banknote className="h-5 w-5 text-primary shrink-0" />
-                    <div className="flex-1 text-left">
-                      <SelectValue placeholder="Үнийн хүрээ" />
+          <div className="rounded-[2.5rem] border-3 border-[#ff2bad] bg-white p-4 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] md:p-5">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+              {PROPERTY_CATEGORIES.map((item, index) => {
+                const Icon = categoryIcons[item.value];
+                return (
+                  <motion.button
+                    key={item.value}
+                    type="button"
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35 + index * 0.04 }}
+                    onClick={() => openCategory(item.value)}
+                    className="group rounded-3xl border border-[#ff2bad] bg-slate-50/70 p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:border-[#ff00c8]/70 hover:bg-[#fff1f9] hover:shadow-xl hover:shadow-[#ff00c8]/20 md:p-5"
+                  >
+                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-[#2a00ff] shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:bg-[#2a00ff] group-hover:text-white md:mb-4 md:h-11 md:w-11">
+                      <Icon className="h-5 w-5" />
                     </div>
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-white/10 text-white">
-                    <SelectItem className={selectItemClassName} value="0-100">
-                      100 сая хүртэл
-                    </SelectItem>
-                    <SelectItem className={selectItemClassName} value="100-300">
-                      100 - 300 сая
-                    </SelectItem>
-                    <SelectItem className={selectItemClassName} value="500+">
-                      500 сая+
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* 3. Rooms Select - FIXED HEIGHT */}
-              <div className="h-13 w-full">
-                <Select value={rooms} onValueChange={setRooms}>
-                  <SelectTrigger className="flex min-h-13 w-full items-center gap-3 bg-white/5 border-none focus:ring-1 focus:ring-white/20 text-white rounded-2xl px-6 text-base shadow-none">
-                    <Home className="h-5 w-5 text-primary shrink-0" />
-                    <div className="flex-1 text-left">
-                      <SelectValue placeholder="Өрөө" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-black tracking-tight text-[#2a00ff] transition-colors group-hover:text-[#ff3bad] md:text-base">
+                        {item.label}
+                      </p>
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#2a00ff] transition-colors group-hover:text-[#ff3bad] md:text-[11px]">
+                        Үзэх
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                      </div>
                     </div>
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-white/10 text-white">
-                    <SelectItem className={selectItemClassName} value="1">
-                      1 өрөө
-                    </SelectItem>
-                    <SelectItem className={selectItemClassName} value="2">
-                      2 өрөө
-                    </SelectItem>
-                    <SelectItem className={selectItemClassName} value="3+">
-                      3+ өрөө
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* 4. Search Button */}
-              <div className="h-13 w-full">
-                <Button
-                  className="h-full w-full bg-primary hover:bg-primary/90 text-white rounded-2xl gap-3 text-lg font-bold shadow-lg shadow-primary/20 group"
-                  onClick={handleSearch}
-                >
-                  <Search className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                  <span>Хайх</span>
-                </Button>
-              </div>
+                  </motion.button>
+                );
+              })}
             </div>
           </div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="flex flex-wrap justify-center gap-12 mt-16 border-t border-white/5 pt-12"
-          >
-            {[
-              { label: "Идэвхтэй зар", value: "2,500+" },
-              { label: "Баталгаажсан агент", value: "150+" },
-              { label: "Сэтгэл ханамж", value: "99%" },
-            ].map((stat, i) => (
-              <div key={i} className="text-center group">
-                <p className="text-3xl md:text-5xl font-bold text-white mb-1 tracking-tighter group-hover:text-primary transition-colors">
-                  {stat.value}
-                </p>
-                <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold italic">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </motion.div>
         </motion.div>
       </div>
     </section>

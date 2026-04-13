@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ import {
   readMarketplaceListings,
   writeMarketplaceListings,
 } from "@/lib/marketplace";
+import { PROPERTY_CATEGORIES } from "@/lib/property-types";
 import {
   Building2,
   MapPin,
@@ -31,108 +32,75 @@ import {
   ArrowLeft,
   User,
   Users,
-  Star,
-  BadgeCheck,
   Sparkles,
   Send,
   CheckCircle2,
+  School,
+  ShoppingCart,
+  Bus,
+  LayoutGrid,
   Camera,
-  MessageCircle,
+  Video,
+  Zap,
 } from "lucide-react";
-
-interface FormData {
-  propertyType: string;
-  location: string;
-  district: string;
-  price: string;
-  sqm: string;
-  rooms: string;
-  floor: string;
-  totalFloors: string;
-  description: string;
-  serviceType: "self" | "agent" | null;
-  selectedAgentId: string | null;
-  images: string[];
-}
-
-const propertyTypes = [
-  { value: "apartment", label: "Орон сууц" },
-  { value: "house", label: "Хашаа байшин" },
-  { value: "office", label: "Оффис" },
-  { value: "land", label: "Газар" },
-];
-
-const districts = [
-  "Сүхбаатар",
-  "Баянзүрх",
-  "Хан-Уул",
-  "Чингэлтэй",
-  "Сонгинохайрхан",
-  "Баянгол",
-];
+import { toast } from "sonner";
 
 export function AddPropertyForm() {
   const { user } = useUser();
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<FormData>({
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
+
+  const [formData, setFormData] = useState({
     propertyType: "",
     location: "",
     district: "",
     price: "",
     sqm: "",
-    rooms: "",
+    rooms: "1",
+    bathrooms: "1",
     floor: "",
     totalFloors: "",
+    commissionYear: "2024",
     description: "",
-    serviceType: null,
-    selectedAgentId: null,
-    images: [],
+    serviceType: null as "self" | "agent" | null,
+    selectedAgentId: null as string | null, // <--- Add this line
+    surroundings: [] as string[],
+    roadAccess: "",
+    images: [] as string[],
   });
-  const [aiMessage, setAiMessage] = useState(
-    "Сайн байна уу! Би таны зарын мэдээллийг илүү сонирхолтой болгож, засварлаж өгч чадна.",
-  );
-  const [isAiTyping, setIsAiTyping] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
-  const updateFormData = (
-    field: keyof FormData,
-    value: string | string[] | null,
-  ) => {
+  const updateField = useCallback((field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  const handleAiHelp = () => {
-    setIsAiTyping(true);
-    setTimeout(() => {
-      if (formData.description) {
-        setAiMessage(
-          `Таны "${formData.description.slice(0, 30)}..." тайлбарыг илүү мэргэжлийн түвшинд засварлаж байна. Тун удахгүй бэлэн болно!`,
-        );
-      } else {
-        setAiMessage(
-          "Эхлээд байрны мэдээллээ оруулаарай. Би танд тохирох тайлбар бичихэд тусална!",
-        );
-      }
-      setIsAiTyping(false);
-    }, 1500);
+  const pricePerSqm = useMemo(() => {
+    const p = parseFloat(formData.price);
+    const s = parseFloat(formData.sqm);
+    return p && s ? Math.round(p / s).toLocaleString() : null;
+  }, [formData.price, formData.sqm]);
+
+  const handleAiOptimize = async () => {
+    if (!formData.description) return toast.error("Эхлээд тайлбар бичнэ үү");
+    setIsAiProcessing(true);
+    await new Promise((r) => setTimeout(r, 1500));
+    const optimized = `✨ ОНЦЛОХ: ${formData.description}\n\n📍 Байршлын давуу тал: Ойр орчимд ${formData.surroundings.length} гаруй үйлчилгээний төвүүдтэй.`;
+    updateField("description", optimized);
+    setIsAiProcessing(false);
+    toast.success("AI тайлбарыг шинэчиллээ");
   };
 
   const handleSubmit = () => {
-    const fallbackAgent = agents.find((agent) => agent.verified) ?? agents[0];
+    const fallbackAgent = agents.find((a) => a.verified) ?? agents[0];
+
+    // Explicitly structure the input to match the required Type
     const nextListing = createMarketplaceListing(
       {
-        district: formData.district,
-        location: formData.location,
-        price: formData.price,
-        sqm: formData.sqm,
-        rooms: formData.rooms,
-        floor: formData.floor,
-        totalFloors: formData.totalFloors,
-        description: formData.description,
-        propertyType: formData.propertyType,
-        selectedAgentId: formData.selectedAgentId,
+        ...formData,
+        // Ensure this property is explicitly passed to satisfy the Type
+        selectedAgentId: formData.selectedAgentId || null,
         submittedBy: {
-          name: user?.fullName || user?.firstName || "Mon1 хэрэглэгч",
+          name: user?.fullName || "Хэрэглэгч",
           email: user?.primaryEmailAddress?.emailAddress || "user@mon1.local",
         },
       },
@@ -144,102 +112,24 @@ export function AddPropertyForm() {
     setShowSuccess(true);
   };
 
-  const nextStep = () => {
-    if (currentStep < 3) setCurrentStep(currentStep + 1);
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
-  };
-
-  const isStep1Valid =
-    formData.propertyType &&
-    formData.location &&
-    formData.district &&
-    formData.price &&
-    formData.sqm;
-
-  if (showSuccess) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center justify-center py-20"
-      >
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle2 className="h-10 w-10 text-green-600" />
-        </div>
-        <h2 className="text-2xl font-bold text-foreground mb-2">
-          Амжилттай илгээгдлээ!
-        </h2>
-        <p className="text-muted-foreground text-center max-w-md">
-          {formData.serviceType === "agent"
-            ? "Таны байрны хүсэлт агентын портал руу илгээгдлээ. Агент хүлээн авмагц үндсэн сайтад нийтлэгдэнэ."
-            : "Таны байрны мэдээлэл агентын хяналтад очлоо. Агент зөвшөөрсний дараа үндсэн сайтад нийтлэгдэнэ."}
-        </p>
-        <Button
-          className="mt-8"
-          onClick={() => {
-            setShowSuccess(false);
-            setCurrentStep(1);
-            setFormData({
-              propertyType: "",
-              location: "",
-              district: "",
-              price: "",
-              sqm: "",
-              rooms: "",
-              floor: "",
-              totalFloors: "",
-              description: "",
-              serviceType: null,
-              selectedAgentId: null,
-              images: [],
-            });
-          }}
-        >
-          Шинэ зар нэмэх
-        </Button>
-      </motion.div>
-    );
-  }
+  if (showSuccess)
+    return <SuccessState onReset={() => setShowSuccess(false)} />;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* Main Form */}
-      <div className="lg:col-span-2">
-        {/* Progress Steps */}
-        <div className="flex items-center justify-between mb-10">
-          {[1, 2, 3].map((step) => (
-            <div key={step} className="flex items-center">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start pb-20">
+      <div className="lg:col-span-8 space-y-8">
+        {/* --- STEP PROGRESS --- */}
+        <div className="flex items-center justify-between px-8 bg-white py-6 rounded-[2.5rem] border border-[#eeebff] shadow-sm">
+          {[1, 2, 3, 4].map((s) => (
+            <div key={s} className="flex items-center gap-3">
               <div
-                className={`
-                w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all
-                ${
-                  currentStep >= step
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                }
-              `}
+                className={`h-10 w-10 rounded-xl flex items-center justify-center font-black transition-all duration-500 ${currentStep >= s ? "bg-[#2a00ff] text-white" : "bg-[#fff9fd] text-[#ff9ce0]"}`}
               >
-                {step}
+                {s}
               </div>
-              <span
-                className={`ml-3 text-sm font-medium hidden sm:block ${
-                  currentStep >= step
-                    ? "text-foreground"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {step === 1 && "Үндсэн мэдээлэл"}
-                {step === 2 && "Шийдвэр"}
-                {step === 3 && "Дуусгах"}
-              </span>
-              {step < 3 && (
+              {s < 4 && (
                 <div
-                  className={`w-12 sm:w-24 h-0.5 mx-4 ${
-                    currentStep > step ? "bg-primary" : "bg-muted"
-                  }`}
+                  className={`w-8 md:w-16 h-0.5 ${currentStep > s ? "bg-[#2a00ff]" : "bg-[#eeebff]"}`}
                 />
               )}
             </div>
@@ -247,183 +137,44 @@ export function AddPropertyForm() {
         </div>
 
         <AnimatePresence mode="wait">
-          {/* Step 1: Basic Info */}
+          {/* STEP 1: MEDIA */}
           {currentStep === 1 && (
             <motion.div
               key="step1"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
             >
-              <Card className="border-border">
-                <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-2">
-                    Үндсэн мэдээлэл
+              <Card className="border-none shadow-2xl rounded-[3.5rem] overflow-hidden bg-white">
+                <div className="bg-[#1a0b3b] p-10 text-white">
+                  <h2 className="text-3xl font-black tracking-tighter uppercase italic">
+                    Зураг оруулах
                   </h2>
-                  <p className="text-muted-foreground mb-8">
-                    Байрны үндсэн мэдээллийг оруулна уу
+                  <p className="text-[#ff9ce0] text-sm font-bold mt-1 italic">
+                    Байрныхаа өнгө төрхийг харуулах чанартай зургууд оруулна уу.
                   </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Property Type */}
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-muted-foreground" />
-                        Байрны төрөл
-                      </Label>
-                      <Select
-                        value={formData.propertyType}
-                        onValueChange={(value) =>
-                          updateFormData("propertyType", value)
-                        }
-                      >
-                        <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Сонгох..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {propertyTypes.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
-                              {type.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                </div>
+                <CardContent className="p-10 space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="md:col-span-2 aspect-video rounded-[2.5rem] border-4 border-dashed border-[#eeebff] flex flex-col items-center justify-center bg-[#fff9fd] hover:border-[#2a00ff] transition-colors cursor-pointer group">
+                      <Camera className="h-12 w-12 text-[#2a00ff] mb-4 group-hover:scale-110 transition-transform" />
+                      <p className="font-black text-[#1a0b3b] uppercase">
+                        Зураг нэмэх
+                      </p>
                     </div>
-
-                    {/* District */}
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        Дүүрэг
-                      </Label>
-                      <Select
-                        value={formData.district}
-                        onValueChange={(value) =>
-                          updateFormData("district", value)
-                        }
-                      >
-                        <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Сонгох..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {districts.map((district) => (
-                            <SelectItem key={district} value={district}>
-                              {district}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Location */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        Байршил / Хаяг
-                      </Label>
-                      <Input
-                        placeholder="Жишээ: Зайсан, Royal Town..."
-                        value={formData.location}
-                        onChange={(e) =>
-                          updateFormData("location", e.target.value)
-                        }
-                        className="h-12"
-                      />
-                    </div>
-
-                    {/* Price */}
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        Үнэ (MNT)
-                      </Label>
-                      <Input
-                        type="number"
-                        placeholder="280,000,000"
-                        value={formData.price}
-                        onChange={(e) =>
-                          updateFormData("price", e.target.value)
-                        }
-                        className="h-12"
-                      />
-                    </div>
-
-                    {/* Square Meters */}
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <Ruler className="h-4 w-4 text-muted-foreground" />
-                        Талбай (м²)
-                      </Label>
-                      <Input
-                        type="number"
-                        placeholder="80"
-                        value={formData.sqm}
-                        onChange={(e) => updateFormData("sqm", e.target.value)}
-                        className="h-12"
-                      />
-                    </div>
-
-                    {/* Rooms */}
-                    <div className="space-y-2">
-                      <Label>Өрөөний тоо</Label>
-                      <Select
-                        value={formData.rooms}
-                        onValueChange={(value) =>
-                          updateFormData("rooms", value)
-                        }
-                      >
-                        <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Сонгох..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["1", "2", "3", "4", "5+"].map((num) => (
-                            <SelectItem key={num} value={num}>
-                              {num} өрөө
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Floor */}
-                    <div className="space-y-2">
-                      <Label>Давхар</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="number"
-                          placeholder="12"
-                          value={formData.floor}
-                          onChange={(e) =>
-                            updateFormData("floor", e.target.value)
-                          }
-                          className="h-12"
-                        />
-                        <span className="flex items-center text-muted-foreground">
-                          /
-                        </span>
-                        <Input
-                          type="number"
-                          placeholder="16"
-                          value={formData.totalFloors}
-                          onChange={(e) =>
-                            updateFormData("totalFloors", e.target.value)
-                          }
-                          className="h-12"
-                        />
-                      </div>
+                    <div className="h-full rounded-[2.5rem] border border-[#eeebff] p-6 bg-[#fff9fd] flex flex-col items-center justify-center text-center">
+                      <Video className="h-8 w-8 text-[#ff3bad] mb-3" />
+                      <p className="text-[10px] font-black uppercase text-[#1a0b3b]">
+                        Видео холбоос
+                      </p>
                     </div>
                   </div>
-
-                  <div className="flex justify-end mt-8">
+                  <div className="flex justify-end">
                     <Button
-                      onClick={nextStep}
-                      disabled={!isStep1Valid}
-                      className="gap-2"
-                      size="lg"
+                      onClick={() => setCurrentStep(2)}
+                      className="h-16 px-12 rounded-2xl bg-[#2a00ff] text-white font-black hover:bg-[#ff3bad] transition-all"
                     >
-                      Үргэлжлүүлэх
-                      <ArrowRight className="h-4 w-4" />
+                      ҮРГЭЛЖЛҮҮЛЭХ <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </div>
                 </CardContent>
@@ -431,178 +182,96 @@ export function AddPropertyForm() {
             </motion.div>
           )}
 
-          {/* Step 2: The Choice */}
+          {/* STEP 2: DETAILS */}
           {currentStep === 2 && (
             <motion.div
               key="step2"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
             >
-              <Card className="border-border">
-                <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-2">
-                    Шийдвэр
+              <Card className="border-none shadow-2xl rounded-[3.5rem] overflow-hidden bg-white">
+                <div className="bg-[#1a0b3b] p-10 text-white italic">
+                  <h2 className="text-3xl font-black tracking-tighter uppercase">
+                    Үнэ ба Үзүүлэлт
                   </h2>
-                  <p className="text-muted-foreground mb-8">
-                    Зараа хэрхэн оруулах вэ?
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    {/* Self Service Option */}
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Card
-                        className={`cursor-pointer transition-all border-2 ${
-                          formData.serviceType === "self"
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
-                        }`}
-                        onClick={() => updateFormData("serviceType", "self")}
-                      >
-                        <CardContent className="p-6 text-center">
-                          <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <User className="h-8 w-8 text-foreground" />
-                          </div>
-                          <h3 className="text-xl font-semibold text-foreground mb-2">
-                            Би өөрөө зарна
-                          </h3>
-                          <p className="text-muted-foreground text-sm mb-4">
-                            Эхлээд хүсэлтээ илгээнэ, дараа нь агент хүсвэл
-                            нийтэлнэ
-                          </p>
-                          <Badge variant="secondary" className="bg-muted">
-                            Хяналтаар орно
-                          </Badge>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-
-                    {/* Agent Service Option */}
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Card
-                        className={`cursor-pointer transition-all border-2 ${
-                          formData.serviceType === "agent"
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
-                        }`}
-                        onClick={() => updateFormData("serviceType", "agent")}
-                      >
-                        <CardContent className="p-6 text-center">
-                          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <Users className="h-8 w-8 text-primary" />
-                          </div>
-                          <h3 className="text-xl font-semibold text-foreground mb-2">
-                            Агенттай хамтарна
-                          </h3>
-                          <p className="text-muted-foreground text-sm mb-4">
-                            Мэргэжлийн агент таны зарыг удирдана
-                          </p>
-                          <Badge className="bg-primary text-primary-foreground">
-                            Санал болгох
-                          </Badge>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
+                </div>
+                <CardContent className="p-10 space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase text-[#ff9ce0] ml-2">
+                        Өрөөний тоо
+                      </Label>
+                      <div className="flex gap-2">
+                        {["1", "2", "3", "4", "5+"].map((num) => (
+                          <button
+                            key={num}
+                            onClick={() => updateField("rooms", num)}
+                            className={`flex-1 h-12 rounded-xl font-black transition-all ${formData.rooms === num ? "bg-[#2a00ff] text-white shadow-lg" : "bg-[#fff9fd] text-[#ff9ce0] border border-[#eeebff]"}`}
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase text-[#ff9ce0] ml-2">
+                        Ариун цэврийн өрөө
+                      </Label>
+                      <div className="flex gap-2">
+                        {["1", "2", "3"].map((num) => (
+                          <button
+                            key={num}
+                            onClick={() => updateField("bathrooms", num)}
+                            className={`flex-1 h-12 rounded-xl font-black transition-all ${formData.bathrooms === num ? "bg-[#2a00ff] text-white shadow-lg" : "bg-[#fff9fd] text-[#ff9ce0] border border-[#eeebff]"}`}
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase text-[#ff9ce0] ml-2">
+                        Үнэ (₮)
+                      </Label>
+                      <div className="relative">
+                        <DollarSign className="absolute left-5 top-1/2 -translate-y-1/2 text-[#ff3bad] h-6 w-6" />
+                        <Input
+                          type="number"
+                          className="h-16 pl-14 rounded-2xl bg-[#fff9fd] border-[#eeebff] text-2xl font-black text-[#1a0b3b]"
+                          value={formData.price}
+                          onChange={(e) => updateField("price", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase text-[#ff9ce0] ml-2">
+                        Талбай (м²)
+                      </Label>
+                      <div className="relative">
+                        <Ruler className="absolute left-5 top-1/2 -translate-y-1/2 text-[#2a00ff] h-6 w-6" />
+                        <Input
+                          type="number"
+                          className="h-16 pl-14 rounded-2xl bg-[#fff9fd] border-[#eeebff] text-2xl font-black text-[#1a0b3b]"
+                          value={formData.sqm}
+                          onChange={(e) => updateField("sqm", e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
-
-                  {/* Agent Selection */}
-                  <AnimatePresence>
-                    {formData.serviceType === "agent" && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <h3 className="text-lg font-semibold text-foreground mb-4">
-                          Агент сонгох
-                        </h3>
-                        <div className="space-y-3">
-                          {agents
-                            .filter((a) => a.verified)
-                            .map((agent) => (
-                              <Card
-                                key={agent.id}
-                                className={`cursor-pointer transition-all border-2 ${
-                                  formData.selectedAgentId === agent.id
-                                    ? "border-primary bg-primary/5"
-                                    : "border-border hover:border-primary/50"
-                                }`}
-                                onClick={() =>
-                                  updateFormData("selectedAgentId", agent.id)
-                                }
-                              >
-                                <CardContent className="p-4">
-                                  <div className="flex items-center gap-4">
-                                    <img
-                                      src={agent.avatar}
-                                      alt={agent.name}
-                                      className="w-14 h-14 rounded-full object-cover"
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-center gap-2">
-                                        <h4 className="font-semibold text-foreground">
-                                          {agent.name}
-                                        </h4>
-                                        {agent.verified && (
-                                          <BadgeCheck className="h-4 w-4 text-primary" />
-                                        )}
-                                      </div>
-                                      <p className="text-sm text-muted-foreground">
-                                        {agent.company}
-                                      </p>
-                                      <div className="flex items-center gap-2 mt-1">
-                                        <Star className="h-4 w-4 fill-chart-4 text-chart-4" />
-                                        <span className="text-sm font-medium">
-                                          {agent.rating}
-                                        </span>
-                                        <span className="text-sm text-muted-foreground">
-                                          ({agent.reviewCount})
-                                        </span>
-                                      </div>
-                                    </div>
-                                    <div className="text-right">
-                                      <Badge variant="secondary">
-                                        {agent.listingsCount} зар
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  <div className="flex justify-between mt-8">
+                  <div className="flex justify-between pt-6">
                     <Button
-                      variant="outline"
-                      onClick={prevStep}
-                      className="gap-2"
+                      variant="ghost"
+                      onClick={() => setCurrentStep(1)}
+                      className="h-16 font-black text-[#ff9ce0]"
                     >
-                      <ArrowLeft className="h-4 w-4" />
-                      Буцах
+                      БУЦАХ
                     </Button>
                     <Button
-                      onClick={nextStep}
-                      disabled={
-                        !formData.serviceType ||
-                        (formData.serviceType === "agent" &&
-                          !formData.selectedAgentId)
-                      }
-                      className="gap-2"
-                      size="lg"
+                      onClick={() => setCurrentStep(3)}
+                      className="h-16 px-12 rounded-2xl bg-[#2a00ff] text-white font-black"
                     >
-                      Үргэлжлүүлэх
-                      <ArrowRight className="h-4 w-4" />
+                      ҮРГЭЛЖЛҮҮЛЭХ
                     </Button>
                   </div>
                 </CardContent>
@@ -610,178 +279,248 @@ export function AddPropertyForm() {
             </motion.div>
           )}
 
-          {/* Step 3: Complete */}
+          {/* STEP 3: LOCATION */}
           {currentStep === 3 && (
             <motion.div
               key="step3"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
             >
-              <Card className="border-border">
-                <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-2">
-                    {formData.serviceType === "self"
-                      ? "Зургаа оруулах"
-                      : "Хүсэлт илгээх"}
+              <Card className="border-none shadow-2xl rounded-[3.5rem] overflow-hidden bg-white">
+                <div className="bg-[#1a0b3b] p-10 text-white italic">
+                  <h2 className="text-3xl font-black tracking-tighter uppercase">
+                    Байршил
                   </h2>
-                  <p className="text-muted-foreground mb-8">
-                    {formData.serviceType === "self"
-                      ? "Зураг болон дэлгэрэнгүй тайлбар оруулна уу"
-                      : "Агент руу хүсэлт илгээхэд бэлэн"}
-                  </p>
-
-                  {formData.serviceType === "self" && (
-                    <div className="space-y-6 mb-8">
-                      {/* Image Upload */}
-                      <div className="space-y-2">
-                        <Label>Зураг</Label>
-                        <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                          <Camera className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-muted-foreground">
-                            Зураг сонгох эсвэл энд чирэх
-                          </p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            PNG, JPG (max. 10MB)
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      <div className="space-y-2">
-                        <Label>Дэлгэрэнгүй тайлбар</Label>
-                        <Textarea
-                          placeholder="Байрны онцлог, давуу талууд..."
-                          value={formData.description}
-                          onChange={(e) =>
-                            updateFormData("description", e.target.value)
-                          }
-                          rows={5}
-                        />
-                      </div>
+                </div>
+                <CardContent className="p-10 space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-[#ff9ce0]">
+                        Дүүрэг
+                      </Label>
+                      <Select
+                        value={formData.district}
+                        onValueChange={(v) => updateField("district", v)}
+                      >
+                        <SelectTrigger className="h-14 rounded-xl bg-[#fff9fd] border-[#eeebff] font-bold text-[#1a0b3b]">
+                          <SelectValue placeholder="Сонгох" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-[#eeebff]">
+                          {["Хан-Уул", "Сүхбаатар", "Баянзүрх", "Баянгол"].map(
+                            (d) => (
+                              <SelectItem key={d} value={d}>
+                                {d}
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  )}
-
-                  {formData.serviceType === "agent" &&
-                    formData.selectedAgentId && (
-                      <div className="bg-muted/50 rounded-xl p-6 mb-8">
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Сонгосон агент:
-                        </p>
-                        {(() => {
-                          const agent = agents.find(
-                            (a) => a.id === formData.selectedAgentId,
-                          );
-                          if (!agent) return null;
-                          return (
-                            <div className="flex items-center gap-4">
-                              <img
-                                src={agent.avatar}
-                                alt={agent.name}
-                                className="w-16 h-16 rounded-full object-cover"
-                              />
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <h4 className="font-semibold text-foreground text-lg">
-                                    {agent.name}
-                                  </h4>
-                                  <BadgeCheck className="h-5 w-5 text-primary" />
-                                </div>
-                                <p className="text-muted-foreground">
-                                  {agent.company}
-                                </p>
-                              </div>
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    )}
-
-                  <div className="flex justify-between">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-[#ff9ce0]">
+                        Дэлгэрэнгүй хаяг
+                      </Label>
+                      <Input
+                        className="h-14 rounded-xl bg-[#fff9fd] border-[#eeebff] font-bold text-[#1a0b3b]"
+                        value={formData.location}
+                        onChange={(e) =>
+                          updateField("location", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <Label className="text-[10px] font-black uppercase text-[#ff9ce0]">
+                      Ойр орчимд
+                    </Label>
+                    <div className="flex flex-wrap gap-3">
+                      {[
+                        { id: "school", label: "Сургууль", icon: School },
+                        { id: "bus", label: "Тээвэр", icon: Bus },
+                        { id: "shop", label: "Дэлгүүр", icon: ShoppingCart },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            const cur = formData.surroundings;
+                            updateField(
+                              "surroundings",
+                              cur.includes(item.id)
+                                ? cur.filter((i) => i !== item.id)
+                                : [...cur, item.id],
+                            );
+                          }}
+                          className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 font-black text-[10px] uppercase transition-all ${formData.surroundings.includes(item.id) ? "border-[#2a00ff] bg-[#eeebff] text-[#2a00ff]" : "border-[#eeebff] text-[#ff9ce0]"}`}
+                        >
+                          <item.icon className="h-4 w-4" /> {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex justify-between pt-6">
                     <Button
-                      variant="outline"
-                      onClick={prevStep}
-                      className="gap-2"
+                      variant="ghost"
+                      onClick={() => setCurrentStep(2)}
+                      className="h-16 font-black text-[#ff9ce0]"
                     >
-                      <ArrowLeft className="h-4 w-4" />
-                      Буцах
+                      БУЦАХ
                     </Button>
-                    <Button onClick={handleSubmit} className="gap-2" size="lg">
-                      <Send className="h-4 w-4" />
-                      {formData.serviceType === "self"
-                        ? "Зар нэмэх"
-                        : "Агент руу хүсэлт илгээх"}
+                    <Button
+                      onClick={() => setCurrentStep(4)}
+                      className="h-16 px-12 rounded-2xl bg-[#2a00ff] text-white font-black"
+                    >
+                      ҮРГЭЛЖЛҮҮЛЭХ
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
           )}
+
+          {/* STEP 4: SERVICE TYPE */}
+          {currentStep === 4 && (
+            <motion.div
+              key="step4"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <SelectionCard
+                    active={formData.serviceType === "self"}
+                    onClick={() => updateField("serviceType", "self")}
+                    icon={User}
+                    title="Би өөрөө зарна"
+                    desc="Зараа шууд нийтэлж, манай системээр баталгаажуулна."
+                  />
+                  <SelectionCard
+                    active={formData.serviceType === "agent"}
+                    onClick={() => updateField("serviceType", "agent")}
+                    icon={Users}
+                    title="Агентаар заруулна"
+                    desc="Мэргэжлийн агент таны өмнөөс борлуулалт хийнэ."
+                    isPremium
+                  />
+                </div>
+                <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-10">
+                  <Label className="text-[10px] font-black uppercase text-[#ff9ce0] mb-4 block">
+                    Тайлбар
+                  </Label>
+                  <div className="relative">
+                    <Textarea
+                      className="min-h-37.5 rounded-3xl bg-[#fff9fd] border-[#eeebff] p-6 font-bold text-[#1a0b3b]"
+                      placeholder="Байрны давуу талуудыг бичнэ үү..."
+                      value={formData.description}
+                      onChange={(e) =>
+                        updateField("description", e.target.value)
+                      }
+                    />
+                    <Button
+                      onClick={handleAiOptimize}
+                      disabled={isAiProcessing}
+                      className="absolute bottom-4 right-4 bg-[#1a0b3b] text-white font-black rounded-xl h-10 px-4 gap-2 text-[10px] hover:bg-[#2a00ff]"
+                    >
+                      <Sparkles
+                        className={`h-3 w-3 ${isAiProcessing ? "animate-spin" : ""}`}
+                      />{" "}
+                      AI ЗАСАХ
+                    </Button>
+                  </div>
+                </Card>
+                <div className="flex justify-between">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setCurrentStep(3)}
+                    className="h-16 font-black text-[#ff9ce0]"
+                  >
+                    БУЦАХ
+                  </Button>
+                  <Button
+                    onClick={handleSubmit}
+                    className="h-20 px-20 rounded-3xl bg-[#2a00ff] hover:bg-[#ff3bad] text-white font-black text-xl shadow-2xl"
+                  >
+                    ЗАР НЭМЭХ <Send className="ml-3 h-6 w-6" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
 
-      {/* AI Assistant Sidebar */}
-      <div className="lg:col-span-1">
-        <Card className="border-border sticky top-24">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-linear-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center">
-                <Sparkles className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">Mon1.mn AI</h3>
-                <p className="text-sm text-muted-foreground">Таны туслагч</p>
-              </div>
+      {/* --- SIDEBAR --- */}
+      <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
+        <Card className="border-none shadow-2xl rounded-[3rem] bg-[#1a0b3b] text-white p-10 overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#2a00ff]/20 blur-3xl rounded-full" />
+          <h3 className="text-xl font-black uppercase italic tracking-tighter mb-6 flex items-center gap-3">
+            <Zap className="h-6 w-6 text-[#ff3bad]" /> Зарын чанар
+          </h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-end">
+              <span className="text-[10px] font-black uppercase text-[#ff9ce0]">
+                Оноо:
+              </span>
+              <span className="text-4xl font-black text-[#2a00ff]">85%</span>
             </div>
-
-            <div className="bg-muted/50 rounded-xl p-4 mb-4">
-              <div className="flex items-start gap-3">
-                <MessageCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                <p className="text-sm text-foreground leading-relaxed">
-                  {isAiTyping ? (
-                    <span className="flex items-center gap-2">
-                      <span className="animate-pulse">Бодож байна...</span>
-                    </span>
-                  ) : (
-                    aiMessage
-                  )}
-                </p>
-              </div>
+            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full bg-[#2a00ff]" style={{ width: "85%" }} />
             </div>
-
-            <Button
-              variant="outline"
-              className="w-full gap-2"
-              onClick={handleAiHelp}
-              disabled={isAiTyping}
-            >
-              <Sparkles className="h-4 w-4" />
-              AI тусламж авах
-            </Button>
-
-            <div className="mt-6 pt-6 border-t border-border">
-              <h4 className="text-sm font-medium text-foreground mb-3">
-                AI чадвар:
-              </h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  Зарын тайлбар засварлах
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  Үнийн санал өгөх
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  Зургийн чанар шалгах
-                </li>
-              </ul>
-            </div>
-          </CardContent>
+          </div>
         </Card>
+      </aside>
+    </div>
+  );
+}
+
+function SelectionCard({
+  active,
+  onClick,
+  icon: Icon,
+  title,
+  desc,
+  isPremium,
+}: any) {
+  return (
+    <Card
+      onClick={onClick}
+      className={`cursor-pointer rounded-[3rem] border-4 transition-all duration-500 p-8 text-center group ${active ? "border-[#2a00ff] bg-[#eeebff] shadow-xl" : "border-[#eeebff] bg-white hover:border-[#ff9ce0]/30"}`}
+    >
+      <div
+        className={`h-20 w-20 rounded-4xl flex items-center justify-center mx-auto mb-6 transition-all ${active ? "bg-[#2a00ff] text-white scale-110" : "bg-[#fff9fd] text-[#ff9ce0]"}`}
+      >
+        <Icon className="h-10 w-10" />
       </div>
+      <h3 className="text-xl font-black text-[#1a0b3b] mb-2 uppercase italic tracking-tighter">
+        {title}
+      </h3>
+      <p className="text-[#ff9ce0] text-xs font-bold">{desc}</p>
+      {isPremium && (
+        <Badge className="mt-4 bg-[#1a0b3b] text-[#2a00ff] font-black rounded-full px-4 py-1 italic text-[9px] uppercase">
+          Recommended
+        </Badge>
+      )}
+    </Card>
+  );
+}
+
+function SuccessState({ onReset }: { onReset: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 text-center">
+      <div className="h-32 w-32 bg-[#2a00ff]/10 rounded-[3.5rem] flex items-center justify-center mb-10 shadow-2xl">
+        <CheckCircle2 className="h-16 w-16 text-[#2a00ff]" />
+      </div>
+      <h2 className="text-5xl font-black text-[#1a0b3b] tracking-tighter mb-6 italic uppercase">
+        Амжилттай!
+      </h2>
+      <p className="text-[#ff9ce0] font-bold max-w-md text-xl mb-12 italic leading-relaxed">
+        Таны зар амжилттай бүртгэгдлээ. Бид тун удахгүй баталгаажуулах болно.
+      </p>
+      <Button
+        onClick={onReset}
+        className="h-20 px-16 rounded-4xl bg-[#1a0b3b] text-white font-black text-xl hover:bg-[#2a00ff] transition-all uppercase italic"
+      >
+        Шинэ зар нэмэх
+      </Button>
     </div>
   );
 }

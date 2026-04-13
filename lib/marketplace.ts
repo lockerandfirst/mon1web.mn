@@ -1,4 +1,8 @@
 import type { Agent, Apartment } from "@/lib/data";
+import {
+  getPlaceholderImage,
+  getPropertyTypeLabel,
+} from "@/lib/property-types";
 
 const MARKETPLACE_LISTINGS_KEY = "mon1-marketplace-listings";
 
@@ -28,32 +32,6 @@ interface CreateMarketplaceListingInput {
     name: string;
     email: string;
   };
-}
-
-function getPlaceholderImage(propertyType: string) {
-  switch (propertyType) {
-    case "house":
-      return "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
-    case "office":
-      return "https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
-    case "land":
-      return "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
-    default:
-      return "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
-  }
-}
-
-function getPropertyTypeLabel(propertyType: string) {
-  switch (propertyType) {
-    case "house":
-      return "хашаа байшин";
-    case "office":
-      return "оффис";
-    case "land":
-      return "газар";
-    default:
-      return "орон сууц";
-  }
 }
 
 function toNumber(value: string, fallback: number) {
@@ -113,6 +91,7 @@ export function createMarketplaceListing(
     location: input.location,
     district: input.district,
     address: input.location,
+    propertyType: input.propertyType,
     description:
       input.description ||
       `${input.location} байршилд байрлах ${propertyTypeLabel}. Дэлгэрэнгүй мэдээллийг агенттай холбогдож авна уу.`,

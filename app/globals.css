@@ -1,18 +1,36 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "../node_modules/@egjs/react-view360/demo/App.css";
+@import "leaflet/dist/leaflet.css";
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Apple-inspired clean design with blue accents */
+  --brand-start: #2a00ff;
+  --brand-end: #ff3bad;
+  --brand-gradient: linear-gradient(135deg, var(--brand-start) 0%, var(--brand-end) 100%);
+  --brand-gradient-strong: linear-gradient(135deg, #2200e6 0%, #e0199a 100%);
+  --page-gradient: radial-gradient(circle at 85% 10%, rgba(42, 0, 255, 0.12), transparent 42%),
+    radial-gradient(circle at 10% 85%, rgba(255, 59, 173, 0.14), transparent 45%),
+    linear-gradient(180deg, #fff9fd 0%, #ffffff 100%);
+  --brand-blue-50: #fff2fb;
+  --brand-blue-100: #ffe4f7;
+  --brand-blue-200: #ffc8ee;
+  --brand-blue-300: #ff9ce0;
+  --brand-blue-400: #ff70d1;
+  --brand-blue-500: #ff3bad;
+  --brand-blue-600: #2a00ff;
+  --brand-blue-700: #2300d9;
+  --brand-blue-800: #1b00b3;
+  --brand-blue-900: #14008c;
+  /* Brand refresh with Bloomberg blue to pink gradient accents */
   --background: oklch(0.99 0 0);
   --foreground: oklch(0.141 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.141 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0 0);
-  /* Primary: Brand Blue */
-  --primary: #0044ff;
+  /* Primary: Brand Magenta */
+  --primary: var(--brand-start);
   --primary-foreground: oklch(1 0 0);
   /* Secondary: Warm neutral gray */
   --secondary: oklch(0.96 0 0);
@@ -26,22 +44,22 @@
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.92 0 0);
   --input: oklch(0.92 0 0);
-  --ring: #0044ff;
-  /* Chart colors - cool palette */
-  --chart-1: #0044ff;
-  --chart-2: oklch(0.75 0.1 70);
-  --chart-3: oklch(0.65 0 0);
-  --chart-4: oklch(0.8 0.15 85);
-  --chart-5: oklch(0.7 0.12 50);
+  --ring: var(--brand-start);
+  /* Chart colors - brand aligned palette */
+  --chart-1: var(--brand-start);
+  --chart-2: var(--brand-end);
+  --chart-3: #553bff;
+  --chart-4: #ff73c3;
+  --chart-5: #14008c;
   --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.141 0 0);
-  --sidebar-primary: #0044ff;
+  --sidebar-primary: var(--brand-start);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.965 0 0);
   --sidebar-accent-foreground: oklch(0.141 0 0);
   --sidebar-border: oklch(0.92 0 0);
-  --sidebar-ring: #0044ff;
+  --sidebar-ring: var(--brand-start);
 }
 
 .dark {
@@ -51,7 +69,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.12 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #0044ff;
+  --primary: var(--brand-start);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.18 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -63,20 +81,20 @@
   --destructive-foreground: oklch(0.637 0.22 25.331);
   --border: oklch(0.2 0 0);
   --input: oklch(0.2 0 0);
-  --ring: #0044ff;
-  --chart-1: #0044ff;
-  --chart-2: oklch(0.75 0.1 70);
-  --chart-3: oklch(0.65 0 0);
-  --chart-4: oklch(0.8 0.15 85);
-  --chart-5: oklch(0.7 0.12 50);
+  --ring: var(--brand-start);
+  --chart-1: var(--brand-start);
+  --chart-2: var(--brand-end);
+  --chart-3: #553bff;
+  --chart-4: #ff73c3;
+  --chart-5: #14008c;
   --sidebar: oklch(0.12 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: #0044ff;
+  --sidebar-primary: var(--brand-start);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.18 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.2 0 0);
-  --sidebar-ring: #0044ff;
+  --sidebar-ring: var(--brand-start);
 }
 
 @theme inline {
@@ -100,6 +118,18 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
+  --color-blue-50: var(--brand-blue-50);
+  --color-blue-100: var(--brand-blue-100);
+  --color-blue-200: var(--brand-blue-200);
+  --color-blue-300: var(--brand-blue-300);
+  --color-blue-400: var(--brand-blue-400);
+  --color-blue-500: var(--brand-blue-500);
+  --color-blue-600: var(--brand-blue-600);
+  --color-blue-700: var(--brand-blue-700);
+  --color-blue-800: var(--brand-blue-800);
+  --color-blue-900: var(--brand-blue-900);
+  --color-brand-start: var(--brand-start);
+  --color-brand-end: var(--brand-end);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -125,5 +155,169 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    background-color: #fff9fd;
+    background-image: var(--page-gradient);
+    background-attachment: fixed;
   }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bg-brand-gradient {
+    background-image: var(--brand-gradient);
+    background-color: var(--brand-start);
+  }
+
+  .text-brand-gradient {
+    background-image: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  .bg-primary,
+  .bg-blue-600,
+  .hover\:bg-blue-600:hover,
+  .data-\[state\=active\]\:bg-blue-600[data-state="active"] {
+    background-image: var(--brand-gradient) !important;
+    background-color: var(--brand-start) !important;
+  }
+
+  .bg-blue-700,
+  .hover\:bg-blue-700:hover {
+    background-image: var(--brand-gradient-strong) !important;
+    background-color: #2200e6 !important;
+  }
+
+  .text-black,
+  .text-slate-950,
+  .text-slate-900,
+  .text-zinc-950,
+  .text-zinc-900,
+  .text-gray-900,
+  .text-stone-900,
+  .text-neutral-900,
+  .text-foreground,
+  .hover\:text-slate-900:hover,
+  .hover\:text-zinc-900:hover,
+  .hover\:text-black:hover,
+  .data-\[state\=active\]\:text-zinc-900[data-state="active"] {
+    color: var(--brand-start) !important;
+  }
+
+  .bg-black,
+  .bg-slate-900,
+  .bg-zinc-950,
+  .bg-zinc-900,
+  .bg-neutral-900,
+  .bg-zinc-950\/80,
+  .bg-zinc-900\/90,
+  .hover\:bg-slate-900:hover,
+  .hover\:bg-zinc-900:hover,
+  .hover\:bg-zinc-800:hover,
+  .data-\[state\=active\]\:bg-zinc-900[data-state="active"] {
+    background-image: var(--brand-gradient) !important;
+    background-color: var(--brand-start) !important;
+  }
+
+  .bg-black\/10,
+  .bg-black\/40,
+  .bg-black\/50,
+  .bg-black\/60,
+  .bg-black\/80,
+  .bg-black\/90,
+  .hover\:bg-black\/80:hover {
+    background-color: rgb(42 0 255 / 0.32) !important;
+  }
+
+  .from-black,
+  .from-black\/20,
+  .from-black\/30,
+  .from-black\/60 {
+    --tw-gradient-from: rgb(42 0 255 / 0.55) var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgb(42 0 255 / 0) var(--tw-gradient-to-position) !important;
+    --tw-gradient-stops:
+      var(--tw-gradient-via-stops, var(--tw-gradient-from), var(--tw-gradient-to)) !important;
+  }
+
+  .via-black,
+  .via-black\/40 {
+    --tw-gradient-via: rgb(255 59 173 / 0.45) var(--tw-gradient-via-position) !important;
+    --tw-gradient-stops:
+      var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to) !important;
+  }
+
+  .to-black,
+  .to-black\/90 {
+    --tw-gradient-to: rgb(255 59 173 / 0.88) var(--tw-gradient-to-position) !important;
+  }
+
+  .shadow-black\/5,
+  .shadow-black\/10 {
+    --tw-shadow-color: rgb(42 0 255 / 0.2) !important;
+  }
+
+  .min-h-screen[class*="bg-"],
+  .h-screen[class*="bg-"] {
+    background-color: transparent !important;
+    background-image: var(--page-gradient) !important;
+  }
+}
+
+/* Cluster-ийн гадна талын хүрээ (Transparent circle) */
+.marker-cluster {
+  background-color: transparent !important;
+}
+
+/* Cluster-ийн дотор талын үндсэн бөөрөнхий */
+.marker-cluster div {
+  width: 36px !important;
+  height: 36px !important;
+  margin-left: 2px !important;
+  margin-top: 2px !important;
+
+  /* Төгс бөөрөнхий болгох гол тохиргоо */
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  /* Өнгө болон фонт */
+  background-color: #2a00ff !important;
+  color: white !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+
+  /* Сүүдэр болон хүрээ */
+  box-shadow: 0 4px 12px rgba(42, 0, 255, 0.4) !important;
+  border: 2px solid white !important;
+
+  /* Текст төвлөрүүлэх */
+  text-align: center !important;
+}
+
+/* Хэмжээнээс хамаарч өнгийг нь өөрчлөх (Заавал биш ч гоё харагддаг) */
+.marker-cluster-small div {
+  background-color: #2a00ff !important;
+}
+.marker-cluster-medium div {
+  background-color: #2a00ff !important;
+}
+.marker-cluster-large div {
+  background-color: #2a00ff !important;
+}
+
+/* Cluster дээр хулгана очиход бага зэрэг томрох */
+.marker-cluster:hover div {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
 }

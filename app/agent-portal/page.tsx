@@ -62,16 +62,21 @@ export default function AgentPortalPage() {
 
       <main className="flex-1 overflow-hidden">
         {/* --- HERO SECTION --- */}
-        <section className="relative h-[calc(100vh-64px)] w-full flex items-center justify-center bg-zinc-950 overflow-hidden">
+        <section className="relative min-h-[90vh] w-full flex items-center justify-center bg-slate-50 overflow-hidden pt-20 pb-20">
+          {/* Background Pattern: Цэвэрхэн, цэлгэр харагдуулах үүднээс */}
           <div className="absolute inset-0 z-0">
             <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105 opacity-40"
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
               style={{
                 backgroundImage:
                   "url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069')",
               }}
             />
-            <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/90" />
+            {/* Gradient Overlay: Цэнхэр туяатай цагаан эффект */}
+            <div className="absolute inset-0 bg-linear-to-tr from-blue-50/80 via-white to-white" />
+            {/* Decorative Circles: Хэт хар харагдуулахгүй туслах гэрлүүд */}
+            <div className="absolute top-[-10%] right-[-10%] w-125 h-125 bg-blue-100/50 blur-[120px] rounded-full" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-125 h-125 bg-primary/5 blur-[120px] rounded-full" />
           </div>
 
           <div className="container relative z-10 mx-auto px-4">
@@ -79,107 +84,117 @@ export default function AgentPortalPage() {
               initial="hidden"
               animate="visible"
               variants={containerVariants}
-              className="grid gap-12 lg:grid-cols-2 items-center"
+              className="grid gap-16 lg:grid-cols-2 items-center"
             >
               <div className="text-left">
                 <motion.div
                   variants={itemVariants}
-                  className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-2 text-xs font-black text-primary uppercase tracking-[0.2em]"
+                  className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-600/10 border border-blue-600/20 px-4 py-2 text-xs font-black text-blue-600 uppercase tracking-[0.2em]"
                 >
-                  <Sparkles className="h-4 w-4 animate-pulse" />
+                  <Sparkles className="h-4 w-4" />
                   Official Agent Network
                 </motion.div>
                 <motion.h1
                   variants={itemVariants}
-                  className="mb-6 text-5xl lg:text-8xl font-black text-white tracking-tighter leading-[0.85]"
+                  className="mb-6 text-6xl lg:text-8xl font-bold text-slate-900 tracking-tighter leading-[0.85] non-italic"
                 >
-                  Бизнесээ <br />{" "}
-                  <span className="text-primary text-glow">Mon1.mn</span>-той{" "}
-                  <br /> өргөжүүл.
+                  Бизнесээ <br />
+                  <div className="mt-2 not-italic flex items-baseline">
+                    {/* Gradient Container for Mon1.mn */}
+                    <div className="bg-linear-to-r from-[#ff3bad] to-[#2a00ff] bg-clip-text text-transparent font-black tracking-tighter">
+                      <span className="text-[96px]">M</span>
+                      <span className="text-[70px]">on</span>
+                      <span className="text-[96px]">1</span>
+                      <span className="text-[70px]">.mn</span>
+                    </div>
+
+                    {/* Regular text for -той */}
+                    <span className="text-slate-900 font-bold text-[96px] ml-2">
+                      -той
+                    </span>
+                  </div>
+                  өргөжүүл.
                 </motion.h1>
                 <motion.p
                   variants={itemVariants}
-                  className="max-w-md text-lg text-white/50 mb-8 leading-relaxed font-medium"
+                  className="max-w-md text-lg text-slate-500 mb-8 leading-relaxed font-semibold italic"
                 >
                   Баталгаажсан агент болсноор эзэмшигчдийн шууд хүсэлтийг хүлээн
-                  авч, AI тусламжтайгаар борлуулалтаа хурдасга.
+                  авч, борлуулалтаа хурдасга.
                 </motion.p>
+
                 <motion.div variants={itemVariants} className="flex gap-4">
-                  <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                    <p className="text-2xl font-bold text-white tracking-tighter">
+                  <div className="p-5 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                    <p className="text-3xl font-black text-slate-900 tracking-tighter italic">
                       150+
                     </p>
-                    <p className="text-[10px] uppercase text-white/40 font-bold">
+                    <p className="text-[10px] uppercase text-slate-400 font-black tracking-widest">
                       Агентууд
                     </p>
                   </div>
-                  <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                    <p className="text-2xl font-bold text-white tracking-tighter">
+                  <div className="p-5 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                    <p className="text-3xl font-black text-slate-900 tracking-tighter italic">
                       98%
                     </p>
-                    <p className="text-[10px] uppercase text-white/40 font-bold">
-                      Амжилт
+                    <p className="text-[10px] uppercase text-slate-400 font-black tracking-widest">
+                      Сэтгэл ханамж
                     </p>
                   </div>
                 </motion.div>
               </div>
 
-              {/* SECURE LOGIN CARD - NO BLUR FOR STABILITY */}
+              {/* --- LOGIN CARD: WHITE GLASSMORPHISM --- */}
               <motion.div variants={itemVariants} className="relative">
-                <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full opacity-10 pointer-events-none" />
+                <div className="absolute inset-0 bg-blue-600/20 blur-[100px] rounded-full opacity-20 pointer-events-none" />
 
-                <Card
-                  style={{ transform: "translateZ(0)" }} // GPU acceleration
-                  className="relative border-white/10 bg-zinc-950 shadow-2xl rounded-[2.5rem] text-white overflow-hidden"
-                >
-                  <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-white/20 to-transparent" />
-
+                <Card className="relative border-white bg-white/70 backdrop-blur-3xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)] rounded-[3rem] text-slate-900 overflow-hidden p-2">
                   <CardHeader className="pt-10 px-10">
-                    <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-4 shadow-xl shadow-primary/20">
+                    <div className="w-14 h-14 bg-blue-600 rounded-[1.2rem] flex items-center justify-center mb-6 shadow-lg shadow-blue-600/20">
                       <Lock className="h-6 w-6 text-white" />
                     </div>
-                    <CardTitle className="text-3xl font-black tracking-tighter uppercase italic leading-none mb-2">
-                      <span className="text-white not-italic">Нэвтрэх</span>
+                    <CardTitle className="text-4xl font-black tracking-tighter uppercase italic leading-none mb-2">
+                      Нэвтрэх
                     </CardTitle>
-                    <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">
-                      Шифрлэгдсэн нэвтрэх хэсэг
+                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                      Агентын удирдлагын хэсэг
                     </p>
                   </CardHeader>
-                  <CardContent className="px-10 pb-10 space-y-6">
-                    <div className="space-y-2 group/input">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+
+                  <CardContent className="px-10 pb-12 space-y-6">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
                         Ажлын и-мэйл
                       </Label>
                       <Input
-                        className="h-14 bg-white/5 border-white/10 rounded-xl focus:bg-white/10 text-white placeholder:text-white/10 ring-0 focus-visible:ring-0"
+                        className="h-14 bg-slate-50 border-slate-100 rounded-2xl focus:bg-white text-slate-900 placeholder:text-slate-300 ring-0 focus-visible:ring-2 focus-visible:ring-blue-600/10 transition-all font-semibold"
                         placeholder="agent@mon1.mn"
                       />
                     </div>
-                    <div className="space-y-2 group/input">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
                         Нууц код
                       </Label>
                       <Input
                         type="password"
-                        className="h-14 bg-white/5 border-white/10 rounded-xl focus:bg-white/10 text-white ring-0 focus-visible:ring-0"
+                        className="h-14 bg-slate-50 border-slate-100 rounded-2xl focus:bg-white text-slate-900 ring-0 focus-visible:ring-2 focus-visible:ring-blue-600/10 transition-all font-semibold"
                         placeholder="••••••••"
                       />
                     </div>
                     <Button
                       asChild={isSignedIn}
-                      className="w-full h-14 bg-primary hover:bg-primary/90 text-white rounded-xl text-lg font-black tracking-tighter shadow-xl shadow-primary/20 group transition-all"
+                      className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xl font-black tracking-tighter shadow-xl shadow-blue-600/20 group transition-all"
                     >
                       {isSignedIn ? (
                         <Link
                           href="/dashboard"
                           className="flex items-center justify-center gap-2"
                         >
-                          Самбар руу орох{" "}
+                          САМБАР РУУ ОРОХ{" "}
                           <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </Link>
                       ) : (
                         <Link href="/sign-in?redirect_url=%2Fdashboard">
-                          Нэвтэрч үргэлжлүүлэх
+                          НЭВТРЭХ
                         </Link>
                       )}
                     </Button>
@@ -200,7 +215,7 @@ export default function AgentPortalPage() {
             >
               <Card className="border-none shadow-2xl shadow-black/5 rounded-[2.5rem] bg-white overflow-hidden">
                 <CardHeader className="bg-zinc-50 border-b border-zinc-100 p-10">
-                  <CardTitle className="text-4xl font-black tracking-tighter uppercase mb-2">
+                  <CardTitle className="text-4xl font-black text-[#2a00ff] tracking-tighter uppercase mb-2">
                     Агент болох хүсэлт
                   </CardTitle>
                   <p className="text-zinc-500 font-medium">
@@ -327,20 +342,36 @@ export default function AgentPortalPage() {
                   ))}
                 </div>
               </div>
-
-              <div className="p-8 rounded-[2.5rem] border-2 border-dashed border-zinc-200 bg-white">
-                <div className="flex items-center gap-3 mb-4">
-                  <Phone className="h-5 w-5 text-primary" />
-                  <p className="font-black tracking-tight uppercase text-[10px] text-zinc-400">
-                    Direct Support
+              <div className="flex flex-col">
+                {" "}
+                <div className="p-8 rounded-[2.5rem] border-2 border-dashed border-zinc-200 bg-white">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Phone className="h-5 w-5 text-primary" />
+                    <p className="font-black tracking-tight uppercase text-[10px] text-zinc-400">
+                      Direct Support
+                    </p>
+                  </div>
+                  <p className="text-2xl font-black text-zinc-950 flex flex-col">
+                    <span>+976 94948873,</span>
                   </p>
+                  <p className="text-primary font-bold underline text-sm mt-1">
+                    agents@mon1.mn
+                  </p>{" "}
+                </div>{" "}
+                <div className="p-8 rounded-[2.5rem] border-2 border-dashed border-zinc-200 bg-white">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Phone className="h-5 w-5 text-primary" />
+                    <p className="font-black tracking-tight uppercase text-[10px] text-zinc-400">
+                      Direct Support
+                    </p>
+                  </div>
+                  <p className="text-2xl font-black text-zinc-950 flex flex-col">
+                    <span>+976 94498873</span>
+                  </p>
+                  <p className="text-primary font-bold underline text-sm mt-1">
+                    agents@mon1.mn
+                  </p>{" "}
                 </div>
-                <p className="text-2xl font-black text-zinc-950">
-                  +976 7000 1234
-                </p>
-                <p className="text-primary font-bold underline text-sm mt-1">
-                  agents@mon1.mn
-                </p>
               </div>
             </motion.aside>
           </div>

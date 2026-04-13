@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/header";
+import { ApartmentCard } from "@/components/apartment-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,12 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { apartments, agents, formatPrice } from "@/lib/data";
 import {
   publishMarketplaceListing,
@@ -32,52 +28,46 @@ import {
   Plus,
   Home,
   Eye,
-  Heart,
-  MessageSquare,
-  TrendingUp,
-  MoreVertical,
-  Pencil,
-  Trash2,
-  BarChart3,
-  Users,
-  Building2,
-  DollarSign,
-  BadgeCheck,
-  Search,
   Bell,
-  MapPin,
-  ArrowRight,
-  ClipboardCheck,
+  Search,
+  Bookmark,
+  UserCircle,
 } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [marketplaceListings, setMarketplaceListings] = useState<
     MarketplaceListing[]
   >([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
 
-  // Mock agent data (would come from auth in real app)
   const currentAgent = agents[0];
 
   useEffect(() => {
     setMarketplaceListings(readMarketplaceListings());
+    setFavorites(["1", "3", "5"]);
   }, []);
 
-  const publishedMarketplaceListings = marketplaceListings.filter(
-    (listing) =>
-      listing.workflowStatus === "published" &&
-      listing.agent.id === currentAgent.id,
+  const agentListings = useMemo(
+    () => [
+      ...marketplaceListings.filter(
+        (l) =>
+          l.workflowStatus === "published" && l.agent.id === currentAgent.id,
+      ),
+      ...apartments.filter((apt) => apt.agent.id === currentAgent.id),
+    ],
+    [marketplaceListings, currentAgent.id],
   );
 
-  const pendingMarketplaceListings = marketplaceListings.filter(
-    (listing) => listing.workflowStatus === "pending",
+  const userRequests = marketplaceListings.filter(
+    (l) => l.workflowStatus === "pending",
   );
 
-  const agentListings = [
-    ...publishedMarketplaceListings,
-    ...apartments.filter((apt) => apt.agent.id === currentAgent.id),
-  ];
+  const favoriteApartments = apartments.filter((apt) =>
+    favorites.includes(apt.id),
+  );
 
   const filteredListings = agentListings.filter(
     (apt) =>
@@ -91,40 +81,39 @@ export default function DashboardPage() {
       currentAgent,
       marketplaceListings,
     );
-
     writeMarketplaceListings(nextListings);
     setMarketplaceListings(nextListings);
   };
 
-  // Mock stats
-  const stats = {
-    totalListings: agentListings.length,
-    totalViews: 12450,
-    totalInquiries: 89,
-    totalFavorites: 324,
+  const openListingDetail = (listingId: string) => {
+    router.push(`/apartment/${listingId}`);
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-[#fff9fd]">
       <Header />
 
       <main className="container mx-auto px-4 py-8">
-        {/* Dashboard Header */}
+        {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-              Агентын хянах самбар
+            <h1 className="text-3xl font-black tracking-tighter text-[#2a00ff] uppercase italic">
+              Хянах самбар
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-[#ff3bad] font-bold">
               Тавтай морил, {currentAgent.name}
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="icon">
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-xl border-[#eeebff] text-[#2a00ff]"
+            >
               <Bell className="h-5 w-5" />
             </Button>
             <Link href="/add-property">
-              <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button className="gap-2 bg-[#2a00ff] hover:bg-[#ff3bad] text-white rounded-xl px-6 font-bold shadow-lg shadow-[#2a00ff]/20">
                 <Plus className="h-5 w-5" />
                 Шинэ зар нэмэх
               </Button>
@@ -132,460 +121,209 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card className="border-border">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Нийт зар</p>
-                  <p className="text-3xl font-bold text-foreground">
-                    {stats.totalListings}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-chart-4/10 rounded-full flex items-center justify-center">
-                  <Building2 className="h-6 w-6 text-chart-4" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Нийт үзэлт</p>
-                  <p className="text-3xl font-bold text-foreground">
-                    {stats.totalViews.toLocaleString()}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Eye className="h-6 w-6 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Хүсэлтүүд</p>
-                  <p className="text-3xl font-bold text-foreground">
-                    {stats.totalInquiries}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-chart-2/10 rounded-full flex items-center justify-center">
-                  <MessageSquare className="h-6 w-6 text-chart-2" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Дуртай</p>
-                  <p className="text-3xl font-bold text-foreground">
-                    {stats.totalFavorites}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-chart-5/10 rounded-full flex items-center justify-center">
-                  <Heart className="h-6 w-6 text-chart-5" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Owner Requests Queue */}
-        <Card className="mb-8 border-2 border-primary/20 bg-primary/5">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <ClipboardCheck className="h-5 w-5 text-primary" />
-                Эзэмшигчдийн шинэ хүсэлтүүд
-              </CardTitle>
-              <Badge className="bg-primary text-primary-foreground">Шинэ</Badge>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Хүмүүс байрны мэдээллээ илгээсэн байна. Та зөвшөөрвөл нийтлэл болж
-              үндсэн сайтад гарна.
-            </p>
-          </CardHeader>
-          <CardContent>
-            {pendingMarketplaceListings.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-background p-8 text-center">
-                <p className="font-medium text-foreground mb-2">
-                  Шинэ хүсэлт алга
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Хэрэглэгч байр нэмэхэд энд гарч ирнэ.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {pendingMarketplaceListings.map((request) => (
-                  <Card
-                    key={request.id}
-                    className="border-border bg-background"
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-primary" />
-                          <span className="font-semibold text-foreground">
-                            {request.district}
-                          </span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(request.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Зар:</span>
-                          <span className="text-foreground truncate ml-3">
-                            {request.title}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Үнэ:</span>
-                          <span className="text-foreground font-medium">
-                            {formatPrice(request.price)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">
-                            Эзэмшигч:
-                          </span>
-                          <span className="text-foreground">
-                            {request.submittedBy.name}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Төлөв:</span>
-                          <span className="text-foreground">
-                            {request.selectedAgentId
-                              ? "Агент хүссэн"
-                              : "Нээлттэй хүсэлт"}
-                          </span>
-                        </div>
-                      </div>
-                      <Button
-                        className="w-full mt-4 gap-2"
-                        size="sm"
-                        onClick={() => handleClaimListing(request.id)}
-                      >
-                        Би энэ байрыг зарна
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Main Content */}
-        <Tabs defaultValue="listings" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="listings" className="gap-2">
-              <Home className="h-4 w-4" />
-              Миний зарууд
+        {/* --- TABS SYSTEM --- */}
+        <Tabs defaultValue="listings" className="space-y-8">
+          <TabsList className="bg-white border border-[#eeebff] p-1 rounded-2xl h-14 shadow-sm">
+            <TabsTrigger
+              value="listings"
+              className="rounded-xl px-6 font-bold text-[#ff3bad] data-[state=active]:bg-[#2a00ff] data-[state=active]:text-white gap-2 transition-all"
+            >
+              <Home className="h-4 w-4" /> Миний зарууд
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Статистик
+            <TabsTrigger
+              value="user-posts"
+              className="rounded-xl px-6 font-bold text-[#ff3bad] data-[state=active]:bg-[#2a00ff] data-[state=active]:text-white gap-2 transition-all"
+            >
+              <UserCircle className="h-4 w-4" /> Ирсэн хүсэлтүүд
+              {userRequests.length > 0 && (
+                <Badge className="ml-1 bg-[#ff3bad] text-white border-none h-5 w-5 flex items-center justify-center p-0 rounded-full">
+                  {userRequests.length}
+                </Badge>
+              )}
             </TabsTrigger>
-            <TabsTrigger value="inquiries" className="gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Хүсэлтүүд
+            <TabsTrigger
+              value="favorites"
+              className="rounded-xl px-6 font-bold text-[#ff3bad] data-[state=active]:bg-[#2a00ff] data-[state=active]:text-white gap-2 transition-all"
+            >
+              <Bookmark className="h-4 w-4" /> Хадгалсан
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="listings" className="space-y-4">
-            <Card className="border-border">
-              <CardHeader className="pb-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <CardTitle className="text-xl">Миний зарууд</CardTitle>
-                  <div className="relative w-full md:w-64">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          {/* 1. Агентын зарууд */}
+          <TabsContent value="listings">
+            <Card className="border-none shadow-xl shadow-[#2a00ff]/5 rounded-4xl overflow-hidden bg-white">
+              <CardHeader className="border-b border-[#fff1f9] p-8">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                  <CardTitle className="text-xl text-[#2a00ff] font-black uppercase italic tracking-tight">
+                    Нийтлэгдсэн зарууд
+                  </CardTitle>
+                  <div className="relative w-full md:w-80">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#ff3bad]" />
                     <Input
-                      placeholder="Зар хайх..."
+                      placeholder="Хайх..."
+                      className="pl-11 bg-[#fff9fd] border-none rounded-xl h-12 font-bold text-[#1a0b3b]"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9"
                     />
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Байр</TableHead>
-                        <TableHead>Үнэ</TableHead>
-                        <TableHead>Төлөв</TableHead>
-                        <TableHead className="text-center">Үзэлт</TableHead>
-                        <TableHead className="text-center">Хүсэлт</TableHead>
-                        <TableHead className="text-right">Үйлдэл</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredListings.map((listing) => (
-                        <TableRow key={listing.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div className="h-12 w-16 shrink-0 overflow-hidden rounded-lg">
-                                <img
-                                  src={listing.images[0]}
-                                  alt={listing.title}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="max-w-50 truncate font-medium text-foreground">
-                                  {listing.title}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {listing.location}
-                                </p>
-                              </div>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader className="bg-[#fff9fd]">
+                    <TableRow className="hover:bg-transparent border-none">
+                      <TableHead className="pl-8 font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
+                        Байршил / Нэр
+                      </TableHead>
+                      <TableHead className="font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
+                        Үнэ
+                      </TableHead>
+                      <TableHead className="font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
+                        Төлөв
+                      </TableHead>
+                      <TableHead className="text-right pr-8 font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
+                        Үйлдэл
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredListings.map((listing) => (
+                      <TableRow
+                        key={listing.id}
+                        onClick={() => openListingDetail(listing.id)}
+                        className="group cursor-pointer border-b border-[#fff1f9] transition-colors hover:bg-[#fff9fd]"
+                      >
+                        <TableCell className="pl-8 py-4">
+                          <div className="flex items-center gap-4">
+                            <img
+                              src={listing.images[0]}
+                              className="w-16 h-12 rounded-xl object-cover shadow-sm"
+                              alt=""
+                            />
+                            <div>
+                              <p className="font-black text-[#1a0b3b] uppercase italic tracking-tighter text-sm">
+                                {listing.title}
+                              </p>
+                              <p className="text-xs text-[#ff3bad] font-bold uppercase">
+                                {listing.location || listing.district}
+                              </p>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <p className="font-semibold text-foreground">
-                              {formatPrice(listing.price)}
-                            </p>
-                          </TableCell>
-                          <TableCell>
-                            {listing.verified ? (
-                              <Badge
-                                variant="secondary"
-                                className="gap-1 bg-primary/10 text-primary border-0"
-                              >
-                                <BadgeCheck className="h-3 w-3" />
-                                Баталгаажсан
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline">Хүлээгдэж байна</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span className="text-muted-foreground">
-                              {((Number(listing.id) * 127 + 100) % 500) + 100}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span className="text-muted-foreground">
-                              {((Number(listing.id) * 7 + 5) % 20) + 5}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem>
-                                  <Link
-                                    href={`/apartment/${listing.id}`}
-                                    className="flex items-center gap-2 w-full"
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                    Үзэх
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                  <Pencil className="h-4 w-4 mr-2" />
-                                  Засах
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive">
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Устгах
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-black text-[#2a00ff] italic text-lg">
+                          {formatPrice(listing.price)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="bg-[#eeebff] text-[#2a00ff] border-none rounded-lg px-3 py-1 font-black text-[10px] tracking-widest">
+                            ИДЭВХТЭЙ
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right pr-8">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="rounded-xl px-4 font-black text-[10px] uppercase tracking-widest text-[#ff3bad] hover:text-[#2a00ff] hover:bg-white hover:shadow-md"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Үзэх
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="analytics">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="border-border">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                    Гүйцэтгэлийн тойм
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">
-                        Энэ сарын үзэлт
-                      </span>
-                      <span className="font-semibold text-foreground">
-                        3,245 <span className="text-primary text-sm">+12%</span>
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">
-                        Энэ сарын хүсэлт
-                      </span>
-                      <span className="font-semibold text-foreground">
-                        28 <span className="text-primary text-sm">+8%</span>
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">
-                        Хөрвүүлэлтийн хувь
-                      </span>
-                      <span className="font-semibold text-foreground">
-                        0.86%
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">
-                        Дундаж хариу өгөх хугацаа
-                      </span>
-                      <span className="font-semibold text-foreground">
-                        2.4 цаг
-                      </span>
+          {/* 2. Ирсэн хүсэлтүүд */}
+          <TabsContent value="user-posts">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {userRequests.map((request) => (
+                <Card
+                  key={request.id}
+                  className="border-none shadow-xl shadow-[#2a00ff]/5 rounded-4xl bg-white overflow-hidden group"
+                >
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={request.images[0]}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      alt=""
+                    />
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-white/90 backdrop-blur-md text-[#2a00ff] border-none font-black text-[10px] px-3 py-1.5 rounded-xl">
+                        ШИНЭ ХҮСЭЛТ
+                      </Badge>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-primary" />
-                    Зарын үнэлгээ
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        Нийт багцын үнэ
-                      </p>
-                      <p className="text-3xl font-bold text-foreground">
-                        {formatPrice(
-                          agentListings.reduce(
-                            (sum, apt) => sum + apt.price,
-                            0,
-                          ),
-                        )}
-                      </p>
+                  <CardContent className="p-6 space-y-4">
+                    <h3 className="font-black text-[#1a0b3b] uppercase italic tracking-tighter text-lg leading-none line-clamp-1">
+                      {request.title}
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-[#ff3bad] font-bold uppercase text-[10px]">
+                          Эзэмшигч:
+                        </span>
+                        <span className="font-black text-[#1a0b3b] italic">
+                          {request.submittedBy.name}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-[#ff3bad] font-bold uppercase text-[10px]">
+                          Байршил:
+                        </span>
+                        <span className="font-black text-[#1a0b3b] italic">
+                          {request.district}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-[#ff3bad] font-bold uppercase text-[10px]">
+                          Үнэ:
+                        </span>
+                        <span className="font-black text-[#2a00ff] italic">
+                          {formatPrice(request.price)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Дундаж үнэ</span>
-                      <span className="font-semibold text-foreground">
-                        {formatPrice(
-                          agentListings.reduce(
-                            (sum, apt) => sum + apt.price,
-                            0,
-                          ) / agentListings.length,
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">
-                        Хамгийн өндөр зар
-                      </span>
-                      <span className="font-semibold text-foreground">
-                        {formatPrice(
-                          Math.max(...agentListings.map((apt) => apt.price)),
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    <Button
+                      className="w-full h-12 bg-[#1a0b3b] hover:bg-[#2a00ff] text-white rounded-xl font-black uppercase tracking-widest text-[10px] transition-all"
+                      onClick={() => handleClaimListing(request.id)}
+                    >
+                      Энэ байрыг хариуцаж авах
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+              {userRequests.length === 0 && (
+                <div className="col-span-full py-20 text-center">
+                  <p className="text-[#ff3bad] font-black uppercase italic tracking-widest">
+                    Одоогоор шинэ хүсэлт ирээгүй байна
+                  </p>
+                </div>
+              )}
             </div>
           </TabsContent>
 
-          <TabsContent value="inquiries">
-            <Card className="border-border">
-              <CardHeader>
-                <CardTitle>Сүүлийн хүсэлтүүд</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    {
-                      name: "Эрдэнэ Батбаяр",
-                      property: "Зайсан дахь орчин үеийн 3 өрөө байр",
-                      time: "2 цагийн өмнө",
-                      message:
-                        "Энэ байр одоо ч гэсэн боломжтой юу? Энэ амралтын өдөр үзлэг хийлгэмээр байна.",
-                    },
-                    {
-                      name: "Сарнай Отгон",
-                      property: "Өргөн 4 өрөө гэр бүлийн байр",
-                      time: "5 цагийн өмнө",
-                      message: "Зогсоолын талаар дэлгэрэнгүй мэдээлэл өгөөч?",
-                    },
-                    {
-                      name: "Түмэндэлгэр Болд",
-                      property: "Зайсан дахь орчин үеийн 3 өрөө байр",
-                      time: "1 өдрийн өмнө",
-                      message:
-                        "Энэ барилгын сарын засвар үйлчилгээний хураамж хэд вэ?",
-                    },
-                  ].map((inquiry, idx) => (
-                    <div
-                      key={idx}
-                      className="flex gap-4 p-4 rounded-lg bg-muted/50"
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/20">
-                        <Users className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-semibold text-foreground">
-                            {inquiry.name}
-                          </h4>
-                          <span className="text-xs text-muted-foreground">
-                            {inquiry.time}
-                          </span>
-                        </div>
-                        <p className="text-sm text-primary mb-1">
-                          {inquiry.property}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {inquiry.message}
-                        </p>
-                        <div className="flex gap-2 mt-3">
-                          <Button
-                            size="sm"
-                            className="bg-primary text-primary-foreground hover:bg-primary/90"
-                          >
-                            Хариу бичих
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            Байр үзэх
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+          {/* 3. Хадгалсан */}
+          <TabsContent value="favorites">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {favoriteApartments.map((apt, index) => (
+                <ApartmentCard
+                  key={apt.id}
+                  apartment={apt}
+                  index={index}
+                  variant="default"
+                />
+              ))}
+              {favoriteApartments.length === 0 && (
+                <div className="col-span-full py-20 text-center">
+                  <p className="text-[#ff3bad] font-black uppercase italic tracking-widest">
+                    Таны хадгалсан байр байхгүй байна
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </main>
