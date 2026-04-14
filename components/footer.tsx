@@ -16,7 +16,7 @@ export function Footer() {
   const quickLinks = [
     { label: "Зарууд үзэх", href: "/listings" },
     { label: "Газрын зураг", href: "/map" },
-    { label: "Мэдээ", href: "/medeee" },
+    { label: "Мэдээ", href: "/news" },
     { label: "Агент хайх", href: "/agents" },
     { label: "Зар нэмэх", href: "/add-property" },
   ] as const;

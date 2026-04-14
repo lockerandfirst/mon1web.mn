@@ -64,7 +64,7 @@ export function ServicePicker({
                     {agent.name}
                   </p>
                   {selectedAgentId === agent.id && (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ff2bad] text-white">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ff2bad] !important text-white">
                       <Sparkles className="h-4 w-4 fill-current" />
                     </div>
                   )}
@@ -73,7 +73,8 @@ export function ServicePicker({
                   {agent.company}
                 </p>
                 <p className="mt-2 text-sm font-semibold text-[#6d4d84]">
-                  {agent.listingsCount} listing • {agent.rating.toFixed(1)} rating
+                  {agent.listingsCount} listing • {agent.rating.toFixed(1)}{" "}
+                  rating
                 </p>
               </button>
             ))}
@@ -131,7 +132,9 @@ function ServiceCard({
       <h3 className="mb-2 text-xl font-black uppercase italic tracking-tight text-[#1a0b3b]">
         {title}
       </h3>
-      <p className="text-xs font-bold leading-5 text-[#ff9ce0]">{description}</p>
+      <p className="text-xs font-bold leading-5 text-[#ff9ce0]">
+        {description}
+      </p>
       {premium && (
         <Badge className="mt-4 rounded-full bg-[#1a0b3b] px-4 py-1 text-[9px] font-black uppercase italic text-[#ff9ce0]">
           Recommended

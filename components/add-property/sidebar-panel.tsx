@@ -28,7 +28,7 @@ export function SidebarPanel({
   selectedAgentName: string;
 }) {
   return (
-    <aside className="space-y-6 md:col-span-5 md:sticky md:top-24 lg:col-span-4">
+    <aside className="space-y-6 md:col-span-5 md:sticky md:top-24 lg:col-span-4 max-w-60">
       <Card className="relative overflow-hidden rounded-[3rem] border-none bg-[#1a0b3b] p-10 text-white shadow-[0_45px_90px_-55px_rgba(26,11,59,1)]">
         <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-[#2a00ff]/25 blur-3xl" />
         <div className="absolute -bottom-4 left-6 h-24 w-24 rounded-full bg-[#ff3bad]/20 blur-3xl" />
@@ -64,7 +64,7 @@ export function SidebarPanel({
           Live Preview
         </p>
         <div className="mt-4 space-y-4">
-          <div className="rounded-[2rem] bg-[#fff8fd] p-5">
+          <div className="rounded-4xl bg-[#fff8fd] p-5">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
               Төрөл
             </p>
@@ -160,7 +160,7 @@ function SummaryTile({
   value: string;
 }) {
   return (
-    <div className="rounded-[1.5rem] bg-[#f8f6ff] p-4">
+    <div className="rounded-3xl bg-[#f8f6ff] p-4">
       <Icon className="h-5 w-5 text-[#2a00ff]" />
       <p className="mt-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
         {label}
