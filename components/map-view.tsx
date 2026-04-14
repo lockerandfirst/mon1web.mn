@@ -47,6 +47,9 @@ export function MapView({
 
     markerLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
+    requestAnimationFrame(() => {
+      map.invalidateSize();
+    });
 
     return () => {
       markerLayerRef.current?.clearLayers();
@@ -60,7 +63,7 @@ export function MapView({
     const map = mapRef.current;
     const markerLayer = markerLayerRef.current;
 
-    if (!map || !markerLayer) {
+    if (!isMounted || !map || !markerLayer) {
       return;
     }
 
@@ -97,7 +100,7 @@ export function MapView({
         .on("click", () => onSelectApartment(apt.id))
         .addTo(markerLayer);
     });
-  }, [apartments, onSelectApartment, selectedId]);
+  }, [apartments, isMounted, onSelectApartment, selectedId]);
 
   if (!isMounted)
     return <div className="h-full w-full animate-pulse bg-slate-100" />;

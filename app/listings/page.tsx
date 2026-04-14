@@ -166,7 +166,11 @@ export default function ListingsPage() {
 
   useEffect(() => {
     setSearchQuery(searchParams.get("q")?.trim() ?? "");
-    setCategory(searchParams.get("category") ?? "");
+    setCategory(
+      searchParams.get("category") === "all"
+        ? ""
+        : (searchParams.get("category") ?? ""),
+    );
     setRentSubcategory(searchParams.get("rentType") ?? "");
     setPriceRange(getPriceRangeFromParam(searchParams.get("price")));
     setRooms(searchParams.get("rooms") ?? "");
@@ -345,7 +349,7 @@ export default function ListingsPage() {
                   variant="ghost"
                   size="sm"
                   onClick={clearFilters}
-                  className="text-[#ff9ce0] font-bold hover:text-[#ff3bad]"
+                  className="text-[#ff2bad] font-bold hover:text-[#ff3bad]"
                 >
                   Цэвэрлэх
                 </Button>
@@ -356,7 +360,12 @@ export default function ListingsPage() {
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2a00ff] flex items-center gap-2">
                   <Building2 className="h-3.5 w-3.5" /> Ангилал
                 </label>
-                <Select value={category} onValueChange={setCategory}>
+                <Select
+                  value={category || "all"}
+                  onValueChange={(value) =>
+                    setCategory(value === "all" ? "" : value)
+                  }
+                >
                   <SelectTrigger className="h-12 rounded-2xl border-[#eeebff] bg-[#fff9fd] font-bold text-[#2a00ff]">
                     <SelectValue placeholder="Бүх ангилал" />
                   </SelectTrigger>
@@ -504,7 +513,7 @@ export default function ListingsPage() {
                   onValueChange={setSqmRange}
                   max={500}
                   step={1}
-                  className="[&_[role=slider]]:bg-[#2a00ff]"
+                  className="**:[[role=slider]]:bg-[#2a00ff]"
                 />
                 <div className="flex justify-between font-black text-[11px] text-[#2a00ff]">
                   <span>
@@ -519,7 +528,7 @@ export default function ListingsPage() {
                   Үнэ
                 </label>
                 <Slider
-                  className="mt-4 [&_[role=slider]]:bg-[#ff3bad]"
+                  className="mt-4 **:[[role=slider]]:bg-[#ff3bad]"
                   value={priceRange}
                   onValueChange={setPriceRange}
                   max={1000000000}

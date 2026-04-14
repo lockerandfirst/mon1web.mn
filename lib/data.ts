@@ -121,6 +121,7 @@ export const apartments: Apartment[] = [
     coordinates: { lat: 47.8764, lng: 106.9057 },
     createdAt: "2024-01-15",
   },
+
   {
     id: "2",
     title: "Cozy 2-Bedroom in Central Sukhbaatar",
@@ -881,3 +882,12 @@ export function formatPrice(price: number): string {
   }
   return `${price.toLocaleString()} MNT`;
 }
+const DISTRICTS = [
+  "Хан-Уул",
+  "Сүхбаатар",
+  "Баянзүрх",
+  "Баянгол",
+  "Сонгинохайрхан",
+  "Чингэлтэй",
+  "бүх дүүрэг",
+];

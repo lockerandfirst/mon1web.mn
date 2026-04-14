@@ -1,4 +1,5 @@
 export const PROPERTY_CATEGORIES = [
+  { value: "all", label: "Бүх" },
   { value: "apartment", label: "Орон сууц" },
   { value: "new-apartment", label: "Шинэ орон сууц" },
   { value: "rent", label: "Түрээс" },
@@ -9,20 +10,29 @@ export const PROPERTY_CATEGORIES = [
   { value: "industrial", label: "Үйлдвэр" },
 ] as const;
 
+type PropertyCategoryOption = (typeof PROPERTY_CATEGORIES)[number];
+
 export const RENT_SUBCATEGORIES = [
   { value: "apartment-rent", label: "Байрны түрээс" },
   { value: "room-rent", label: "Өрөө түрээс" },
-  { value: "shared-housing", label: "Нийтийн байр" },
   { value: "house-rent", label: "Хаус түрээс" },
   { value: "office-rent", label: "Оффис түрээс" },
-  { value: "garage-rent", label: "Гараж түрээс" },
+  { value: "work-rent", label: "Ажлын байр түрээс" },
 ] as const;
 
-export type PropertyCategory = (typeof PROPERTY_CATEGORIES)[number]["value"];
+export type FilterPropertyCategory = PropertyCategoryOption["value"];
+export type PropertyCategory = Exclude<FilterPropertyCategory, "all">;
 export type RentSubcategory = (typeof RENT_SUBCATEGORIES)[number]["value"];
 
+export const LISTING_PROPERTY_CATEGORIES = PROPERTY_CATEGORIES.filter(
+  (
+    category,
+  ): category is Extract<PropertyCategoryOption, { value: PropertyCategory }> =>
+    category.value !== "all",
+);
+
 const PROPERTY_CATEGORY_SET = new Set<PropertyCategory>(
-  PROPERTY_CATEGORIES.map((category) => category.value),
+  LISTING_PROPERTY_CATEGORIES.map((category) => category.value),
 );
 
 const RENT_SUBCATEGORY_SET = new Set<RentSubcategory>(
@@ -103,8 +113,8 @@ export function inferPropertyCategory(listing: {
     return "office";
   }
 
-  if (searchableText.includes("garage") || searchableText.includes("гараж")) {
-    return "garage";
+  if (searchableText.includes("barter") || searchableText.includes("бартер")) {
+    return "barter";
   }
 
   if (

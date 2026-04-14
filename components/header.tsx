@@ -29,7 +29,21 @@ export function Header() {
 
   // Scroll хийхэд Header-ийн өнгө өөрчлөгдөх эффект
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Use a small hysteresis gap so sticky height changes don't bounce
+      // around one exact threshold and cause a resize loop.
+      setScrolled((prev) => {
+        if (prev) {
+          return currentScrollY > 8;
+        }
+
+        return currentScrollY > 24;
+      });
+    };
+
+    handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -46,10 +60,10 @@ export function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300 border-b",
+        "sticky top-0 z-50 w-full border-b py-3 transition-[background-color,border-color,backdrop-filter] duration-300",
         scrolled
-          ? "bg-background/80 backdrop-blur-md border-border py-2"
-          : "bg-background border-transparent py-4",
+          ? "border-border bg-background/80 backdrop-blur-md"
+          : "border-transparent bg-background",
       )}
     >
       <div className="container mx-auto flex items-center justify-between px-4 lg:px-8">

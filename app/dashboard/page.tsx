@@ -25,6 +25,13 @@ import {
   type MarketplaceListing,
 } from "@/lib/marketplace";
 import {
+  claimBuyRequest,
+  getBuyRequestBudgetLabel,
+  readBuyRequests,
+  writeBuyRequests,
+  type BuyRequest,
+} from "@/lib/buy-requests";
+import {
   Plus,
   Home,
   Eye,
@@ -41,12 +48,14 @@ export default function DashboardPage() {
   const [marketplaceListings, setMarketplaceListings] = useState<
     MarketplaceListing[]
   >([]);
+  const [buyRequests, setBuyRequests] = useState<BuyRequest[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const currentAgent = agents[0];
 
   useEffect(() => {
     setMarketplaceListings(readMarketplaceListings());
+    setBuyRequests(readBuyRequests());
     setFavorites(["1", "3", "5"]);
   }, []);
 
@@ -64,6 +73,8 @@ export default function DashboardPage() {
   const userRequests = marketplaceListings.filter(
     (l) => l.workflowStatus === "pending",
   );
+  const buyerRequests = buyRequests.filter((request) => request.workflowStatus === "open");
+  const totalIncomingRequests = userRequests.length + buyerRequests.length;
 
   const favoriteApartments = apartments.filter((apt) =>
     favorites.includes(apt.id),
@@ -83,6 +94,12 @@ export default function DashboardPage() {
     );
     writeMarketplaceListings(nextListings);
     setMarketplaceListings(nextListings);
+  };
+
+  const handleClaimBuyRequest = (requestId: string) => {
+    const nextRequests = claimBuyRequest(requestId, currentAgent, buyRequests);
+    writeBuyRequests(nextRequests);
+    setBuyRequests(nextRequests);
   };
 
   const openListingDetail = (listingId: string) => {
@@ -135,9 +152,9 @@ export default function DashboardPage() {
               className="rounded-xl px-6 font-bold text-[#ff3bad] data-[state=active]:bg-[#2a00ff] data-[state=active]:text-white gap-2 transition-all"
             >
               <UserCircle className="h-4 w-4" /> Ирсэн хүсэлтүүд
-              {userRequests.length > 0 && (
+              {totalIncomingRequests > 0 && (
                 <Badge className="ml-1 bg-[#ff3bad] text-white border-none h-5 w-5 flex items-center justify-center p-0 rounded-full">
-                  {userRequests.length}
+                  {totalIncomingRequests}
                 </Badge>
               )}
             </TabsTrigger>
@@ -239,6 +256,78 @@ export default function DashboardPage() {
           {/* 2. Ирсэн хүсэлтүүд */}
           <TabsContent value="user-posts">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {buyerRequests.map((request) => (
+                <Card
+                  key={request.id}
+                  className="border-none shadow-xl shadow-[#2a00ff]/5 rounded-4xl bg-white overflow-hidden group"
+                >
+                  <div className="relative h-48 overflow-hidden bg-[#f8f6ff]">
+                    <img
+                      src={request.image}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      alt=""
+                    />
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-[#2a00ff] text-white border-none font-black text-[10px] px-3 py-1.5 rounded-xl">
+                        АВНА ХҮСЭЛТ
+                      </Badge>
+                    </div>
+                  </div>
+                  <CardContent className="p-6 space-y-4">
+                    <h3 className="font-black text-[#1a0b3b] uppercase italic tracking-tighter text-lg leading-none">
+                      {request.title}
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between gap-4 text-sm">
+                        <span className="text-[#ff3bad] font-bold uppercase text-[10px]">
+                          Хэрэглэгч:
+                        </span>
+                        <span className="text-right font-black text-[#1a0b3b] italic">
+                          {request.submittedBy.name}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-4 text-sm">
+                        <span className="text-[#ff3bad] font-bold uppercase text-[10px]">
+                          Байршил:
+                        </span>
+                        <span className="text-right font-black text-[#1a0b3b] italic">
+                          {request.location || request.district}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-4 text-sm">
+                        <span className="text-[#ff3bad] font-bold uppercase text-[10px]">
+                          Төсөв:
+                        </span>
+                        <span className="text-right font-black text-[#2a00ff] italic">
+                          {getBuyRequestBudgetLabel(request)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-4 text-sm">
+                        <span className="text-[#ff3bad] font-bold uppercase text-[10px]">
+                          Дэлгэрэнгүй:
+                        </span>
+                        <span className="text-right font-black text-[#1a0b3b] italic">
+                          {request.rooms} өрөө • {request.sqm}м²
+                        </span>
+                      </div>
+                      <div className="rounded-2xl bg-[#fff9fd] p-3">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-[#ff3bad]">
+                          Тайлбар
+                        </p>
+                        <p className="mt-2 text-sm font-medium leading-6 text-[#6e5479]">
+                          {request.notes || "Нэмэлт тайлбар оруулаагүй."}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      className="w-full h-12 bg-[#2a00ff] hover:bg-[#ff3bad] text-white rounded-xl font-black uppercase tracking-widest text-[10px] transition-all"
+                      onClick={() => handleClaimBuyRequest(request.id)}
+                    >
+                      Энэ хүсэлтийг хариуцаж авах
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
               {userRequests.map((request) => (
                 <Card
                   key={request.id}
@@ -295,7 +384,7 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               ))}
-              {userRequests.length === 0 && (
+              {totalIncomingRequests === 0 && (
                 <div className="col-span-full py-20 text-center">
                   <p className="text-[#ff3bad] font-black uppercase italic tracking-widest">
                     Одоогоор шинэ хүсэлт ирээгүй байна

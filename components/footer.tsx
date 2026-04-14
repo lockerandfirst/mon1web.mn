@@ -80,7 +80,7 @@ export function Footer() {
                     href={item.href}
                     className="text-slate-500 hover:text-blue-600 text-sm font-bold flex items-center gap-0 hover:gap-3 transition-all duration-300 group uppercase tracking-tight"
                   >
-                    <div className="w-0 h-[2px] bg-blue-600 group-hover:w-4 transition-all duration-300" />
+                    <div className="w-0 h-0.5 bg-blue-600 group-hover:w-4 transition-all duration-300" />
                     {item.label}
                   </Link>
                 </li>
@@ -119,10 +119,21 @@ export function Footer() {
                   <Phone className="h-5 w-5" />
                 </div>
                 <a
-                  href="tel:+97670001234"
+                  href="tel:+97694948873"
                   className="text-slate-900 font-black italic text-lg tracking-tighter hover:text-blue-600 transition-colors"
                 >
-                  +976 94948873, +976 94498873
+                  +976 94948873
+                </a>
+              </div>
+              <div className="flex items-center gap-4 group">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                  <Phone className="h-5 w-5" />
+                </div>
+                <a
+                  href="tel:+97694948873"
+                  className="text-slate-900 font-black italic text-lg tracking-tighter hover:text-blue-600 transition-colors"
+                >
+                  +976 94498873
                 </a>
               </div>
             </div>

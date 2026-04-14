@@ -1,0 +1,309 @@
+{
+  "recommendedEndpoints": {
+    "listListings": "/api/listings?status=published&page=1&limit=12",
+    "getListing": "/api/listings/1",
+    "createListing": "/api/listings",
+    "listAgents": "/api/agents?page=1&limit=12",
+    "getAgent": "/api/agents/a1",
+    "listBuyRequests": "/api/buy-requests?status=open&page=1&limit=12",
+    "createBuyRequest": "/api/buy-requests"
+  },
+  "listingsResponse": {
+    "data": [
+      {
+        "id": "1",
+        "title": "Modern 3-Bedroom Apartment in Zaisan",
+        "propertyType": "apartment",
+        "price": 280000000,
+        "paymentMethod": "mortgage",
+        "pricePerSqm": 3500000,
+        "sqm": 80,
+        "rooms": 3,
+        "bathrooms": 2,
+        "floor": 12,
+        "totalFloors": 16,
+        "commissionYear": 2021,
+        "location": "Zaisan",
+        "district": "Хан-Уул",
+        "address": "Zaisan Valley, Building 24, Apt 1201",
+        "description": "Luxurious modern apartment with stunning mountain views.",
+        "features": [
+          "Parking",
+          "Elevator",
+          "Security",
+          "Balcony"
+        ],
+        "images": [
+          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+          "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+        ],
+        "verified": true,
+        "featured": true,
+        "agent": {
+          "id": "a1",
+          "name": "Bat-Erdene Ganbaatar",
+          "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
+          "phone": "+976 9911 2233",
+          "email": "baterdene@mon1.mn",
+          "company": "Elite Properties Mongolia",
+          "rating": 4.9,
+          "reviewCount": 127,
+          "listingsCount": 45,
+          "verified": true
+        },
+        "nearbyServices": [
+          {
+            "type": "school",
+            "name": "American School of Ulaanbaatar",
+            "distance": "800m",
+            "walkTime": "10 min"
+          },
+          {
+            "type": "supermarket",
+            "name": "Nomin Supermarket",
+            "distance": "400m",
+            "walkTime": "5 min"
+          }
+        ],
+        "coordinates": {
+          "lat": 47.8764,
+          "lng": 106.9057
+        },
+        "createdAt": "2024-01-15T00:00:00.000Z",
+        "workflowStatus": "published",
+        "selectedAgentId": "a1",
+        "submittedBy": null
+      }
+    ],
+    "meta": {
+      "page": 1,
+      "limit": 12,
+      "total": 1,
+      "totalPages": 1
+    }
+  },
+  "listingDetailResponse": {
+    "data": {
+      "id": "1",
+      "title": "Modern 3-Bedroom Apartment in Zaisan",
+      "propertyType": "apartment",
+      "price": 280000000,
+      "paymentMethod": "mortgage",
+      "pricePerSqm": 3500000,
+      "sqm": 80,
+      "rooms": 3,
+      "bathrooms": 2,
+      "floor": 12,
+      "totalFloors": 16,
+      "commissionYear": 2021,
+      "location": "Zaisan",
+      "district": "Хан-Уул",
+      "address": "Zaisan Valley, Building 24, Apt 1201",
+      "description": "Luxurious modern apartment with stunning mountain views.",
+      "features": [
+        "Parking",
+        "Elevator",
+        "Security",
+        "Balcony"
+      ],
+      "images": [
+        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+      ],
+      "verified": true,
+      "featured": true,
+      "agent": {
+        "id": "a1",
+        "name": "Bat-Erdene Ganbaatar",
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
+        "phone": "+976 9911 2233",
+        "email": "baterdene@mon1.mn",
+        "company": "Elite Properties Mongolia",
+        "rating": 4.9,
+        "reviewCount": 127,
+        "listingsCount": 45,
+        "verified": true
+      },
+      "nearbyServices": [
+        {
+          "type": "school",
+          "name": "American School of Ulaanbaatar",
+          "distance": "800m",
+          "walkTime": "10 min"
+        },
+        {
+          "type": "supermarket",
+          "name": "Nomin Supermarket",
+          "distance": "400m",
+          "walkTime": "5 min"
+        }
+      ],
+      "coordinates": {
+        "lat": 47.8764,
+        "lng": 106.9057
+      },
+      "createdAt": "2024-01-15T00:00:00.000Z",
+      "workflowStatus": "published",
+      "selectedAgentId": "a1",
+      "submittedBy": null
+    }
+  },
+  "agentsResponse": {
+    "data": [
+      {
+        "id": "a1",
+        "name": "Bat-Erdene Ganbaatar",
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
+        "phone": "+976 9911 2233",
+        "email": "baterdene@mon1.mn",
+        "company": "Elite Properties Mongolia",
+        "rating": 4.9,
+        "reviewCount": 127,
+        "listingsCount": 45,
+        "verified": true
+      }
+    ],
+    "meta": {
+      "page": 1,
+      "limit": 12,
+      "total": 1,
+      "totalPages": 1
+    }
+  },
+  "agentDetailResponse": {
+    "data": {
+      "id": "a1",
+      "name": "Bat-Erdene Ganbaatar",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
+      "phone": "+976 9911 2233",
+      "email": "baterdene@mon1.mn",
+      "company": "Elite Properties Mongolia",
+      "rating": 4.9,
+      "reviewCount": 127,
+      "listingsCount": 45,
+      "verified": true,
+      "bio": "Residential property specialist in Zaisan and Khan-Uul.",
+      "listings": [
+        {
+          "id": "1",
+          "title": "Modern 3-Bedroom Apartment in Zaisan",
+          "propertyType": "apartment",
+          "price": 280000000,
+          "paymentMethod": "mortgage",
+          "pricePerSqm": 3500000,
+          "sqm": 80,
+          "rooms": 3,
+          "bathrooms": 2,
+          "floor": 12,
+          "totalFloors": 16,
+          "commissionYear": 2021,
+          "location": "Zaisan",
+          "district": "Хан-Уул",
+          "address": "Zaisan Valley, Building 24, Apt 1201",
+          "description": "Luxurious modern apartment with stunning mountain views.",
+          "features": [
+            "Parking",
+            "Elevator"
+          ],
+          "images": [
+            "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+          ],
+          "verified": true,
+          "featured": true,
+          "agent": {
+            "id": "a1",
+            "name": "Bat-Erdene Ganbaatar",
+            "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
+            "phone": "+976 9911 2233",
+            "email": "baterdene@mon1.mn",
+            "company": "Elite Properties Mongolia",
+            "rating": 4.9,
+            "reviewCount": 127,
+            "listingsCount": 45,
+            "verified": true
+          },
+          "nearbyServices": [],
+          "coordinates": {
+            "lat": 47.8764,
+            "lng": 106.9057
+          },
+          "createdAt": "2024-01-15T00:00:00.000Z",
+          "workflowStatus": "published",
+          "selectedAgentId": "a1",
+          "submittedBy": null
+        }
+      ]
+    }
+  },
+  "createListingRequest": {
+    "propertyType": "apartment",
+    "district": "Хан-Уул",
+    "location": "Zaisan",
+    "address": "Zaisan, Building 24",
+    "price": 280000000,
+    "sqm": 80,
+    "rooms": 3,
+    "bathrooms": 2,
+    "floor": 12,
+    "totalFloors": 16,
+    "description": "Luxurious modern apartment with mountain views.",
+    "nearbyServiceIds": [
+      "school",
+      "bus",
+      "shop"
+    ],
+    "serviceType": "agent",
+    "selectedAgentId": "a1",
+    "submittedBy": {
+      "name": "Test User",
+      "email": "user@mon1.local"
+    }
+  },
+  "buyRequestsResponse": {
+    "data": [
+      {
+        "id": "buy-1",
+        "title": "Хан-Уул дэх 3 өрөө орон сууц авна",
+        "propertyType": "apartment",
+        "district": "Хан-Уул",
+        "location": "Zaisan",
+        "budget": 320000000,
+        "rooms": 3,
+        "sqm": 85,
+        "notes": "Зогсоолтой, сургуульд ойр байвал сайн.",
+        "contactPhone": "+976 99112233",
+        "createdAt": "2024-02-01T00:00:00.000Z",
+        "workflowStatus": "open",
+        "submittedBy": {
+          "name": "Buyer User",
+          "email": "buyer@mon1.local"
+        },
+        "assignedAgentId": null,
+        "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+      }
+    ],
+    "meta": {
+      "page": 1,
+      "limit": 12,
+      "total": 1,
+      "totalPages": 1
+    }
+  },
+  "createBuyRequestRequest": {
+    "propertyType": "apartment",
+    "district": "Хан-Уул",
+    "location": "Zaisan",
+    "budget": 320000000,
+    "rooms": 3,
+    "sqm": 85,
+    "contactPhone": "+976 99112233",
+    "notes": "Зогсоолтой, сургуульд ойр байвал сайн.",
+    "barterOffer": null,
+    "barterTarget": null,
+    "cashDifference": null,
+    "submittedBy": {
+      "name": "Buyer User",
+      "email": "buyer@mon1.local"
+    }
+  }
+}
