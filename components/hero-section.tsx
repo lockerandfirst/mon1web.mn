@@ -17,7 +17,6 @@ import {
   Search,
   Sparkles,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const categoryIcons = {
   apartment: Building2,
@@ -33,16 +32,17 @@ const categoryIcons = {
 export function HeroSection() {
   const router = useRouter();
 
-  return (
-    <section className="relative flex min-h-screen lg:h-[calc(100vh-80px)] w-full flex-col items-center justify-center overflow-hidden bg-white pt-12 pb-12 lg:pt-0 lg:pb-0">
-      {/* Background Decor */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-50/40 blur-[120px] rounded-full" />
-      </div>
+  const openCategory = (category: string) => {
+    router.push(`/listings?category=${category}`);
+  };
 
-      <div className="container relative z-10 mx-auto px-4 flex flex-col items-center">
-        {/* --- HEADER --- */}
-        <div className="max-w-4xl text-center mb-6 lg:mb-10">
+  return (
+    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-white py-10 md:py-12">
+      {/* --- BACKGROUND DECOR --- */}
+
+      <div className="relative z-10 container mx-auto -mt-20 px-4">
+        {/* --- HEADER SECTION --- */}
+        <div className="mx-auto mb-6 max-w-4xl text-center lg:mb-10">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -90,61 +90,44 @@ export function HeroSection() {
         </div>
 
         {/* --- CATEGORIES GRID --- */}
-        <div className="w-full max-w-6xl px-2">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
-            {LISTING_PROPERTY_CATEGORIES.map((item, index) => {
-              const Icon =
-                categoryIcons[item.value as keyof typeof categoryIcons] ||
-                Building2;
-              return (
-                <motion.button
-                  key={item.value}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  // FAST BACK: transition here controls how it returns to normal
-                  transition={{
-                    delay: 0.4 + index * 0.05,
-                    duration: 0.2, // Faster return speed
-                    ease: "easeOut",
-                  }}
-                  whileHover={{
-                    y: -10,
-                    scale: 1.02,
-                    transition: { duration: 0.15, ease: "circOut" }, // Snappy entry
-                  }}
-                  onClick={() =>
-                    router.push(`/listings?category=${item.value}`)
-                  }
-                  className={cn(
-                    "group relative flex flex-col items-start p-4 lg:p-6 rounded-[1.5rem] lg:rounded-[2rem] bg-white border border-slate-100",
-                    "transition-all duration-200", // Faster Tailwind transition for colors
-                    "hover:border-[#ff3bad]/40 hover:bg-[#ff3bad]/5 hover:shadow-[0_20px_40px_-12px_rgba(255,59,173,0.12)]",
-                  )}
-                >
-                  {/* Icon Container */}
-                  <div className="mb-3 flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center rounded-xl lg:rounded-2xl bg-slate-50 text-slate-900 group-hover:bg-[#ff3bad] group-hover:text-white transition-colors duration-200">
-                    <Icon className="h-5 w-5 lg:h-6 lg:w-6" />
-                  </div>
-
-                  {/* Label */}
-                  <p className="text-[12px] lg:text-sm font-black uppercase italic tracking-tight text-slate-900 group-hover:text-[#ff3bad] transition-colors duration-200">
-                    {item.label}
-                  </p>
-
-                  {/* Uzeh Section - Hidden by default, slides in and shows on hover */}
-                  <div className="mt-2 flex items-center gap-1.5 overflow-hidden h-4">
-                    <div className="flex items-center gap-1.5 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-[#ff3bad]">
-                        Үзэх
-                      </span>
-                      <ArrowRight className="h-3 w-3 text-[#ff3bad]" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3 }}
+          className="relative mx-auto max-w-5xl border-t border-slate-100 pt-10"
+        >
+          <div className="rounded-[2.5rem] border-2 border-[#ff2bad] bg-white p-4 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] md:p-5">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+              {LISTING_PROPERTY_CATEGORIES.map((item, index) => {
+                const Icon = categoryIcons[item.value];
+                return (
+                  <motion.button
+                    key={item.value}
+                    type="button"
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35 + index * 0.04 }}
+                    onClick={() => openCategory(item.value)}
+                    className="group rounded-3xl border  bg-slate-50/70 p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:border-[#ff00c8]/70 hover:bg-[#fff1f9] hover:shadow-xl hover:shadow-[#ff00c8]/20 md:p-5"
+                  >
+                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-[#2a00ff] shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:bg-[#2a00ff] group-hover:text-white md:mb-4 md:h-11 md:w-11">
+                      <Icon className="h-5 w-5" />
                     </div>
-                  </div>
-                </motion.button>
-              );
-            })}
+                    <div className="space-y-1">
+                      <p className="text-sm font-black tracking-tight text-[#2a00ff] transition-colors group-hover:text-[#ff3bad] md:text-base">
+                        {item.label}
+                      </p>
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#2a00ff] transition-colors group-hover:text-[#ff3bad] md:text-[11px]">
+                        Үзэх
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                      </div>
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
