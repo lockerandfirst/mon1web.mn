@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ApartmentCard } from "@/components/apartment-card";
 import { apartments } from "@/lib/data";
+import Link from "next/link";
 
 interface RelatedListingsProps {
   currentId: string;
@@ -68,9 +69,11 @@ export function RelatedListings({ currentId }: RelatedListingsProps) {
           Өөрийн үл хөдлөх хөрөнгөө{" "}
           <span className="text-blue-500">үнэгүй</span> байршуулаарай
         </h4>
-        <Button className="relative z-10 mt-8 h-16 px-12 rounded-2xl bg-white text-[#1a0b3b] font-black uppercase hover:bg-blue-50">
-          Зар нэмэх
-        </Button>
+        <Link href="/add-property">
+          <Button className="relative z-10 mt-8 h-16 px-12 rounded-2xl bg-white text-[#1a0b3b] font-black uppercase hover:bg-blue-50">
+            Зар нэмэх
+          </Button>
+        </Link>
       </div>
     </section>
   );

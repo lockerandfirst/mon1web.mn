@@ -42,9 +42,13 @@ export function PropertyTypeGrid({
             >
               {isActive && (
                 <motion.span
-                  layoutId="add-property-category-badge"
-                  transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                  className="pointer-events-none absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#ffb7e3_0%,#ff72c7_52%,#ff2bad_100%)] text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)]"
+                  layoutId="buy-request-category-badge"
+                  transition={{
+                    type: "spring",
+                    stiffness: 380,
+                    damping: 28,
+                  }}
+                  className="pointer-events-none absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-linear-to-br from-[#ffb7e3] via-[#ff72c7] to-[#ff2bad] text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)]"
                 >
                   <span className="absolute left-2 top-2 h-2.5 w-2.5 rounded-full bg-white/60" />
                   <span className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-white/75" />
@@ -188,10 +192,16 @@ export function SurroundingsGrid({
             >
               {isActive && (
                 <motion.span
-                  initial={{ scale: 0.7, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-[#ff2bad] text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)]"
+                  layoutId="buy-request-category-badge"
+                  transition={{
+                    type: "spring",
+                    stiffness: 380,
+                    damping: 28,
+                  }}
+                  className="pointer-events-none absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-linear-to-br from-[#ffb7e3] via-[#ff72c7] to-[#ff2bad] text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)]"
                 >
+                  <span className="absolute left-2 top-2 h-2.5 w-2.5 rounded-full bg-white/60" />
+                  <span className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-white/75" />
                   <Sparkles className="h-4 w-4 fill-current" />
                 </motion.span>
               )}

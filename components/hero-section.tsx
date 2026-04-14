@@ -67,7 +67,7 @@ export function HeroSection() {
             transition={{ delay: 0.2 }}
             className="text-base lg:text-lg font-bold text-slate-400 italic"
           >
-            Монголын Үндэсний үл хөдлөх хөрөнгийн агентлаг.
+            Монголын Үндэсний үл хөдлөх хөрөнгийн платпорм.
           </motion.p>
         </div>
 

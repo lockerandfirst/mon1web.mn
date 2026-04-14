@@ -1,7 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowLeft, Building2, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  Building2,
+  CheckCircle2,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 
 type AuthShellProps = {
   badge: string;
@@ -67,7 +73,7 @@ export function AuthShell({
 
             <div className="relative max-w-xl">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#eeebff] px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-[#2a00ff]">
-                <Sparkles className="h-4 w-4" />
+                <Sparkles className="h-4 w-4 " />
                 {badge}
               </div>
 

@@ -28,7 +28,7 @@ export function SidebarPanel({
   selectedAgentName: string;
 }) {
   return (
-    <aside className="space-y-6 md:col-span-5 md:sticky md:top-24 lg:col-span-4 max-w-60">
+    <aside className="hidden md:block md:sticky md:top-8 h-fit space-y-6">
       <Card className="relative overflow-hidden rounded-[3rem] border-none bg-[#1a0b3b] p-10 text-white shadow-[0_45px_90px_-55px_rgba(26,11,59,1)]">
         <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-[#2a00ff]/25 blur-3xl" />
         <div className="absolute -bottom-4 left-6 h-24 w-24 rounded-full bg-[#ff3bad]/20 blur-3xl" />

@@ -126,7 +126,11 @@ export default function BuyRequestPage() {
                       : "border-slate-100 bg-white text-slate-300",
                   )}
                 >
-                  {step > num ? <CheckCircle2 className="h-6 w-6" /> : `0${num}`}
+                  {step > num ? (
+                    <CheckCircle2 className="h-6 w-6" />
+                  ) : (
+                    `0${num}`
+                  )}
                 </div>
                 <div className="hidden flex-col md:flex">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
@@ -147,7 +151,9 @@ export default function BuyRequestPage() {
                         : "Дэлгэрэнгүй"}
                   </span>
                 </div>
-                {num < 3 && <div className="mx-2 h-[2px] w-12 bg-slate-100 md:w-24" />}
+                {num < 3 && (
+                  <div className="mx-2 h-0.5 w-12 bg-slate-100 md:w-24" />
+                )}
               </div>
             ))}
           </div>
@@ -180,7 +186,7 @@ export default function BuyRequestPage() {
                         type="button"
                         onClick={() => updateField("propertyType", cat.value)}
                         className={cn(
-                          "group relative flex min-h-[11rem] flex-col items-center justify-center gap-4 overflow-hidden rounded-[2.5rem] border-2 p-8 transition-all duration-300",
+                          "group relative flex min-h-44 flex-col items-center justify-center gap-4 overflow-hidden rounded-[2.5rem] border-2 p-8 transition-all duration-300",
                           isActive
                             ? "scale-105 border-[#2a00ff] bg-[#2a00ff]/5 shadow-xl shadow-[#2a00ff]/10"
                             : "border-slate-50 bg-slate-50/50 hover:border-slate-200 hover:bg-white",
@@ -194,7 +200,7 @@ export default function BuyRequestPage() {
                               stiffness: 380,
                               damping: 28,
                             }}
-                            className="pointer-events-none absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#ffb7e3] via-[#ff72c7] to-[#ff2bad] text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)]"
+                            className="pointer-events-none absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-linear-to-br from-[#ffb7e3] via-[#ff72c7] to-[#ff2bad] text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)]"
                           >
                             <span className="absolute left-2 top-2 h-2.5 w-2.5 rounded-full bg-white/60" />
                             <span className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-white/75" />
@@ -205,13 +211,13 @@ export default function BuyRequestPage() {
                         <div className="pointer-events-none absolute inset-x-6 bottom-4 h-8 rounded-full bg-[#ff2bad]/8 blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
                         <Icon
                           className={cn(
-                            "relative z-[1] h-10 w-10 transition-transform group-hover:scale-110",
+                            "relative z-1 h-10 w-10 transition-transform group-hover:scale-110",
                             isActive ? "text-[#2a00ff]" : "text-slate-300",
                           )}
                         />
                         <span
                           className={cn(
-                            "relative z-[1] text-center text-[10px] font-black uppercase tracking-[0.15em]",
+                            "relative z-1 text-center text-[10px] font-black uppercase tracking-[0.15em]",
                             isActive ? "text-[#2a00ff]" : "text-slate-500",
                           )}
                         >
@@ -228,7 +234,9 @@ export default function BuyRequestPage() {
                   </label>
                   <Input
                     value={formData.contactPhone}
-                    onChange={(e) => updateField("contactPhone", e.target.value)}
+                    onChange={(e) =>
+                      updateField("contactPhone", e.target.value)
+                    }
                     placeholder="99XX-XXXX"
                     className="h-16 rounded-3xl border-none bg-slate-50 px-8 text-center text-xl font-bold text-slate-900 transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
                   />
@@ -260,7 +268,7 @@ export default function BuyRequestPage() {
                         type="button"
                         onClick={() => updateField("district", district)}
                         className={cn(
-                          "h-16 rounded-[1.5rem] border-2 font-black uppercase tracking-widest transition-all",
+                          "h-16 rounded-3xl border-2 font-black uppercase tracking-widest transition-all",
                           formData.district === district
                             ? "scale-105 border-[#ff2bad] bg-[#ff2bad]/5 text-[#ff2bad] shadow-lg shadow-[#ff2bad]/10"
                             : "border-slate-50 bg-slate-50 text-slate-400",
@@ -292,9 +300,11 @@ export default function BuyRequestPage() {
                       </label>
                       <Textarea
                         value={formData.barterOffer}
-                        onChange={(e) => updateField("barterOffer", e.target.value)}
+                        onChange={(e) =>
+                          updateField("barterOffer", e.target.value)
+                        }
                         placeholder="Жишээ: Prius 50, зуслангийн газар, cash нэмнэ..."
-                        className="min-h-[180px] rounded-[2rem] border-none bg-slate-50 p-6 text-base font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
+                        className="min-h-45 rounded-4xl border-none bg-slate-50 p-6 text-base font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
                       />
                     </div>
                     <div className="space-y-3">
@@ -303,9 +313,11 @@ export default function BuyRequestPage() {
                       </label>
                       <Textarea
                         value={formData.barterTarget}
-                        onChange={(e) => updateField("barterTarget", e.target.value)}
+                        onChange={(e) =>
+                          updateField("barterTarget", e.target.value)
+                        }
                         placeholder="Жишээ: 2 өрөө байр, Хан-Уул дүүрэг, сургууль ойр..."
-                        className="min-h-[180px] rounded-[2rem] border-none bg-slate-50 p-6 text-base font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
+                        className="min-h-45 rounded-4xl border-none bg-slate-50 p-6 text-base font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
                       />
                     </div>
                     <div className="md:col-span-2 max-w-md">
@@ -339,7 +351,9 @@ export default function BuyRequestPage() {
                               className="flex items-baseline gap-3"
                             >
                               <span className="text-5xl font-black tracking-tighter text-[#2a00ff] md:text-7xl">
-                                {Number(formData.budget).toLocaleString("en-US")}
+                                {Number(formData.budget).toLocaleString(
+                                  "en-US",
+                                )}
                               </span>
                               <span className="text-2xl font-black text-slate-300">
                                 ₮
@@ -360,17 +374,18 @@ export default function BuyRequestPage() {
                         value={formData.budget}
                         onChange={(e) => updateField("budget", e.target.value)}
                         placeholder="Дүнгээ бичнэ үү..."
-                        className="h-20 rounded-[2rem] border-none bg-slate-100/50 px-8 text-center text-xl font-bold transition-all placeholder:text-slate-300 focus:ring-8 focus:ring-[#2a00ff]/5"
+                        className="h-20 rounded-4xl border-none bg-slate-100/50 px-8 text-center text-xl font-bold transition-all placeholder:text-slate-300 focus:ring-8 focus:ring-[#2a00ff]/5"
                       />
-                      {formData.budget && Number(formData.budget) >= 1000000 && (
-                        <div className="mt-4 flex justify-center">
-                          <div className="rounded-2xl bg-[#ff2bad]/10 px-6 py-2 text-xs font-black uppercase tracking-widest text-[#ff2bad]">
-                            {Number(formData.budget) >= 1000000000
-                              ? `${(Number(formData.budget) / 1000000000).toFixed(1)} Тэрбум`
-                              : `${(Number(formData.budget) / 1000000).toFixed(0)} Сая`}
+                      {formData.budget &&
+                        Number(formData.budget) >= 1000000 && (
+                          <div className="mt-4 flex justify-center">
+                            <div className="rounded-2xl bg-[#ff2bad]/10 px-6 py-2 text-xs font-black uppercase tracking-widest text-[#ff2bad]">
+                              {Number(formData.budget) >= 1000000000
+                                ? `${(Number(formData.budget) / 1000000000).toFixed(1)} Тэрбум`
+                                : `${(Number(formData.budget) / 1000000).toFixed(0)} Сая`}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                     </div>
                   </div>
                 )}
@@ -400,8 +415,8 @@ export default function BuyRequestPage() {
                         Бартерын тайлбар
                       </p>
                       <p className="mt-3 text-base font-medium leading-7 text-slate-600">
-                        Солих нөхцөл, зөвшөөрөх сонголт, яаралтай эсэх, нэмэлт cash,
-                        хүлээн зөвшөөрөх байршлаа энд тодорхой бичээрэй.
+                        Солих нөхцөл, зөвшөөрөх сонголт, яаралтай эсэх, нэмэлт
+                        cash, хүлээн зөвшөөрөх байршлаа энд тодорхой бичээрэй.
                       </p>
                     </div>
 
@@ -409,7 +424,7 @@ export default function BuyRequestPage() {
                       value={formData.notes}
                       onChange={(e) => updateField("notes", e.target.value)}
                       placeholder="Жишээ: River Garden, Zaisan орчим 2-3 өрөө сонирхоно. Машин + cash хувилбар боломжтой. Яаралтай..."
-                      className="min-h-[220px] rounded-[2.5rem] border-none bg-slate-50 p-8 text-lg font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
+                      className="min-h-55 rounded-[2.5rem] border-none bg-slate-50 p-8 text-lg font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
                     />
                   </div>
                 ) : (
@@ -441,7 +456,7 @@ export default function BuyRequestPage() {
                       value={formData.notes}
                       onChange={(e) => updateField("notes", e.target.value)}
                       placeholder="Жишээ: Цонх урагшаа харсан, сургууль болон цэцэрлэгтэй ойр..."
-                      className="min-h-[200px] rounded-[2.5rem] border-none bg-slate-50 p-8 text-lg font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
+                      className="min-h-50 rounded-[2.5rem] border-none bg-slate-50 p-8 text-lg font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
                     />
                   </>
                 )}
@@ -453,7 +468,7 @@ export default function BuyRequestPage() {
                 <button
                   type="button"
                   onClick={prevStep}
-                  className="flex h-20 w-24 items-center justify-center rounded-[2rem] border-2 border-slate-100 bg-white transition-all hover:bg-slate-50 active:scale-90"
+                  className="flex h-20 w-24 items-center justify-center rounded-4xl border-2 border-slate-100 bg-white transition-all hover:bg-slate-50 active:scale-90"
                 >
                   <ChevronLeft className="h-8 w-8 text-slate-400" />
                 </button>
@@ -462,7 +477,7 @@ export default function BuyRequestPage() {
               <Button
                 onClick={step === 3 ? handleSubmit : nextStep}
                 disabled={isPending || !isLoaded}
-                className="h-20 flex-1 rounded-[2rem] bg-[#2a00ff] text-base font-black uppercase tracking-[0.25em] text-white shadow-2xl shadow-[#2a00ff]/30 transition-all hover:-translate-y-1 hover:bg-[#ff2bad] active:translate-y-0 disabled:opacity-50"
+                className="h-20 flex-1 rounded-4xl bg-[#2a00ff] text-base font-black uppercase tracking-[0.25em] text-white shadow-2xl shadow-[#2a00ff]/30 transition-all hover:-translate-y-1 hover:bg-[#ff2bad] active:translate-y-0 disabled:opacity-50"
               >
                 {isPending ? (
                   <Loader2 className="h-8 w-8 animate-spin" />
@@ -477,7 +492,6 @@ export default function BuyRequestPage() {
           </motion.div>
         </div>
       </main>
-
       <Footer />
     </div>
   );
@@ -486,7 +500,10 @@ export default function BuyRequestPage() {
 function SuccessUI({ onHome }: { onHome: () => void }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center">
-      <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+      >
         <div className="mx-auto flex h-40 w-40 rotate-12 items-center justify-center rounded-[3rem] bg-green-50 text-green-500">
           <CheckCircle2 className="h-20 w-20" />
         </div>

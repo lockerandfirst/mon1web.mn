@@ -118,7 +118,7 @@ export default function Home() {
                     },
                   ].map((item, i) => (
                     <div key={i} className="flex gap-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-[#eeebff] flex items-center justify-center text-[#2a00ff]">
+                      <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#eeebff] flex items-center justify-center text-[#2a00ff]">
                         <item.icon className="w-6 h-6" />
                       </div>
                       <div>

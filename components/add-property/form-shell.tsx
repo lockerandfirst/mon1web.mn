@@ -69,13 +69,13 @@ export function FormSection({
   children: ReactNode;
 }) {
   return (
-    <Card className="overflow-hidden rounded-[3.5rem] border border-slate-50 bg-white shadow-[0_50px_100px_-55px_rgba(42,0,255,0.5)]">
+    <Card className="overflow-hidden mt-0 rounded-[3.5rem] border border-slate-50 bg-white shadow-[0_50px_100px_-55px_rgba(42,0,255,0.5)]">
       <div className="bg-[linear-gradient(135deg,#1a0b3b_0%,#2a00ff_110%)] p-10 text-white">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#ff9ce0]">
           {eyebrow}
         </p>
         <h2 className="mt-3 text-4xl font-black uppercase italic leading-none tracking-tight md:text-5xl">
-          {title} <span className="text-[#ff9ce0]">{accent}</span>
+          {title} <span className="text-[#ff2bad]">{accent}</span>
         </h2>
         <p className="mt-4 max-w-2xl text-sm font-semibold leading-6 text-white/75">
           {description}
@@ -104,7 +104,7 @@ export function StepNavigation({
           type="button"
           variant="ghost"
           onClick={onBack}
-          className="h-[4.5rem] w-24 rounded-[1.8rem] border-2 border-slate-100 bg-white text-slate-400 transition-all hover:bg-slate-50"
+          className="h-18 w-24 rounded-[1.8rem] border-2 border-slate-100 bg-white text-slate-400 transition-all hover:bg-slate-50"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -114,7 +114,7 @@ export function StepNavigation({
         onClick={onNext}
         className={cn(
           "rounded-[1.8rem] bg-[#2a00ff] text-base font-black uppercase tracking-[0.25em] text-white shadow-2xl shadow-[#2a00ff]/25 transition-all hover:-translate-y-1 hover:bg-[#ff3bad]",
-          onBack ? "h-[4.5rem] flex-1" : "h-[4.5rem] w-full",
+          onBack ? "h-18 flex-1" : "h-18 w-full",
           submit && "h-20 rounded-4xl text-xl tracking-[0.22em]",
         )}
       >
