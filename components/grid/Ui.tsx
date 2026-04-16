@@ -44,16 +44,6 @@ export function AiTextarea({
         placeholder={placeholder}
         className="mt-3 min-h-[15rem] rounded-[2rem] border-none bg-[#fff9fd] p-6 pr-32 text-base font-bold text-[#1a0b3b] resize-none focus:ring-8 focus:ring-[#2a00ff]/5"
       />
-      <Button
-        onClick={onOptimize}
-        disabled={isProcessing}
-        className="absolute bottom-4 right-4 h-11 rounded-xl bg-[#1a0b3b] px-4 text-[10px] font-black uppercase tracking-[0.18em] text-white hover:bg-[#2a00ff]"
-      >
-        <Sparkles
-          className={cn("mr-2 h-3 w-3", isProcessing && "animate-spin")}
-        />
-        AI засах
-      </Button>
     </div>
   );
 }

@@ -8,15 +8,23 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Clock, CalendarX } from "lucide-react";
+import { Eye, Clock, CalendarX, Pencil } from "lucide-react";
 import { formatPrice } from "@/lib/data";
 
 interface ListingTableProps {
   listings: any[];
   onView: (id: string) => void;
+  onEdit?: (id: string) => void;
 }
 
-export function ListingTable({ listings, onView }: ListingTableProps) {
+export function ListingTable({ listings, onView, onEdit }: ListingTableProps) {
+  const formatDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}.${month}.${day}`;
+  };
+
   return (
     <Table>
       <TableHeader className="bg-[#fff9fd]">
@@ -44,18 +52,11 @@ export function ListingTable({ listings, onView }: ListingTableProps) {
       <TableBody>
         {listings.map((listing) => {
           // Logic for 3-month removal
-          const createdAt = listing.createdAt
-            ? new Date(listing.createdAt)
-            : new Date();
-          const removedAt = new Date(createdAt);
-          removedAt.setMonth(removedAt.getMonth() + 3);
-
-          const formatDate = (date: Date) =>
-            date.toLocaleDateString("mn-MN", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-            });
+          const createdAt = listing.createdAt ? new Date(listing.createdAt) : null;
+          const removedAt = createdAt ? new Date(createdAt) : null;
+          if (removedAt) {
+            removedAt.setMonth(removedAt.getMonth() + 3);
+          }
 
           return (
             <TableRow
@@ -89,7 +90,7 @@ export function ListingTable({ listings, onView }: ListingTableProps) {
               <TableCell>
                 <div className="flex items-center gap-2 text-slate-500 font-bold text-xs">
                   <Clock className="h-3.5 w-3.5 text-slate-400" />
-                  {formatDate(createdAt)}
+                  {createdAt ? formatDate(createdAt) : "-"}
                 </div>
               </TableCell>
 
@@ -97,7 +98,7 @@ export function ListingTable({ listings, onView }: ListingTableProps) {
               <TableCell>
                 <div className="flex items-center gap-2 text-[#ff3bad] font-black text-xs italic">
                   <CalendarX className="h-3.5 w-3.5" />
-                  {formatDate(removedAt)}
+                  {removedAt ? formatDate(removedAt) : "-"}
                 </div>
               </TableCell>
 
@@ -108,14 +109,36 @@ export function ListingTable({ listings, onView }: ListingTableProps) {
               </TableCell>
 
               <TableCell className="text-right pr-8">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-xl px-4 font-black text-[10px] uppercase tracking-widest text-[#ff3bad] hover:text-[#2a00ff] hover:bg-white hover:shadow-md"
-                >
-                  <Eye className="mr-2 h-4 w-4" />
-                  Үзэх
-                </Button>
+                <div className="flex items-center justify-end gap-2">
+                  {onEdit && String(listing.id).startsWith("user-") ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-xl px-4 font-black text-[10px] uppercase tracking-widest text-[#2a00ff] hover:bg-white hover:shadow-md"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onEdit(listing.id);
+                      }}
+                    >
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Засах
+                    </Button>
+                  ) : null}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="rounded-xl px-4 font-black text-[10px] uppercase tracking-widest text-[#ff3bad] hover:text-[#2a00ff] hover:bg-white hover:shadow-md"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onView(listing.id);
+                    }}
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    Үзэх
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           );

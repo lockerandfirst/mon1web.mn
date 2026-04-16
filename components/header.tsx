@@ -16,6 +16,7 @@ import {
   BriefcaseBusiness,
   LayoutDashboard,
   Newspaper,
+  UserSearch,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils"; // classNames нэгтгэх функц
@@ -27,6 +28,59 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
+  // #region agent log
+  useEffect(() => {
+    fetch("http://127.0.0.1:7834/ingest/78590180-74c3-4b1d-a39f-896d406574be", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Debug-Session-Id": "96ab0a",
+      },
+      body: JSON.stringify({
+        sessionId: "96ab0a",
+        runId: "pre-fix",
+        hypothesisId: "H3",
+        location: "components/header.tsx:31",
+        message: "Header state snapshot",
+        data: { pathname, mobileMenuOpen, scrolled, isSignedIn: Boolean(isSignedIn) },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+  }, [pathname, mobileMenuOpen, scrolled, isSignedIn]);
+  // #endregion
+
+  // #region agent log
+  useEffect(() => {
+    const headerEl = document.querySelector("header");
+    if (!headerEl || typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const nextHeight = Math.round(entry.contentRect.height);
+      fetch("http://127.0.0.1:7834/ingest/78590180-74c3-4b1d-a39f-896d406574be", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Debug-Session-Id": "96ab0a",
+        },
+        body: JSON.stringify({
+          sessionId: "96ab0a",
+          runId: "pre-fix",
+          hypothesisId: "H5",
+          location: "components/header.tsx:57",
+          message: "Header height observed",
+          data: { pathname, nextHeight, mobileMenuOpen, scrolled },
+          timestamp: Date.now(),
+        }),
+      }).catch(() => {});
+    });
+
+    observer.observe(headerEl);
+    return () => observer.disconnect();
+  }, [pathname, mobileMenuOpen, scrolled]);
+  // #endregion
+
   // Scroll хийхэд Header-ийн өнгө өөрчлөгдөх эффект
   useEffect(() => {
     const handleScroll = () => {
@@ -35,11 +89,32 @@ export function Header() {
       // Use a small hysteresis gap so sticky height changes don't bounce
       // around one exact threshold and cause a resize loop.
       setScrolled((prev) => {
-        if (prev) {
-          return currentScrollY > 8;
+        const next = prev ? currentScrollY > 8 : currentScrollY > 24;
+        if (prev !== next) {
+          // #region agent log
+          fetch(
+            "http://127.0.0.1:7834/ingest/78590180-74c3-4b1d-a39f-896d406574be",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Debug-Session-Id": "96ab0a",
+              },
+              body: JSON.stringify({
+                sessionId: "96ab0a",
+                runId: "pre-fix",
+                hypothesisId: "H1",
+                location: "components/header.tsx:50",
+                message: "Scrolled state changed",
+                data: { currentScrollY, prev, next },
+                timestamp: Date.now(),
+              }),
+            },
+          ).catch(() => {});
+          // #endregion
         }
 
-        return currentScrollY > 24;
+        return next;
       });
     };
 
@@ -53,14 +128,19 @@ export function Header() {
     { name: "Зарууд", href: "/listings", icon: LayoutGrid },
     { name: "Газрын зураг", href: "/map", icon: Map },
     { name: "Мэдээ", href: "/news", icon: Newspaper },
-    { name: "Агент портал", href: "/agent-portal", icon: BriefcaseBusiness },
+    {
+      name: "Агент портал",
+      href: "/agent-portal",
+      icon: BriefcaseBusiness,
+    },
+
     { name: "Хянах самбар", href: "/dashboard", icon: LayoutDashboard },
   ];
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b py-3 transition-[background-color,border-color,backdrop-filter] duration-300",
+        "fixed top-0 left-0 z-[9999] w-full border-b py-3 transition-[background-color,border-color,backdrop-filter] duration-300",
         scrolled
           ? "border-border bg-background/80 backdrop-blur-md"
           : "border-transparent bg-background",
@@ -84,6 +164,29 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
+              onClick={() => {
+                // #region agent log
+                fetch(
+                  "http://127.0.0.1:7834/ingest/78590180-74c3-4b1d-a39f-896d406574be",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "X-Debug-Session-Id": "96ab0a",
+                    },
+                    body: JSON.stringify({
+                      sessionId: "96ab0a",
+                      runId: "pre-fix",
+                      hypothesisId: "H6",
+                      location: "components/header.tsx:149",
+                      message: "Desktop nav link clicked",
+                      data: { href: link.href, pathnameBeforeClick: pathname },
+                      timestamp: Date.now(),
+                    }),
+                  },
+                ).catch(() => {});
+                // #endregion
+              }}
               className={cn(
                 "px-4 py-2 text-[16px] font-bold rounded-full transition-all",
                 pathname === link.href
@@ -142,7 +245,33 @@ export function Header() {
           variant="ghost"
           size="icon"
           className="md:hidden rounded-full text-[#ff3bad] hover:bg-muted hover:text-[#2a00ff]"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={() =>
+            setMobileMenuOpen((prev) => {
+              const next = !prev;
+              // #region agent log
+              fetch(
+                "http://127.0.0.1:7834/ingest/78590180-74c3-4b1d-a39f-896d406574be",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "X-Debug-Session-Id": "96ab0a",
+                  },
+                  body: JSON.stringify({
+                    sessionId: "96ab0a",
+                    runId: "pre-fix",
+                    hypothesisId: "H2",
+                    location: "components/header.tsx:182",
+                    message: "Mobile menu toggled",
+                    data: { prev, next, pathname },
+                    timestamp: Date.now(),
+                  }),
+                },
+              ).catch(() => {});
+              // #endregion
+              return next;
+            })
+          }
         >
           {mobileMenuOpen ? (
             <X className="h-5 w-5" />
@@ -160,7 +289,30 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => {
+                  // #region agent log
+                  fetch(
+                    "http://127.0.0.1:7834/ingest/78590180-74c3-4b1d-a39f-896d406574be",
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "X-Debug-Session-Id": "96ab0a",
+                      },
+                      body: JSON.stringify({
+                        sessionId: "96ab0a",
+                        runId: "pre-fix",
+                        hypothesisId: "H4",
+                        location: "components/header.tsx:212",
+                        message: "Mobile nav link clicked",
+                        data: { href: link.href, pathnameBeforeClick: pathname },
+                        timestamp: Date.now(),
+                      }),
+                    },
+                  ).catch(() => {});
+                  // #endregion
+                  setMobileMenuOpen(false);
+                }}
                 className={cn(
                   "flex items-center gap-3 p-3 rounded-xl transition-colors",
                   pathname === link.href
@@ -195,7 +347,7 @@ export function Header() {
               )}
               {isSignedIn && (
                 <>
-                  <Link href="/agent-portal" className="w-full">
+                  <Link href="/dashboard" className="w-full">
                     <Button
                       variant="outline"
                       className="w-full gap-2 rounded-xl text-[#ff3bad] border-[#2a00ff]/30 hover:text-[#2a00ff]"

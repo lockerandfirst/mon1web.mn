@@ -7,10 +7,19 @@
 :root {
   --brand-start: #2a00ff;
   --brand-end: #ff3bad;
-  --brand-gradient: linear-gradient(135deg, var(--brand-start) 0%, var(--brand-end) 100%);
+  --brand-gradient: linear-gradient(
+    135deg,
+    var(--brand-start) 0%,
+    var(--brand-end) 100%
+  );
   --brand-gradient-strong: linear-gradient(135deg, #2200e6 0%, #e0199a 100%);
-  --page-gradient: radial-gradient(circle at 85% 10%, rgba(42, 0, 255, 0.12), transparent 42%),
-    radial-gradient(circle at 10% 85%, rgba(255, 59, 173, 0.14), transparent 45%),
+  --page-gradient:
+    radial-gradient(circle at 85% 10%, rgba(42, 0, 255, 0.12), transparent 42%),
+    radial-gradient(
+      circle at 10% 85%,
+      rgba(255, 59, 173, 0.14),
+      transparent 45%
+    ),
     linear-gradient(180deg, #fff9fd 0%, #ffffff 100%);
   --brand-blue-50: #fff2fb;
   --brand-blue-100: #ffe4f7;
@@ -183,7 +192,19 @@
     -webkit-text-fill-color: transparent;
     color: transparent;
   }
+  .leaflet-container {
+    z-index: 1 !important;
+  }
 
+  /* Ensure the map panes don't jump higher than your header */
+  .leaflet-pane {
+    z-index: 1 !important;
+  }
+
+  /* Keep markers visible but still under the header (Header is 9999) */
+  .leaflet-marker-pane {
+    z-index: 600 !important;
+  }
   .bg-primary,
   .bg-blue-600,
   .hover\:bg-blue-600:hover,
@@ -245,8 +266,11 @@
   .from-black\/60 {
     --tw-gradient-from: rgb(42 0 255 / 0.55) var(--tw-gradient-from-position) !important;
     --tw-gradient-to: rgb(42 0 255 / 0) var(--tw-gradient-to-position) !important;
-    --tw-gradient-stops:
-      var(--tw-gradient-via-stops, var(--tw-gradient-from), var(--tw-gradient-to)) !important;
+    --tw-gradient-stops: var(
+      --tw-gradient-via-stops,
+      var(--tw-gradient-from),
+      var(--tw-gradient-to)
+    ) !important;
   }
 
   .via-black,

@@ -8,7 +8,6 @@ import {
   useScroll,
   useMotionValueEvent,
 } from "framer-motion";
-import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ApartmentCard } from "@/components/apartment-card";
 import { Button } from "@/components/ui/button";
@@ -228,7 +227,9 @@ export default function ListingsPage() {
         const matchesRentSubcategory =
           !rentSubcategory || inferRentSubcategory(apt) === rentSubcategory;
         const matchesPaymentMethod =
-          paymentMethod === "any" || apt.paymentMethod === paymentMethod;
+          paymentMethod === "any" ||
+          apt.paymentMethod === "any" ||
+          apt.paymentMethod === paymentMethod;
         const matchesRooms = matchesCountFilter(apt.rooms, rooms);
         const matchesBathrooms = matchesCountFilter(apt.bathrooms, bathrooms);
         const matchesDistrict =
@@ -287,8 +288,6 @@ export default function ListingsPage() {
 
   return (
     <div className="min-h-screen bg-[#fff9fd] selection:bg-[#2a00ff]/10">
-      <Header />
-
       <main className="container mx-auto px-4 py-8 lg:py-10">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_minmax(0,1fr)] lg:gap-8">
           {/* --- STICKY SEARCH BAR --- */}
@@ -543,7 +542,7 @@ export default function ListingsPage() {
           </aside>
 
           {/* --- MAIN CONTENT --- */}
-          <div className="min-w-0 space-y-6 lg:row-start-2">
+          <div className="min-w-0 space-y-6 lg:row-start-2 mt-10">
             <div className="flex items-center justify-between pt-4">
               <div className="space-y-1">
                 <h2 className="text-2xl font-black tracking-tight text-[#2a00ff] uppercase">
@@ -589,6 +588,13 @@ export default function ListingsPage() {
                 </div>
               </div>
             </div>
+            {category === "land" ? (
+              <div className="rounded-3xl border border-[#2a00ff]/25 bg-[#eef0ff] px-5 py-4">
+                <p className="text-sm font-black text-[#2a00ff]">
+                  Газар зар дээр зөвхөн 2% агентын төлбөр тооцогдоно.
+                </p>
+              </div>
+            ) : null}
 
             <AnimatePresence mode="wait">
               {filteredItems.length === 0 ? (
@@ -607,7 +613,7 @@ export default function ListingsPage() {
                     <h3 className="text-2xl font-black tracking-tight text-[#2a00ff]">
                       Илэрц олдсонгүй
                     </h3>
-                    <p className="mt-3 max-w-md text-sm font-medium leading-6 text-[#ff9ce0]">
+                    <p className="mt-3 max-w-md text-sm font-medium leading-6 text-[#ff2bad]">
                       Таны хайлт болон сонгосон шүүлтүүрт тохирох зар одоогоор
                       алга байна. Шүүлтүүрээ цэвэрлээд дахин оролдоно уу.
                     </p>
@@ -636,6 +642,7 @@ export default function ListingsPage() {
                   {filteredItems.map((apt, idx) => (
                     <motion.div
                       key={apt.id}
+                      className="h-full"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -12 }}

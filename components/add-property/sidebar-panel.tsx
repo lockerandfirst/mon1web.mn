@@ -19,17 +19,17 @@ export function SidebarPanel({
   formData,
   pricePerSqm,
   propertyLabel,
-  selectedAgentName,
 }: {
   completionScore: number;
   formData: FormData;
   pricePerSqm: string | null;
   propertyLabel: string;
-  selectedAgentName: string;
 }) {
+  const publishModeLabel =
+    formData.serviceType === "agent" ? "Агентаар зарна" : "Өөрөө нийтэлнэ";
   return (
-    <aside className="hidden md:block md:sticky md:top-8 h-fit space-y-6">
-      <Card className="relative overflow-hidden rounded-[3rem] border-none bg-[#1a0b3b] p-10 text-white shadow-[0_45px_90px_-55px_rgba(26,11,59,1)]">
+    <aside className="hidden space-y-5 md:block md:h-fit md:max-w-[30%] md:flex-[0_0_30%] md:top-8">
+      <Card className="relative overflow-hidden rounded-[3rem] border-none bg-[#1a0b3b] p-8 text-white shadow-[0_45px_90px_-55px_rgba(26,11,59,1)]">
         <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-[#2a00ff]/25 blur-3xl" />
         <div className="absolute -bottom-4 left-6 h-24 w-24 rounded-full bg-[#ff3bad]/20 blur-3xl" />
         <h3 className="mb-6 flex items-center gap-3 text-xl font-black uppercase italic tracking-tight">
@@ -59,7 +59,7 @@ export function SidebarPanel({
         </div>
       </Card>
 
-      <Card className="rounded-[2.5rem] border border-[#f0e8ff] bg-white p-8 shadow-[0_35px_80px_-55px_rgba(42,0,255,0.45)]">
+      <Card className="rounded-[2.5rem] border border-[#f0e8ff] bg-white p-7 shadow-[0_35px_80px_-55px_rgba(42,0,255,0.45)]">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#ff3bad]">
           Live Preview
         </p>
@@ -103,7 +103,7 @@ export function SidebarPanel({
               Нийтлэх хэлбэр
             </p>
             <p className="mt-2 text-sm font-black text-[#1a0b3b]">
-              {selectedAgentName}
+              {publishModeLabel}
             </p>
           </div>
           {pricePerSqm && (
@@ -119,7 +119,7 @@ export function SidebarPanel({
         </div>
       </Card>
 
-      <Card className="rounded-[2.5rem] border border-[#f8e4f4] bg-[#fff8fd] p-8">
+      <Card className="rounded-[2.5rem] border border-[#f8e4f4] bg-[#fff8fd] p-7">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#ff3bad]">
           Checklist
         </p>
@@ -133,7 +133,10 @@ export function SidebarPanel({
             label="Үнэ ба талбай оруулсан"
           />
           <ChecklistRow
-            done={Boolean(formData.location && formData.district)}
+            done={Boolean(
+              formData.district &&
+                (formData.address.trim() || formData.location.trim()),
+            )}
             label="Байршлаа тодорхойлсон"
           />
           <ChecklistRow
@@ -143,6 +146,10 @@ export function SidebarPanel({
           <ChecklistRow
             done={Boolean(formData.description.trim())}
             label="Тайлбараа бичсэн"
+          />
+          <ChecklistRow
+            done={formData.images.length > 0}
+            label="Зураг оруулсан"
           />
         </div>
       </Card>

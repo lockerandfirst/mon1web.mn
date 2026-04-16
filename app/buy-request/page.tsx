@@ -29,7 +29,6 @@ import {
   writeBuyRequests,
 } from "@/lib/buy-requests";
 import { buildCreateBuyRequestPayload } from "@/lib/backend-contract";
-import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,10 +110,8 @@ export default function BuyRequestPage() {
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
-      <Header />
-
-      <main className="container mx-auto px-4 py-12 lg:py-12">
-        <div className="mx-auto max-w-4xl">
+      <main className="container mx-auto px-4 py-12  lg:py-12">
+        <div className="mx-auto max-w-4xl mt-13">
           <div className="mb-16 flex items-center justify-between px-6">
             {[1, 2, 3].map((num) => (
               <div key={num} className="flex items-center gap-4">
@@ -200,11 +197,13 @@ export default function BuyRequestPage() {
                               stiffness: 380,
                               damping: 28,
                             }}
-                            className="pointer-events-none absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-linear-to-br from-[#ffb7e3] via-[#ff72c7] to-[#ff2bad] text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)]"
+                            style={{ backgroundColor: "#ff2bad", opacity: 1 }}
+                            className="pointer-events-none absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full !bg-[#ff2bad] !opacity-100 text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)]"
                           >
+                            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ffb7e3] via-[#ff72c7] to-[#ff2bad]" />
                             <span className="absolute left-2 top-2 h-2.5 w-2.5 rounded-full bg-white/60" />
                             <span className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-white/75" />
-                            <Sparkles className="h-4 w-4 fill-current" />
+                            <Sparkles className="relative z-10 h-4 w-4 fill-current" />
                           </motion.span>
                         )}
 

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Newspaper, Sparkles, ArrowLeft } from "lucide-react";
-import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
@@ -58,8 +57,6 @@ const newsItems = [
 export default function MedeeePage() {
   return (
     <div className="min-h-screen bg-[#fff9fd]">
-      <Header />
-
       <main>
         <section className="relative overflow-hidden px-4 py-20 md:py-32">
           {/* --- BRAND BACKGROUND --- */}

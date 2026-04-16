@@ -7,6 +7,7 @@ const paymentMethodLabels = {
   cash: "Бэлэн төлбөр",
   mortgage: "Ипотекийн зээл",
   installment: "Хувь лизинг",
+  any: "Дурын / тохиролцоно",
 } as const;
 
 export function PropertyHeader({ apt }: { apt: Apartment }) {

@@ -11,6 +11,44 @@ type MapViewProps = {
   onSelectApartment: (id: string) => void;
 };
 
+const DEFAULT_CENTER: [number, number] = [47.9188, 106.9176];
+const DEFAULT_ZOOM = 13;
+const SELECTED_ZOOM = 16;
+
+function fitMapToApartments(map: L.Map, apartments: Apartment[]) {
+  if (apartments.length === 0) {
+    map.setView(DEFAULT_CENTER, DEFAULT_ZOOM, { animate: true });
+    return;
+  }
+
+  if (apartments.length === 1) {
+    const [apartment] = apartments;
+    map.setView(
+      [apartment.coordinates.lat, apartment.coordinates.lng],
+      SELECTED_ZOOM,
+      { animate: true },
+    );
+    return;
+  }
+
+  const bounds = L.latLngBounds(
+    apartments.map(
+      (apartment) =>
+        [apartment.coordinates.lat, apartment.coordinates.lng] as [
+          number,
+          number,
+        ],
+    ),
+  );
+
+  map.fitBounds(bounds.pad(0.18), {
+    animate: true,
+    duration: 0.35,
+    maxZoom: 15,
+    padding: [48, 48],
+  });
+}
+
 export function MapView({
   apartments,
   selectedId,
@@ -30,10 +68,9 @@ export function MapView({
       return;
     }
 
-    const defaultCenter: [number, number] = [47.9188, 106.9176];
     const map = L.map(mapElementRef.current, {
-      center: defaultCenter,
-      zoom: 13,
+      center: DEFAULT_CENTER,
+      zoom: DEFAULT_ZOOM,
       zoomControl: false,
     });
 
@@ -44,6 +81,8 @@ export function MapView({
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       },
     ).addTo(map);
+
+    L.control.zoom({ position: "topright" }).addTo(map);
 
     markerLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
@@ -67,17 +106,21 @@ export function MapView({
       return;
     }
 
-    const defaultCenter: [number, number] = [47.9188, 106.9176];
     const activeApt = apartments.find(
       (apartment) => apartment.id === selectedId,
     );
-    const currentCenter: [number, number] = activeApt
-      ? [activeApt.coordinates.lat, activeApt.coordinates.lng]
-      : defaultCenter;
 
-    map.setView(currentCenter, activeApt ? 16 : 13, {
-      animate: true,
-    });
+    if (activeApt) {
+      map.setView(
+        [activeApt.coordinates.lat, activeApt.coordinates.lng],
+        SELECTED_ZOOM,
+        {
+          animate: true,
+        },
+      );
+    } else {
+      fitMapToApartments(map, apartments);
+    }
 
     markerLayer.clearLayers();
 
@@ -120,6 +163,7 @@ export function MapView({
           flex-direction: column;
           align-items: center;
           transform: translate(-50%, -100%);
+          cursor: pointer;
           filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
           transition: all 0.2s ease;
         }
@@ -135,6 +179,11 @@ export function MapView({
           font-size: 11px;
           font-weight: 800;
           transition: all 0.2s ease;
+        }
+
+        .marker-wrapper:hover .marker-bubble {
+          border-color: #93c5fd;
+          transform: translateY(-1px);
         }
 
         .marker-arrow {
@@ -160,7 +209,46 @@ export function MapView({
         .marker-wrapper.is-active .marker-arrow {
           border-top-color: var(--brand-start);
         }
+
+        .leaflet-top.leaflet-right {
+          top: 16px;
+          right: 16px;
+        }
+
+        .leaflet-control-zoom {
+          border: none !important;
+          box-shadow: 0 20px 45px -24px rgba(15, 23, 42, 0.45) !important;
+        }
+
+        .leaflet-control-zoom a {
+          height: 44px !important;
+          width: 44px !important;
+          border: none !important;
+          color: #0f172a !important;
+          font-size: 20px !important;
+          font-weight: 800;
+          line-height: 44px !important;
+        }
+
+        .leaflet-control-zoom a:first-child {
+          border-radius: 18px 18px 0 0 !important;
+        }
+
+        .leaflet-control-zoom a:last-child {
+          border-radius: 0 0 18px 18px !important;
+        }
       `}</style>
+
+      <div className="pointer-events-none absolute bottom-4 left-4 z-[400] max-w-72 rounded-3xl bg-white/92 px-4 py-3 shadow-2xl backdrop-blur-xl">
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">
+          {apartments.length} байр харагдаж байна
+        </p>
+        <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
+          {selectedId
+            ? "Сонгосон pin дээр төвлөрлөө. Карт эсвэл pin дарж өөр байр сонгоно."
+            : "Үнэ харагдаж байгаа pin эсвэл зүүн талын карт дээр дарж дэлгэрэнгүй үзээрэй."}
+        </p>
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Inter, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { clerkAppearance } from "@/lib/clerk-theme";
+import { Header } from "@/components/header";
 import "./globals.css";
 
 const inter = Inter({
@@ -48,6 +49,7 @@ export default function RootLayout({
     <ClerkProvider appearance={clerkAppearance}>
       <html lang="en" className={`${inter.variable} ${geistMono.variable}`}>
         <body className="font-sans antialiased">
+          <Header />
           {children}
           <Analytics />
         </body>

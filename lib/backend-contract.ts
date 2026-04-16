@@ -1,3 +1,8 @@
+import {
+  appendPaymentMethodsToDescription,
+  resolvePayloadPaymentMethod,
+} from "./create-listing-payment";
+
 export interface ApiListMeta {
   page: number;
   limit: number;
@@ -15,7 +20,11 @@ export interface ApiItemResponse<T> {
 }
 
 export type BackendServiceType = "self" | "agent";
-export type BackendPaymentMethod = "cash" | "mortgage" | "installment";
+export type BackendPaymentMethod =
+  | "cash"
+  | "mortgage"
+  | "installment"
+  | "any";
 export type BackendListingWorkflowStatus =
   | "draft"
   | "pending"
@@ -26,6 +35,7 @@ export type BackendBuyRequestWorkflowStatus = "open" | "claimed" | "closed";
 export interface BackendSubmittedBy {
   name: string;
   email: string;
+  phone?: string;
 }
 
 export interface BackendAgent {
@@ -89,17 +99,22 @@ export interface BackendAgentProfile extends BackendAgent {
 }
 
 export interface CreateListingRequestPayload {
+  title: string;
   propertyType: string;
   district: string;
   location: string;
   address: string;
   price: number;
+  paymentMethod: BackendPaymentMethod;
   sqm: number;
   rooms: number;
   bathrooms: number;
   floor: number;
   totalFloors: number;
+  commissionYear: number;
   description: string;
+  features: string[];
+  imageUrls: string[];
   nearbyServiceIds: string[];
   serviceType: BackendServiceType;
   selectedAgentId: string | null;
@@ -107,16 +122,25 @@ export interface CreateListingRequestPayload {
 }
 
 export interface CreateListingPayloadInput {
+  title: string;
   propertyType: string;
   district: string;
   location: string;
+  address: string;
   price: string | number;
+  /** Legacy: зөвхөн paymentFlexible / paymentMethods байхгүй үед */
+  paymentMethod?: BackendPaymentMethod;
+  paymentFlexible?: boolean;
+  paymentMethods?: BackendPaymentMethod[];
   sqm: string | number;
   rooms: string | number;
   bathrooms: string | number;
   floor: string | number;
   totalFloors: string | number;
+  commissionYear: string | number;
   description: string;
+  features?: string[];
+  imageUrls?: string | string[];
   surroundings?: string[];
   serviceType: BackendServiceType;
   selectedAgentId: string | null;
@@ -201,21 +225,72 @@ function toNullableText(value?: string) {
   return normalized ? normalized : null;
 }
 
+function toListingTitle(
+  title: string | undefined,
+  district: string,
+  rooms: string | number,
+  propertyType: string,
+) {
+  const normalized = title?.trim();
+
+  if (normalized) {
+    return normalized;
+  }
+
+  const roomLabel = rooms ? `${rooms} өрөө` : propertyType || "Орон сууц";
+  return `${district.trim()} дэх ${roomLabel} байр`;
+}
+
+function toImageUrls(value?: string | string[]) {
+  if (!value) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }
+
+  return value
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+}
+
 export function buildCreateListingPayload(
   input: CreateListingPayloadInput,
 ): CreateListingRequestPayload {
   return {
+    title: toListingTitle(
+      input.title,
+      input.district,
+      input.rooms,
+      input.propertyType,
+    ),
     propertyType: input.propertyType || "apartment",
     district: input.district.trim(),
-    location: input.location.trim(),
-    address: input.location.trim(),
+    location: (input.location || input.address).trim(),
+    address: input.address.trim() || input.location.trim(),
     price: toPositiveNumber(input.price, 0),
+    paymentMethod: resolvePayloadPaymentMethod(
+      input,
+    ) as BackendPaymentMethod,
     sqm: toPositiveNumber(input.sqm, 1),
     rooms: toRoomCount(input.rooms, 1),
     bathrooms: toPositiveNumber(input.bathrooms, 1),
     floor: toPositiveNumber(input.floor, 1),
     totalFloors: toPositiveNumber(input.totalFloors, 1),
-    description: input.description.trim(),
+    commissionYear: toPositiveNumber(
+      input.commissionYear,
+      new Date().getFullYear(),
+    ),
+    description: appendPaymentMethodsToDescription(
+      input.description,
+      input,
+    ),
+    features: (input.features ?? []).map((feature) => feature.trim()),
+    imageUrls: toImageUrls(input.imageUrls),
     nearbyServiceIds: input.surroundings ?? [],
     serviceType: input.serviceType,
     selectedAgentId:

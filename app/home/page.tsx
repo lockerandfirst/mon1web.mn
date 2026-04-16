@@ -1,6 +1,5 @@
 "use client";
 
-import { Header } from "@/components/header";
 import { HeroSection } from "@/components/hero-section";
 import { FeaturedListings } from "@/components/featured-listings";
 import { Footer } from "@/components/footer";
@@ -15,16 +14,13 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#FDFCFB] selection:bg-blue-100">
-      <Header />
-
       <main>
         <HeroSection />
 
-        <div className="relative z-20 -mt-20">
+        <div className="relative z-20 -mt-6 md:-mt-10 lg:-mt-14">
           <FeaturedListings />
         </div>
 
@@ -194,7 +190,7 @@ export default function Home() {
                   variant="outline"
                   className="h-16 rounded-2xl px-12 text-base font-black border-slate-200 hover:bg-slate-50"
                 >
-                  АГЕНТ ПОРТАЛ
+                  Агент портал
                 </Button>
               </Link>
               <Link href="/news">

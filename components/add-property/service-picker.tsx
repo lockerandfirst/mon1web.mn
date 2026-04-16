@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
-import { Sparkles, User, Users } from "lucide-react";
+import { Sparkles, Users } from "lucide-react";
+import { useEffect } from "react";
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 import { AGENT_OPTIONS } from "./constants";
 import type { ServiceType } from "./types";
@@ -21,27 +23,55 @@ export function ServicePicker({
   onServiceChange: (value: ServiceType) => void;
   onAgentSelect: (value: string) => void;
 }) {
+  useEffect(() => {
+    if (serviceType === "agent" && !selectedAgentId && AGENT_OPTIONS[0]) {
+      onAgentSelect(AGENT_OPTIONS[0].id);
+    }
+  }, [serviceType, selectedAgentId, onAgentSelect]);
+
+  const isAgentEnabled = serviceType === "agent";
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="rounded-4xl border-2 border-[#eeebff] bg-white p-5 md:p-6">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#2a00ff]">
+              Агентаар заруулах
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[#6d4d84]">
+              Баталгаажсан агенттай холбож нийтэлнэ.
+            </p>
+          </div>
+          <Switch
+            checked={isAgentEnabled}
+            onCheckedChange={(checked) => {
+              if (checked) {
+                onServiceChange("agent");
+                if (!selectedAgentId && AGENT_OPTIONS[0]) {
+                  onAgentSelect(AGENT_OPTIONS[0].id);
+                }
+                return;
+              }
+              onServiceChange("self");
+            }}
+            className="h-7 w-12 data-[state=checked]:bg-[#2a00ff] data-[state=unchecked]:bg-slate-300"
+          />
+        </div>
+      </div>
+
+      {isAgentEnabled && (
         <ServiceCard
-          active={serviceType === "self"}
-          icon={User}
-          title="Би өөрөө зарна"
-          description="Зараа шууд илгээж, системд хадгална."
-          onClick={() => onServiceChange("self")}
-        />
-        <ServiceCard
-          active={serviceType === "agent"}
+          active
           icon={Users}
           title="Агентаар заруулна"
-          description="Баталгаажсан агенттай холбож нийтэлнэ."
+          description="Туршлагатай, баталгаажсан агент таны зарыг борлуулалтад бэлдэнэ."
           onClick={() => onServiceChange("agent")}
           premium
         />
-      </div>
+      )}
 
-      {serviceType === "agent" && (
+      {isAgentEnabled && (
         <div className="space-y-4">
           <Label className="ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
             Агент сонгох
@@ -53,7 +83,7 @@ export function ServicePicker({
                 type="button"
                 onClick={() => onAgentSelect(agent.id)}
                 className={cn(
-                  "rounded-[2rem] border-2 p-5 text-left transition-all",
+                  "rounded-4xl border-2 p-5 text-left transition-all",
                   selectedAgentId === agent.id
                     ? "border-[#2a00ff] bg-[#eef0ff] shadow-lg shadow-[#2a00ff]/10"
                     : "border-[#f0e8ff] bg-white",
@@ -64,7 +94,7 @@ export function ServicePicker({
                     {agent.name}
                   </p>
                   {selectedAgentId === agent.id && (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ff2bad] !important text-white">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ff2bad] text-white">
                       <Sparkles className="h-4 w-4 fill-current" />
                     </div>
                   )}
@@ -121,7 +151,7 @@ function ServiceCard({
       )}
       <div
         className={cn(
-          "mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[2rem] transition-all",
+          "mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-4xl transition-all",
           active
             ? "scale-110 bg-[#2a00ff] text-white"
             : "bg-[#fff9fd] text-[#ff9ce0]",

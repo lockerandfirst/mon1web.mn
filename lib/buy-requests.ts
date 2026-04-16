@@ -9,6 +9,13 @@ const BUY_REQUESTS_KEY = "mon1-buy-requests";
 
 export type BuyRequestStatus = "open" | "claimed";
 
+export interface BuyRequestAgentRecommendation {
+  listingId: string;
+  listingTitle: string;
+  agentId: string | null;
+  recommendedAt: string;
+}
+
 export interface BuyRequest {
   id: string;
   title: string;
@@ -28,6 +35,7 @@ export interface BuyRequest {
   };
   assignedAgentId: string | null;
   image: string;
+  agentRecommendations?: BuyRequestAgentRecommendation[];
 }
 
 interface CreateBuyRequestInput {
@@ -122,6 +130,7 @@ export function createBuyRequest(input: CreateBuyRequestInput): BuyRequest {
     submittedBy: input.submittedBy,
     assignedAgentId: null,
     image: getPlaceholderImage(input.propertyType),
+    agentRecommendations: [],
   };
 }
 
@@ -165,7 +174,51 @@ export function createBuyRequestFromPayload(
     submittedBy: input.submittedBy,
     assignedAgentId: null,
     image: getPlaceholderImage(input.propertyType),
+    agentRecommendations: [],
   };
+}
+
+export function appendBuyRequestRecommendation(
+  requestId: string,
+  rec: {
+    listingId: string;
+    listingTitle: string;
+    agentId: string | null;
+  },
+  requests: BuyRequest[],
+) {
+  const entry: BuyRequestAgentRecommendation = {
+    ...rec,
+    recommendedAt: new Date().toISOString(),
+  };
+  return requests.map((request) =>
+    request.id === requestId
+      ? {
+          ...request,
+          agentRecommendations: [
+            ...(request.agentRecommendations ?? []),
+            entry,
+          ],
+        }
+      : request,
+  );
+}
+
+/** Клиент дээр шууд localStorage-д бичнэ. */
+export function persistBuyRequestRecommendation(
+  requestId: string,
+  rec: {
+    listingId: string;
+    listingTitle: string;
+    agentId: string | null;
+  },
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  writeBuyRequests(
+    appendBuyRequestRecommendation(requestId, rec, readBuyRequests()),
+  );
 }
 
 export function claimBuyRequest(

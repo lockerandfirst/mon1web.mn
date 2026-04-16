@@ -5,11 +5,35 @@ import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
 import {
+  AMENITY_OPTIONS,
   DISTRICTS,
   PROPERTY_TYPE_ICONS,
   PROPERTY_TYPE_OPTIONS,
   SURROUNDING_OPTIONS,
 } from "./constants";
+
+function SparkleBadge({ sharedLayoutId }: { sharedLayoutId?: string }) {
+  return (
+    <motion.span
+      layoutId={sharedLayoutId}
+      initial={sharedLayoutId ? undefined : { scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={sharedLayoutId ? undefined : { scale: 0.8, opacity: 0 }}
+      transition={{
+        type: "spring",
+        stiffness: 380,
+        damping: 28,
+      }}
+      style={{ backgroundColor: "#ff2bad", opacity: 1 }}
+      className="pointer-events-none absolute right-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-[#ff2bad]! opacity-100! text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)]"
+    >
+      <span className="absolute inset-0 rounded-full bg-linear-to-br from-[#ffb7e3] via-[#ff72c7] to-[#ff2bad]" />
+      <span className="absolute left-2 top-2 h-2.5 w-2.5 rounded-full bg-white/60" />
+      <span className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-white/75" />
+      <Sparkles className="relative z-10 h-4 w-4 fill-current" />
+    </motion.span>
+  );
+}
 
 export function PropertyTypeGrid({
   value,
@@ -41,19 +65,7 @@ export function PropertyTypeGrid({
               )}
             >
               {isActive && (
-                <motion.span
-                  layoutId="buy-request-category-badge"
-                  transition={{
-                    type: "spring",
-                    stiffness: 380,
-                    damping: 28,
-                  }}
-                  className="pointer-events-none absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-linear-to-br from-[#ffb7e3] via-[#ff72c7] to-[#ff2bad] text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)]"
-                >
-                  <span className="absolute left-2 top-2 h-2.5 w-2.5 rounded-full bg-white/60" />
-                  <span className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-white/75" />
-                  <Sparkles className="h-4 w-4 fill-current" />
-                </motion.span>
+                <SparkleBadge sharedLayoutId="add-property-type-badge" />
               )}
               <div className="pointer-events-none absolute inset-x-6 bottom-4 h-8 rounded-full bg-[#ff2bad]/8 blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
               <Icon
@@ -190,21 +202,7 @@ export function SurroundingsGrid({
                   : "border-[#f2eaff] bg-[#fff9fd]",
               )}
             >
-              {isActive && (
-                <motion.span
-                  layoutId="buy-request-category-badge"
-                  transition={{
-                    type: "spring",
-                    stiffness: 380,
-                    damping: 28,
-                  }}
-                  className="pointer-events-none absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-linear-to-br from-[#ffb7e3] via-[#ff72c7] to-[#ff2bad] text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)]"
-                >
-                  <span className="absolute left-2 top-2 h-2.5 w-2.5 rounded-full bg-white/60" />
-                  <span className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-white/75" />
-                  <Sparkles className="h-4 w-4 fill-current" />
-                </motion.span>
-              )}
+              {isActive && <SparkleBadge />}
               <item.icon
                 className={cn(
                   "h-8 w-8 transition-transform group-hover:scale-110",
@@ -217,6 +215,43 @@ export function SurroundingsGrid({
               <p className="mt-2 text-sm font-semibold leading-6 text-[#7f6f98]">
                 {item.description}
               </p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function AmenitiesGrid({
+  value,
+  onToggle,
+}: {
+  value: string[];
+  onToggle: (value: string) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <Label className="ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+        Байрны боломжууд
+      </Label>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        {AMENITY_OPTIONS.map((feature) => {
+          const isActive = value.includes(feature);
+
+          return (
+            <button
+              key={feature}
+              type="button"
+              onClick={() => onToggle(feature)}
+              className={cn(
+                "rounded-[1.6rem] border-2 px-4 py-4 text-sm font-black uppercase tracking-[0.12em] transition-all",
+                isActive
+                  ? "border-[#2a00ff] bg-[#eef0ff] text-[#2a00ff] shadow-lg shadow-[#2a00ff]/10"
+                  : "border-[#f2eaff] bg-[#fff9fd] text-[#7f6f98] hover:border-[#d7c7ff]",
+              )}
+            >
+              {feature}
             </button>
           );
         })}

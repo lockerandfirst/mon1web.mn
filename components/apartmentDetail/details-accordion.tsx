@@ -11,10 +11,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Apartment } from "@/lib/data";
 
+const paymentLabels: Record<Apartment["paymentMethod"], string> = {
+  cash: "Бэлэн",
+  mortgage: "Зээл",
+  installment: "Лизинг",
+  any: "Дурын / тохиролцоно",
+};
+
 export function DetailsAccordion({ apt }: { apt: Apartment }) {
   const detailItems = [
     { icon: LayoutGrid, label: "Ангилал", value: apt.propertyType },
-    { icon: Landmark, label: "Төлбөр", value: apt.paymentMethod },
+    { icon: Landmark, label: "Төлбөр", value: paymentLabels[apt.paymentMethod] },
     {
       icon: Building2,
       label: "Нийт давхар",

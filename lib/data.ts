@@ -3,7 +3,7 @@ export interface Apartment {
   title: string;
   propertyType?: string;
   price: number;
-  paymentMethod: "cash" | "mortgage" | "installment";
+  paymentMethod: "cash" | "mortgage" | "installment" | "any";
   pricePerSqm: number;
   sqm: number;
   rooms: number;

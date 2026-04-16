@@ -1,7 +1,6 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { Header } from "@/components/header";
 import { ApartmentCard } from "@/components/apartment-card";
 import { apartments, type Apartment } from "@/lib/data";
 import { readMarketplaceListings } from "@/lib/marketplace";
@@ -42,8 +41,6 @@ export default function ApartmentDetailPage({
 
   return (
     <div className="min-h-screen bg-[#FDFCFB] pb-20">
-      <Header />
-
       <GallerySection images={apt.images} />
 
       <main className="max-w-7xl mx-auto mt-12 grid grid-cols-1 gap-12 px-6 lg:grid-cols-12">

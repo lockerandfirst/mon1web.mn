@@ -25,15 +25,27 @@ interface ApartmentCardProps {
   apartment: Apartment;
   index?: number;
   variant?: "default" | "compact";
+  onCardClick?: (apartment: Apartment) => void;
+  actionLabel?: string;
 }
 
 export const ApartmentCard = memo(
-  ({ apartment, index = 0, variant = "default" }: ApartmentCardProps) => {
+  ({
+    apartment,
+    index = 0,
+    variant = "default",
+    onCardClick,
+    actionLabel = "Үзэх",
+  }: ApartmentCardProps) => {
     const [isFavorite, setIsFavorite] = useState(false);
     const [currentImg, setCurrentImg] = useState(0);
     const router = useRouter();
 
     const handleCardClick = () => {
+      if (onCardClick) {
+        onCardClick(apartment);
+        return;
+      }
       router.push(`/apartment/${apartment.id}`);
     };
 
@@ -66,14 +78,14 @@ export const ApartmentCard = memo(
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.05 }}
         className={cn(
-          "cursor-pointer",
+          "h-full w-full cursor-pointer",
           variant === "compact" && "lg:[&>div]:flex lg:[&>div]:items-stretch",
         )}
         onClick={handleCardClick}
       >
         <Card
           className={cn(
-            "group relative overflow-hidden pt-0 pb-1 border-slate-100 bg-white shadow-sm transition-all duration-500 hover:shadow-2xl hover:shadow-[#ffc6e7]/20 hover:-translate-y-1 rounded-[2.5rem]",
+            "group relative flex h-full w-full flex-col overflow-hidden rounded-[2.5rem] border-slate-100 bg-white pt-0 pb-1 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#ffc6e7]/20",
             variant === "compact" &&
               "lg:grid lg:grid-cols-[minmax(300px,380px)_1fr] lg:gap-0",
           )}
@@ -179,7 +191,7 @@ export const ApartmentCard = memo(
           {/* --- CONTENT SECTION --- */}
           <CardContent
             className={cn(
-              "p-5",
+              "flex flex-1 flex-col p-5",
               variant === "compact" &&
                 "lg:p-7 lg:flex lg:flex-col lg:justify-between",
             )}
@@ -196,14 +208,14 @@ export const ApartmentCard = memo(
             </div>
 
             {/* COMPACT INFO GRID */}
-            <div className="grid grid-cols-4 gap-0 py-4 border-y border-slate-100 mb-5 bg-[#fff9fd] rounded-2xl overflow-hidden">
-              <div className="flex flex-col items-center border-r border-slate-200">
+            <div className="mb-5 grid grid-cols-2 gap-0 overflow-hidden rounded-2xl border-y border-slate-100 bg-[#fff9fd] py-4 md:grid-cols-4">
+              <div className="flex flex-col items-center border-b border-r border-slate-200 md:border-b-0">
                 <Bed className="h-4 w-4 text-[#2a00ff] mb-1" />
                 <span className="text-[10px] font-black text-slate-900 uppercase tracking-tighter">
                   {apartment.rooms} өрөө
                 </span>
               </div>
-              <div className="flex flex-col items-center border-r border-slate-200">
+              <div className="flex flex-col items-center border-b border-slate-200 md:border-b-0 md:border-r">
                 <Bath className="h-4 w-4 text-[#2a00ff] mb-1" />
                 <span className="text-[10px] font-black text-slate-900 uppercase tracking-tighter">
                   {apartment.bathrooms} угаалга
@@ -223,8 +235,8 @@ export const ApartmentCard = memo(
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div className="mt-auto flex items-center justify-between gap-4">
+              <div className="flex min-w-0 items-center gap-3">
                 <div className="relative h-9 w-9">
                   <img
                     src={apartment.agent.avatar}
@@ -233,8 +245,8 @@ export const ApartmentCard = memo(
                   />
                   <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#2a00ff] border-2 border-white rounded-full" />
                 </div>
-                <div className="flex flex-col leading-none">
-                  <span className="text-xs font-black text-slate-900 uppercase tracking-tight">
+                <div className="flex min-w-0 flex-col leading-none">
+                  <span className="truncate text-xs font-black uppercase tracking-tight text-slate-900">
                     {apartment.agent.name}
                   </span>
                   <div className="flex items-center gap-1 mt-1">
@@ -250,7 +262,7 @@ export const ApartmentCard = memo(
                 size="sm"
                 className="h-10 rounded-xl font-black text-[10px] px-6 bg-[#2a00ff] hover:bg-[#ff3bad] transition-all uppercase tracking-widest shadow-lg shadow-[#2a00ff]/20"
               >
-                Үзэх
+                {actionLabel}
               </Button>
             </div>
           </CardContent>

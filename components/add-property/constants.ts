@@ -109,6 +109,24 @@ export const SURROUNDING_OPTIONS = [
   },
 ] as const;
 
+export const AMENITY_OPTIONS = [
+  "Машины зогсоол",
+  "Лефт",
+  "Харуул хамгаалалт",
+  "Тагт",
+  "Халаалт",
+  "Агааржуулалт",
+  "Агуулах",
+  "Фитнесс төв",
+  "Цэцэрлэгт хүрээлэн",
+] as const;
+
+export const PAYMENT_METHOD_OPTIONS = [
+  { value: "cash", label: "Бэлэн" },
+  { value: "mortgage", label: "Зээл" },
+  { value: "installment", label: "Лизинг" },
+] as const;
+
 export const FORM_STEPS = [
   { step: 1, label: "Үндсэн", hint: "Төрөл" },
   { step: 2, label: "Байршил", hint: "Орчин" },
@@ -122,20 +140,31 @@ export const FEATURE_GUIDE = [
   "Сургууль, үйлчилгээний төвийн ойр байдал",
 ];
 
-export const AGENT_OPTIONS = agents.filter((agent) => agent.verified).slice(0, 3);
+export const AGENT_OPTIONS = agents
+  .filter((agent) => agent.verified)
+  .slice(0, 3);
 
 export const DEFAULT_FORM: FormData = {
+  title: "",
   propertyType: "apartment",
   district: "",
   location: "",
+  address: "",
   price: "",
+  paymentFlexible: false,
+  paymentMethods: ["cash"],
   sqm: "",
   rooms: "2",
   bathrooms: "1",
   floor: "",
   totalFloors: "",
+  commissionYear: `${new Date().getFullYear()}`,
   description: "",
-  serviceType: "self",
-  selectedAgentId: null,
+  contactPhone: "",
+  serviceType: "agent",
+  selectedAgentId: AGENT_OPTIONS[0]?.id ?? null,
   surroundings: [],
+  features: [],
+  imageUrls: "",
+  images: [],
 };
