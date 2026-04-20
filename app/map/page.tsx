@@ -1,7 +1,7 @@
 "use client";
 
-import { type MouseEvent } from "react";
-import { List, X } from "lucide-react";
+import { type MouseEvent, useState } from "react";
+import { List, SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MapCanvas } from "./components/MapCanvas";
@@ -12,6 +12,9 @@ import { useMapFilters } from "./use-map-filters";
 
 export default function MapPage() {
   const filters = useMapFilters();
+  const [mobilePanelTab, setMobilePanelTab] = useState<"filters" | "list">(
+    "filters",
+  );
 
   const toggleFavorite = (id: string, event: MouseEvent<HTMLElement>) => {
     event.stopPropagation();
@@ -21,17 +24,47 @@ export default function MapPage() {
   };
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#FDFCFB]">
-      <main className="relative flex flex-1 overflow-hidden">
+    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-[#FDFCFB] md:h-screen">
+      <main className="relative flex min-h-0 flex-1 overflow-hidden">
+        {filters.showListings && (
+          <button
+            type="button"
+            aria-label="Шүүлтүүрийн самбар хаах"
+            onClick={() => filters.setShowListings(false)}
+            className="absolute inset-0 z-20 bg-slate-900/35 backdrop-blur-[1px] md:hidden"
+          />
+        )}
+
         <aside
           className={cn(
-            "absolute inset-y-0 left-0 z-30 flex h-full w-[88%] max-w-sm flex-col overflow-hidden border-r border-slate-100 bg-white shadow-2xl transition-transform duration-300 ease-in-out md:relative md:w-105 md:max-w-none",
+            "absolute bottom-0 left-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-30 flex w-[min(94vw,22rem)] max-w-sm flex-col overflow-hidden border-r border-slate-100 bg-white shadow-2xl transition-transform duration-300 ease-in-out md:relative md:top-0 md:h-full md:w-105 md:max-w-none",
             filters.showListings
               ? "translate-x-0"
               : "pointer-events-none -translate-x-[105%]",
           )}
         >
           <div className="flex h-full min-w-0 flex-col bg-white md:min-w-105">
+            <div className="border-b border-slate-100 bg-white p-2 md:hidden">
+              <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+                <Button
+                  type="button"
+                  variant={mobilePanelTab === "filters" ? "default" : "ghost"}
+                  onClick={() => setMobilePanelTab("filters")}
+                  className="h-9 rounded-xl text-[11px] font-black uppercase tracking-wide"
+                >
+                  Шүүлтүүр
+                </Button>
+                <Button
+                  type="button"
+                  variant={mobilePanelTab === "list" ? "default" : "ghost"}
+                  onClick={() => setMobilePanelTab("list")}
+                  className="h-9 rounded-xl text-[11px] font-black uppercase tracking-wide"
+                >
+                  Жагсаалт ({filters.filteredApartments.length})
+                </Button>
+              </div>
+            </div>
+
             <MapFilterPanel
               activeFilterBadges={filters.activeFilterBadges}
               category={filters.category}
@@ -61,6 +94,7 @@ export default function MapPage() {
               searchQuery={filters.searchQuery}
               sqmRange={filters.sqmRange}
               yearRange={filters.yearRange}
+              className={cn(mobilePanelTab !== "filters" && "max-md:hidden")}
             />
 
             <MapListingsPanel
@@ -70,24 +104,37 @@ export default function MapPage() {
               onSelectApartment={filters.setSelectedId}
               onToggleFavorite={toggleFavorite}
               selectedId={filters.selectedId}
+              className={cn(mobilePanelTab !== "list" && "max-md:hidden")}
             />
           </div>
         </aside>
 
         <div className="relative z-10 flex-1 overflow-hidden bg-slate-100">
-          <div className="absolute left-4 top-4 z-40 md:left-6 md:top-6">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => filters.setShowListings(!filters.showListings)}
-              className="h-12 w-12 rounded-2xl border-none bg-white text-slate-600 shadow-xl transition-all hover:scale-105 active:scale-95"
-            >
-              {!filters.showListings ? (
-                <List className="h-5 w-5" />
-              ) : (
-                <X className="h-5 w-5" />
-              )}
-            </Button>
+          {/* Доор нь байрлуулна: тогтмол header (z-9999) дээр товч дарагдахгүй */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-5000 max-md:pt-[calc(0.5rem+4.35rem+env(safe-area-inset-top,0px))] md:static md:z-auto md:pt-0">
+            <div className="pointer-events-auto flex justify-start px-3 md:absolute md:left-6 md:top-6 md:px-0">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const next = !filters.showListings;
+                  filters.setShowListings(next);
+                  if (next) setMobilePanelTab("filters");
+                }}
+                className="h-9 gap-2 rounded-xl border-none bg-white px-3 text-slate-700 shadow-xl transition-all hover:scale-[1.02] hover:bg-slate-50 active:scale-95 max-md:shadow-lg md:h-12 md:w-12 md:gap-0 md:px-0 md:shadow-xl"
+              >
+                {!filters.showListings ? (
+                  <>
+                    <SlidersHorizontal className="h-4 w-4 shrink-0 text-[#2a00ff] md:hidden" />
+                    <List className="hidden h-5 w-5 shrink-0 md:block" />
+                  </>
+                ) : (
+                  <X className="h-4 w-4 shrink-0 md:h-5 md:w-5" />
+                )}
+                <span className="text-[11px] font-black uppercase tracking-wide max-md:inline md:hidden">
+                  {filters.showListings ? "Хаах" : "Шүүлтүүр"}
+                </span>
+              </Button>
+            </div>
           </div>
 
           <MapCanvas

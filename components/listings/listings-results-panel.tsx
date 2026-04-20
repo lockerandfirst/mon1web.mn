@@ -53,13 +53,13 @@ export function ListingsResultsPanel({
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger
               className={cn(
-                "h-auto min-h-10 w-full min-w-0 flex-1 rounded-xl border-[#eeebff] bg-white py-2 pl-2.5 pr-2 text-left text-[10px] font-bold leading-snug text-[#2a00ff] whitespace-normal",
+                "h-auto min-h-10 w-full min-w-0 flex-1 rounded-xl border-[#eeebff] bg-white py-2 pl-2.5 pr-2 text-left text-[13px] font-bold leading-snug text-[#2a00ff] whitespace-normal",
                 "lg:h-10 lg:min-h-10 lg:w-40 lg:shrink-0 lg:whitespace-nowrap lg:px-3 lg:text-xs",
               )}
             >
               <SelectValue placeholder="Эрэмбэлэх" />
             </SelectTrigger>
-            <SelectContent className="z-12050 rounded-xl border-[#eeebff] bg-white font-bold text-[#2a00ff]">
+            <SelectContent className="z-12050 rounded-xl border-[#eeebff] bg-white lg:text-xs text-xs font-bold text-[#2a00ff]">
               <SelectItem value="newest">Шинэ нь эхэндээ</SelectItem>
               <SelectItem value="price-low">Үнэ: Хямдаас</SelectItem>
               <SelectItem value="price-high">Үнэ: Үнэтэйгээс</SelectItem>

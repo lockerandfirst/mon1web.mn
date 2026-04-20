@@ -138,7 +138,7 @@ export function Header() {
           {/* LOGO */}
           <Link
             href="/"
-            className="flex items-center gap-2 md:gap-3 group shrink-0"
+            className="group flex shrink-0 items-center gap-2 lg:gap-3"
           >
             <Image
               src="/ZAAAA.png"
@@ -148,11 +148,11 @@ export function Header() {
               /* w-16: Mobile width (small & clean)
        md:w-25: Desktop width (original size)
     */
-              className="w-16 md:w-25 object-contain transition-all"
+              className="w-16 object-contain transition-all lg:w-25"
             />
           </Link>
           {/* DESKTOP NAV */}
-          <nav className="hidden md:flex items-center bg-muted/50 rounded-full px-2 py-1 border border-border/50">
+          <nav className="hidden items-center rounded-full border border-border/50 bg-muted/50 px-2 py-1 lg:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -195,7 +195,7 @@ export function Header() {
             ))}
           </nav>
           {/* ACTIONS */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden items-center gap-3 lg:flex">
             {!isSignedIn && (
               <>
                 <SignInButton mode="modal" appearance={clerkAppearance}>
@@ -230,7 +230,7 @@ export function Header() {
             </Link>
             {isSignedIn ? <ClerkAppUserButton /> : null}
           </div>
-          <div className="flex items-center gap-2 md:hidden">
+          <div className="flex items-center gap-2 lg:hidden">
             <Link href="/add-property">
               <Button
                 size="sm"

@@ -19,32 +19,32 @@ export function RelatedListings({ currentId }: RelatedListingsProps) {
   if (related.length === 0) return null;
 
   return (
-    <section className="max-w-7xl mx-auto mt-20 space-y-10 px-6">
+    <section className="mx-auto mt-12 max-w-7xl space-y-6 px-3 sm:px-4 md:mt-20 md:space-y-10 md:px-6">
       {/* Header Section */}
-      <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-        <div className="space-y-3">
-          <Badge className="bg-blue-50 text-blue-600 border-none px-4 py-1.5 font-black text-[10px] tracking-widest uppercase">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end md:gap-6">
+        <div className="space-y-2 md:space-y-3">
+          <Badge className="border-none bg-blue-50 px-3 py-1 text-[9px] font-black uppercase tracking-wide text-blue-600 md:px-4 md:py-1.5 md:text-[10px] md:tracking-widest">
             Танд санал болгох
           </Badge>
-          <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter uppercase italic">
+          <h3 className="text-2xl font-black uppercase italic tracking-tight text-slate-900 md:text-5xl md:tracking-tighter">
             Ойролцоох <span className="text-blue-600">зарууд</span>
           </h3>
-          <p className="text-slate-400 font-bold tracking-tight max-w-md">
+          <p className="max-w-md text-sm font-bold tracking-tight text-slate-400 md:text-base">
             Энэ байршилтай ойрхон болон ижил төрлийн бусад боломжууд
           </p>
         </div>
 
         <Button
           variant="ghost"
-          className="group flex items-center gap-3 px-8 h-16 font-black text-xs uppercase tracking-widest text-blue-600 hover:bg-blue-50 rounded-[1.5rem] border border-transparent hover:border-blue-100 transition-all"
+          className="group h-11 rounded-xl border border-transparent px-4 text-[10px] font-black uppercase tracking-wide text-blue-600 transition-all hover:border-blue-100 hover:bg-blue-50 md:h-16 md:rounded-3xl md:px-8 md:text-xs md:tracking-widest"
         >
           Бүх зарыг үзэх
-          <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-2" />
+          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-2 md:h-5 md:w-5" />
         </Button>
       </div>
 
       {/* Grid Section */}
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
         {related.map((item, i) => (
           <motion.div
             key={item.id}
@@ -64,14 +64,14 @@ export function RelatedListings({ currentId }: RelatedListingsProps) {
       </div>
 
       {/* Optional: Bottom Banner for "Mon1" Premium feel */}
-      <div className="relative mt-16 overflow-hidden rounded-[3rem] bg-[#1a0b3b] p-12 text-center text-white shadow-2xl">
+      <div className="relative mt-8 overflow-hidden rounded-4xl bg-[#1a0b3b] p-5 text-center text-white shadow-2xl md:mt-16 md:rounded-[3rem] md:p-12">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 rounded-full bg-blue-600/20 blur-[100px]" />
-        <h4 className="relative z-10 text-3xl font-black italic uppercase tracking-tighter">
+        <h4 className="relative z-10 text-xl font-black italic uppercase tracking-tight md:text-3xl md:tracking-tighter">
           Өөрийн үл хөдлөх хөрөнгөө{" "}
           <span className="text-blue-500">үнэгүй</span> байршуулаарай
         </h4>
         <Link href="/add-property">
-          <Button className="relative z-10 mt-8 h-16 px-12 rounded-2xl bg-white text-[#1a0b3b] font-black uppercase hover:bg-blue-50">
+          <Button className="relative z-10 mt-4 h-11 rounded-xl bg-white px-5 text-[11px] font-black uppercase text-[#1a0b3b] hover:bg-blue-50 md:mt-8 md:h-16 md:rounded-2xl md:px-12 md:text-base">
             Зар нэмэх
           </Button>
         </Link>

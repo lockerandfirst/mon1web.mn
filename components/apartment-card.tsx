@@ -123,7 +123,7 @@ export const ApartmentCard = memo(
             {/* Price Tag */}
             <div className="absolute bottom-2 left-2 z-20 max-md:max-w-[58%] md:bottom-4 md:left-4">
               <div className="rounded-lg border border-white/10 bg-[#2a00ff]/90 px-2 py-1 shadow-xl backdrop-blur-md md:rounded-2xl md:px-4 md:py-2 md:shadow-2xl">
-                <p className="text-xs font-black leading-none tracking-tighter text-white md:text-lg">
+                <p className="text-sm font-black leading-none tracking-tight text-white md:text-lg md:tracking-tighter">
                   {formatPrice(apartment.price)}
                 </p>
                 <p className="mt-0.5 hidden text-[10px] font-bold uppercase tracking-widest text-white/70 md:mt-1 md:block">
@@ -157,12 +157,12 @@ export const ApartmentCard = memo(
             {/* Badges */}
             <div className="absolute top-3 left-3 md:top-4 md:left-4 flex gap-1.5 z-20">
               {apartment.featured && (
-                <Badge className="bg-[#ff3bad] hover:bg-[#ff3bad] border-none shadow-lg text-[8px] md:text-[10px] font-black px-2 py-0.5 md:px-2.5 md:py-1 uppercase tracking-wider text-white">
+                <Badge className="bg-[#ff3bad] hover:bg-[#ff3bad] border-none shadow-lg text-[9px] font-black uppercase tracking-wide text-white md:text-[10px] md:tracking-wider md:px-2.5 md:py-1 px-2 py-0.5">
                   ОНЦЛОХ
                 </Badge>
               )}
               {apartment.verified && (
-                <Badge className="bg-white/90 text-[#2a00ff] border-none shadow-lg gap-1 text-[8px] md:text-[10px] font-black px-2 py-0.5 md:px-2.5 md:py-1 backdrop-blur-md uppercase tracking-wider">
+                <Badge className="bg-white/90 text-[#2a00ff] border-none shadow-lg gap-1 text-[9px] font-black uppercase tracking-wide backdrop-blur-md md:text-[10px] md:tracking-wider md:px-2.5 md:py-1 px-2 py-0.5">
                   <BadgeCheck className="h-3 w-3 md:h-3.5 md:w-3.5 fill-[#2a00ff] text-white" />{" "}
                   Verified
                 </Badge>
@@ -188,12 +188,12 @@ export const ApartmentCard = memo(
 
           {/* --- CONTENT SECTION --- */}
           <CardContent className="flex min-w-0 flex-1 flex-col px-3 py-2.5 md:p-5">
-            <h3 className="mb-1 line-clamp-1 text-sm font-black uppercase leading-tight tracking-tight text-slate-900 transition-colors group-hover:text-[#2a00ff] md:mb-2 md:text-lg">
+            <h3 className="mb-0.5 line-clamp-2 text-[15px] font-black uppercase leading-[1.15] tracking-normal text-slate-900 transition-colors group-hover:text-[#2a00ff] md:mb-2 md:line-clamp-1 md:text-lg md:mt-0 -mt-4 md:leading-tight md:tracking-tight">
               {apartment.title}
             </h3>
 
-            <div className="mb-2 flex items-center gap-1 text-[9px] font-bold uppercase leading-tight tracking-wider text-slate-400 md:mb-5 md:text-[11px]">
-              <MapPin className="h-2.5 w-2.5 shrink-0 text-[#ff3bad] md:h-3.5 md:w-3.5" />
+            <div className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase leading-snug tracking-wide text-slate-400 md:mb-5 md:gap-1 md:text-[11px] md:tracking-wider">
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-[#ff3bad] md:h-4 md:w-4" />
               <span className="min-w-0 truncate font-black md:truncate">
                 {apartment.location}, {apartment.district}
               </span>
@@ -203,8 +203,8 @@ export const ApartmentCard = memo(
             <div className="mb-2 grid grid-cols-4 items-stretch divide-x divide-slate-200/90 overflow-hidden rounded-xl border border-slate-100/90 bg-[#fff9fd] py-1 md:mb-5 md:divide-x-0 md:rounded-2xl md:border-none md:bg-[#fff9fd] md:py-4 md:px-0">
               {/* Room */}
               <div className="flex min-w-0 flex-col items-center justify-center gap-0 px-0.5 py-0.5 text-center md:flex-col md:gap-0.5 md:border-r md:border-slate-200 md:px-1 md:py-0">
-                <Bed className="h-2.5 w-2.5 shrink-0 text-[#2a00ff] md:h-4 md:w-4" />
-                <span className="text-[8px] font-black uppercase leading-tight text-slate-900 md:text-[10px]">
+                <Bed className="h-3 w-3 shrink-0 text-[#2a00ff] md:h-4 md:w-4" />
+                <span className="text-[10px] font-black uppercase leading-tight text-slate-900 md:text-[10px]">
                   {apartment.rooms}
                   <span className="hidden md:ml-0.5 md:inline">өрөө</span>
                 </span>
@@ -212,8 +212,8 @@ export const ApartmentCard = memo(
 
               {/* Bath */}
               <div className="flex min-w-0 flex-col items-center justify-center gap-0 px-0.5 py-0.5 text-center md:flex-col md:gap-0.5 md:border-r md:border-slate-200 md:px-1 md:py-0">
-                <Bath className="h-2.5 w-2.5 shrink-0 text-[#2a00ff] md:h-4 md:w-4" />
-                <span className="text-[8px] font-black uppercase leading-tight text-slate-900 md:text-[10px]">
+                <Bath className="h-3 w-3 shrink-0 text-[#2a00ff] md:h-4 md:w-4" />
+                <span className="text-[10px] font-black uppercase leading-tight text-slate-900 md:text-[10px]">
                   {apartment.bathrooms}
                   <span className="hidden md:ml-0.5 md:inline">угаалга</span>
                 </span>
@@ -221,16 +221,16 @@ export const ApartmentCard = memo(
 
               {/* Sqm */}
               <div className="flex min-w-0 flex-col items-center justify-center gap-0 px-0.5 py-0.5 text-center md:flex-col md:gap-0.5 md:border-r md:border-slate-200 md:px-1 md:py-0">
-                <Square className="h-2.5 w-2.5 shrink-0 text-[#2a00ff] md:h-4 md:w-4" />
-                <span className="text-[8px] font-black uppercase leading-tight text-slate-900 md:text-[10px]">
+                <Square className="h-3 w-3 shrink-0 text-[#2a00ff] md:h-4 md:w-4" />
+                <span className="text-[10px] font-black uppercase leading-tight text-slate-900 md:text-[10px]">
                   {apartment.sqm}м²
                 </span>
               </div>
 
               {/* Floor */}
               <div className="flex min-w-0 flex-col items-center justify-center gap-0 px-0.5 py-0.5 text-center md:flex-col md:gap-0.5 md:px-1 md:py-0">
-                <Hash className="h-2.5 w-2.5 shrink-0 text-[#2a00ff] md:h-4 md:w-4" />
-                <span className="text-[8px] font-black uppercase leading-tight text-slate-900 md:text-[10px]">
+                <Hash className="h-3 w-3 shrink-0 text-[#2a00ff] md:h-4 md:w-4" />
+                <span className="text-[10px] font-black uppercase leading-tight text-slate-900 md:text-[10px]">
                   {apartment.floor || "6"}
                   <span className="hidden md:inline">-р д.</span>
                 </span>
@@ -249,12 +249,12 @@ export const ApartmentCard = memo(
                   <div className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-white bg-[#2a00ff] md:h-2.5 md:w-2.5" />
                 </div>
                 <div className="flex min-w-0 flex-col leading-none">
-                  <span className="truncate text-[10px] font-black uppercase tracking-tight text-slate-900 md:text-xs">
+                  <span className="truncate text-[11px] font-black uppercase tracking-tight text-slate-900 md:text-xs">
                     {apartment.agent.name.split(" ")[0]}
                   </span>
                   <div className="mt-0.5 flex items-center gap-1 md:mt-1">
                     <Star className="h-2 w-2 fill-[#ff3bad] text-[#ff3bad] md:h-2.5 md:w-2.5" />
-                    <span className="text-[9px] font-black text-slate-400 md:text-[10px]">
+                    <span className="text-[10px] font-black text-slate-400 md:text-[10px]">
                       {apartment.agent.rating}
                     </span>
                   </div>
@@ -263,7 +263,7 @@ export const ApartmentCard = memo(
 
               <Button
                 size="sm"
-                className="h-8 max-md:min-w-15 shrink-0 rounded-lg bg-[#2a00ff] px-3 text-[8px] font-black uppercase tracking-widest text-white shadow-md transition-all hover:bg-[#ff3bad] md:h-10 md:rounded-xl md:px-6 md:text-[10px] md:shadow-lg"
+                className="h-8 max-md:min-w-15 shrink-0 rounded-lg bg-[#2a00ff] px-3 text-[10px] font-black uppercase tracking-wide text-white shadow-md transition-all hover:bg-[#ff3bad] md:h-10 md:rounded-xl md:px-6 md:text-[10px] md:tracking-widest md:shadow-lg"
               >
                 {actionLabel}
               </Button>

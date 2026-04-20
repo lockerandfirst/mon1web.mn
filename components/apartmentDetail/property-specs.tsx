@@ -10,17 +10,17 @@ export function PropertySpecs({ apt }: { apt: Apartment }) {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-4">
       {specs.map((spec) => (
         <div
           key={spec.label}
-          className="bg-white border border-slate-100 p-6 rounded-[2.5rem] shadow-sm hover:border-blue-500 transition-colors"
+          className="rounded-3xl border border-slate-100 bg-white p-3 shadow-sm transition-colors hover:border-blue-500 md:rounded-[2.5rem] md:p-6"
         >
-          <spec.icon className="h-6 w-6 text-blue-600 mb-4" />
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+          <spec.icon className="mb-2 h-4 w-4 text-blue-600 md:mb-4 md:h-6 md:w-6" />
+          <p className="text-[8px] font-black uppercase tracking-wide text-slate-400 md:text-[9px] md:tracking-widest">
             {spec.label}
           </p>
-          <p className="text-xl font-black text-slate-900">{spec.val}</p>
+          <p className="text-base font-black text-slate-900 md:text-xl">{spec.val}</p>
         </div>
       ))}
     </div>

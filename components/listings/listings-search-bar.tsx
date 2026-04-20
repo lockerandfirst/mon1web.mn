@@ -39,17 +39,18 @@ export function ListingsSearchBar({
         role="presentation"
         onClick={() => searchInputRef.current?.focus()}
         className={cn(
-          "flex w-full items-center gap-2 rounded-4xl border p-2 shadow-2xl shadow-[#2a00ff]/5 backdrop-blur-2xl transition-all duration-200",
-          "max-lg:gap-1.5 max-lg:rounded-3xl max-lg:p-1.5 lg:gap-2 lg:rounded-4xl lg:p-2",
+          "flex w-full items-center gap-2 rounded-4xl border pt-0 p-2 shadow-2xl shadow-[#2a00ff]/5 backdrop-blur-2xl transition-all duration-200",
+          "max-lg:gap-1 max-lg:rounded-2xl max-lg:p-1 max-lg:shadow-lg",
+          "lg:gap-2 lg:rounded-4xl lg:p-2",
           isSearchFocused
             ? "border-[#2a00ff] bg-white shadow-[#2a00ff]/10 ring-4 ring-[#2a00ff]/10"
             : "border-[#eeebff] bg-white/80",
         )}
       >
-        <div className="group relative flex-1 pl-4">
+        <div className="group relative min-w-0 flex-1 pl-2 max-lg:pl-1 lg:pl-4">
           <Search
             className={cn(
-              "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors max-lg:h-4 max-lg:w-4 lg:left-6 lg:h-5 lg:w-5",
+              "absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors max-lg:left-2 max-lg:h-3.5 max-lg:w-3.5 lg:left-6 lg:h-5 lg:w-5",
               isSearchFocused ? "text-[#2a00ff]" : "text-[#ff9ce0]",
             )}
           />
@@ -67,7 +68,7 @@ export function ListingsSearchBar({
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setIsSearchFocused(false)}
             className={cn(
-              "h-11 border-none bg-transparent pl-10 text-sm font-bold text-[#2a00ff] shadow-none focus-visible:ring-0",
+              "h-9 border-none bg-transparent pl-8 text-[13px] font-bold text-[#2a00ff] shadow-none focus-visible:ring-0 max-lg:pr-1",
               "lg:h-14 lg:pl-12 lg:text-base",
             )}
           />
@@ -79,8 +80,8 @@ export function ListingsSearchBar({
             applyKeywordSearch();
           }}
           className={cn(
-            "h-11 shrink-0 rounded-2xl bg-[#2a00ff] px-4 text-xs font-black text-white shadow-xl shadow-[#2a00ff]/10 transition-all hover:bg-[#ff3bad]",
-            "lg:h-14 lg:rounded-3xl lg:px-10 lg:text-base",
+            "h-9 shrink-0 rounded-xl bg-[#2a00ff] px-3 text-[11px] font-black text-white shadow-lg shadow-[#2a00ff]/10 transition-all hover:bg-[#ff3bad] max-lg:px-2.5",
+            "lg:h-14 lg:rounded-3xl lg:px-10 lg:text-base lg:shadow-xl",
           )}
         >
           ХАЙХ

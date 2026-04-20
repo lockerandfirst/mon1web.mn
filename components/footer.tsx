@@ -108,7 +108,7 @@ export function Footer() {
           </div>
 
           {/* Newsletter - Simplified for mobile */}
-          <div className="lg:col-span-4 space-y-4 md:space-y-10">
+          <div className="lg:col-span-4 space-y-4 md:space-y-10 mb-3">
             <div className="relative group w-full">
               <Input
                 placeholder="И-мэйл..."

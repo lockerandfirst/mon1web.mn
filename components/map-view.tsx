@@ -237,9 +237,15 @@ export function MapView({
         .leaflet-control-zoom a:last-child {
           border-radius: 0 0 18px 18px !important;
         }
+
+        @media (max-width: 767px) {
+          .leaflet-control-zoom {
+            display: none !important;
+          }
+        }
       `}</style>
 
-      <div className="pointer-events-none absolute bottom-4 left-4 z-[400] max-w-72 rounded-3xl bg-white/92 px-4 py-3 shadow-2xl backdrop-blur-xl">
+      <div className="pointer-events-none absolute bottom-[max(7rem,env(safe-area-inset-bottom,0px)+5rem)] left-3 right-3 z-400 rounded-3xl bg-white/92 px-4 py-3 shadow-2xl backdrop-blur-xl md:bottom-4 md:left-4 md:right-auto md:max-w-72">
         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">
           {apartments.length} байр харагдаж байна
         </p>

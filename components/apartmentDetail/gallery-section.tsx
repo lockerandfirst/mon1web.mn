@@ -15,10 +15,10 @@ export function GallerySection({ images }: { images: string[] }) {
     setCurrentIdx((prev) => (prev === 0 ? images.length - 1 : prev - 1));
 
   return (
-    <section className="px-6 pt-5 max-w-[1400px] mx-auto">
+    <section className="mx-auto max-w-[1400px] px-3 pt-3 sm:px-4 md:px-6 md:pt-5">
       <div
         onClick={() => setIsOpen(true)}
-        className="relative group h-[500px] md:h-[650px] rounded-[3rem] overflow-hidden bg-slate-100 cursor-zoom-in shadow-2xl shadow-blue-900/5"
+        className="group relative h-[280px] cursor-zoom-in overflow-hidden rounded-4xl bg-slate-100 shadow-xl shadow-blue-900/5 md:h-[650px] md:rounded-[3rem] md:shadow-2xl"
       >
         <AnimatePresence mode="wait">
           <motion.img
@@ -31,14 +31,14 @@ export function GallerySection({ images }: { images: string[] }) {
           />
         </AnimatePresence>
 
-        <div className="absolute inset-x-8 top-1/2 -translate-y-1/2 flex justify-between opacity-0 group-hover:opacity-100 transition-all z-10 pointer-events-none">
+        <div className="pointer-events-none absolute inset-x-3 top-1/2 z-10 flex -translate-y-1/2 justify-between transition-all md:inset-x-8 md:opacity-0 md:group-hover:opacity-100">
           <Button
             onClick={(e) => {
               e.stopPropagation();
               prev();
             }}
             variant="ghost"
-            className="w-14 h-14 rounded-full bg-white/90 pointer-events-auto active:scale-90"
+            className="h-9 w-9 rounded-full bg-white/90 pointer-events-auto active:scale-90 md:h-14 md:w-14"
           >
             <ChevronLeft />
           </Button>
@@ -48,13 +48,13 @@ export function GallerySection({ images }: { images: string[] }) {
               next();
             }}
             variant="ghost"
-            className="w-14 h-14 rounded-full bg-white/90 pointer-events-auto active:scale-90"
+            className="h-9 w-9 rounded-full bg-white/90 pointer-events-auto active:scale-90 md:h-14 md:w-14"
           >
             <ChevronRight />
           </Button>
         </div>
 
-        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 flex gap-2 bg-black/20 p-2.5 rounded-full backdrop-blur-md">
+        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-black/20 p-1.5 backdrop-blur-md md:bottom-7 md:gap-2 md:p-2.5">
           {images.map((_, i) => (
             <div
               key={i}

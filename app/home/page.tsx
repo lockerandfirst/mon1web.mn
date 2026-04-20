@@ -34,7 +34,7 @@ export default function Home() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                className="mb-2 md:mb-4 inline-flex items-center gap-2 rounded-full bg-[#eeebff] px-3 py-1 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-[#2a00ff]"
+                className="mb-2 md:mb-4 inline-flex items-center gap-2 rounded-full bg-[#eeebff] px-3 py-1 text-[10px] md:text-[10px] font-black uppercase tracking-[0.15em] text-[#2a00ff] md:tracking-[0.2em]"
               >
                 <Building2 className="h-3 w-3 md:h-4 md:w-4" />
                 Үл Хөдлөх
@@ -53,10 +53,10 @@ export default function Home() {
                 <p className="text-3xl md:text-5xl font-black text-[#2a00ff] mb-0.5">
                   50К+
                 </p>
-                <p className="text-[9px] md:text-sm font-bold uppercase tracking-widest text-[#ff3bad]">
+                <p className="text-[11px] md:text-sm font-bold uppercase tracking-widest text-[#ff3bad]">
                   Нийлүүлэлт
                 </p>
-                <p className="mt-2 text-[11px] md:text-sm font-medium text-slate-500 leading-tight md:leading-relaxed">
+                <p className="mt-2 text-[13px] md:text-sm font-medium text-slate-500 leading-snug md:leading-relaxed">
                   2024-2025 онд зах зээлд хүлээгдэж буй шинэ орон сууц.
                 </p>
               </motion.div>
@@ -68,10 +68,10 @@ export default function Home() {
                 <p className="text-3xl md:text-5xl font-black text-white mb-0.5">
                   1%
                 </p>
-                <p className="text-[9px] md:text-sm font-bold uppercase tracking-widest text-blue-200">
+                <p className="text-[11px] md:text-sm font-bold uppercase tracking-widest text-blue-200">
                   Зорилго
                 </p>
-                <p className="mt-2 text-[11px] md:text-sm font-medium text-blue-100/80 leading-tight md:leading-relaxed">
+                <p className="mt-2 text-[13px] md:text-sm font-medium text-blue-100/80 leading-snug md:leading-relaxed">
                   Шимтгэлийг 1% болгож, мөнгийг гэр бүлд нь үлдээх.
                 </p>
               </motion.div>
@@ -83,10 +83,10 @@ export default function Home() {
                 <p className="text-3xl md:text-5xl font-black text-[#ff3bad] mb-0.5">
                   30К+
                 </p>
-                <p className="text-[9px] md:text-sm font-bold uppercase tracking-widest text-[#2a00ff]">
+                <p className="text-[11px] md:text-sm font-bold uppercase tracking-widest text-[#2a00ff]">
                   Хүлээлт
                 </p>
-                <p className="mt-2 text-[11px] md:text-sm font-medium text-slate-500 leading-tight md:leading-relaxed">
+                <p className="mt-2 text-[13px] md:text-sm font-medium text-slate-500 leading-snug md:leading-relaxed">
                   Ипотекийн зээл хүсээд 1-2 жил хүлээж буй иргэд.
                 </p>
               </motion.div>
@@ -122,10 +122,10 @@ export default function Home() {
                         <item.icon className="w-4 h-4 md:w-6 md:h-6" />
                       </div>
                       <div>
-                        <h4 className="font-black text-slate-900 uppercase text-[8px] md:text-xs tracking-widest leading-none">
+                        <h4 className="font-black text-slate-900 uppercase text-[10px] md:text-xs tracking-wide leading-tight md:tracking-widest md:leading-none">
                           {item.title}
                         </h4>
-                        <p className="text-[11px] md:text-sm text-slate-500 font-medium leading-tight">
+                        <p className="text-[13px] md:text-sm text-slate-500 font-medium leading-snug">
                           {item.desc}
                         </p>
                       </div>
@@ -135,7 +135,7 @@ export default function Home() {
               </div>
 
               <div className="bg-slate-50 rounded-2xl md:rounded-[3rem] p-5 md:p-8 border border-slate-100">
-                <h4 className="font-black text-[#ff3bad] uppercase text-[9px] md:text-xs tracking-[0.2em] mb-3">
+                <h4 className="mb-3 font-black uppercase text-[#ff3bad] text-[11px] md:text-xs tracking-[0.15em] md:tracking-[0.2em]">
                   Зах зээлийн бодит тоо
                 </h4>
                 <ul className="space-y-2 md:space-y-4">
@@ -147,7 +147,7 @@ export default function Home() {
                   ].map((text, i) => (
                     <li
                       key={i}
-                      className="flex items-center gap-2 text-[11px] md:text-sm font-bold text-slate-700"
+                      className="flex items-center gap-2 text-[13px] md:text-sm font-bold text-slate-700"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5 md:w-5 md:h-5 text-[#2a00ff] shrink-0" />
                       {text}
@@ -155,10 +155,10 @@ export default function Home() {
                   ))}
                 </ul>
                 <div className="mt-4 md:mt-8 p-3 bg-white rounded-xl border border-pink-100">
-                  <p className="text-[9px] font-black text-[#ff3bad] uppercase">
+                  <p className="text-[11px] font-black uppercase text-[#ff3bad]">
                     Анхаарах:
                   </p>
-                  <p className="text-[10px] md:text-xs text-slate-500 font-medium leading-tight">
+                  <p className="text-[12px] font-medium leading-snug text-slate-500 md:text-xs md:leading-tight">
                     70,000 гаруй иргэн хохирсон судалгаа бий. Бид үүнийг
                     өөрчлөхөөр ирлээ.
                   </p>
@@ -179,7 +179,7 @@ export default function Home() {
             </h2>
 
             {/* text-xs for phone, text-lg for desktop */}
-            <p className="mx-auto mb-8 md:mb-10 max-w-2xl text-xs md:text-lg font-medium text-slate-500 px-6 md:px-0 leading-tight md:leading-relaxed">
+            <p className="mx-auto mb-8 md:mb-10 max-w-2xl text-sm md:text-lg font-medium text-slate-500 px-6 md:px-0 leading-snug md:leading-relaxed">
               Бид үл хөдлөхийн сүүлийн үеийн мэдээлэл, хууль эрх зүйн зөвлөгөөг
               иргэдэд хамгийн ойлгомжтойгоор хүргэж байна.
             </p>
@@ -201,7 +201,7 @@ export default function Home() {
                 <Link href="/agent-portal" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
-                    className="w-full h-12 md:h-16 rounded-xl md:rounded-2xl text-[10px] md:text-base font-black border-slate-200 bg-white"
+                    className="w-full h-12 md:h-16 rounded-xl md:rounded-2xl text-[12px] md:text-base font-black border-slate-200 bg-white"
                   >
                     Агент портал
                   </Button>
@@ -209,7 +209,7 @@ export default function Home() {
                 <Link href="/news" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
-                    className="w-full h-12 md:h-16 rounded-xl md:rounded-2xl text-[10px] md:text-base font-black border-[#ff3bad]/30 text-[#ff3bad]"
+                    className="w-full h-12 md:h-16 rounded-xl md:rounded-2xl text-[12px] md:text-base font-black border-[#ff3bad]/30 text-[#ff3bad]"
                   >
                     МЭДЭЭ
                   </Button>

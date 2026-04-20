@@ -34,7 +34,7 @@ export function HeaderMobileBottomNav({
     pathname === "/dashboard" || pathname.startsWith("/dashboard/");
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-9998 border-t border-border/80 bg-background/95 px-3 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-9998 border-t border-border/80 bg-background/95 px-3 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur lg:hidden">
       <div className="grid grid-cols-5 gap-1 rounded-4xl border border-border/60 bg-background/80 p-2">
         {mainLinks.map((link) => (
           <Link
