@@ -1,9 +1,9 @@
 "use client";
 
-import { UserButton, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { Mail, User } from "lucide-react";
 
-import { clerkUserButtonAppearance } from "@/lib/clerk-theme";
+import { ClerkAppUserButton } from "@/components/clerk-app-user-button";
 
 export function PortalProfilePanel() {
   const { user, isLoaded } = useUser();
@@ -25,7 +25,7 @@ export function PortalProfilePanel() {
   return (
     <div className="mx-auto max-w-lg rounded-3xl border border-slate-100 bg-white p-8 shadow-[0_24px_60px_-28px_rgba(42,0,255,0.15)]">
       <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
-        <UserButton appearance={clerkUserButtonAppearance} />
+        <ClerkAppUserButton />
         <div className="min-w-0 flex-1 space-y-1">
           <p className="text-[10px] font-black uppercase tracking-widest text-[#ff3bad]">
             Профайл

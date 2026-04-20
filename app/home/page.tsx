@@ -19,7 +19,6 @@ export default function Home() {
     <div className="min-h-screen bg-[#FDFCFB] selection:bg-blue-100">
       <main>
         <HeroSection />
-
         <div className="relative z-20 -mt-6 md:-mt-10 lg:-mt-14">
           <FeaturedListings />
         </div>
