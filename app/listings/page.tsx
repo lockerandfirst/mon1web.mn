@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { Suspense, useEffect, useState, useMemo, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   motion,
@@ -121,7 +121,7 @@ function matchesKeywordSearch(apartment: Apartment, keyword: string) {
     .every((part) => searchableContent.includes(part));
 }
 
-export default function ListingsPage() {
+function ListingsPageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -662,5 +662,19 @@ export default function ListingsPage() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function ListingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-svh flex-col items-center justify-center bg-background">
+          <p className="text-sm font-bold text-slate-500">Уншиж байна...</p>
+        </div>
+      }
+    >
+      <ListingsPageContent />
+    </Suspense>
   );
 }

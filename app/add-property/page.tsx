@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { Footer } from "@/components/footer";
 import { AddPropertyForm } from "@/components/add-property/add-property-form";
 import { cn } from "@/lib/utils";
 
-export default function AddPropertyPage() {
+function AddPropertyPageContent() {
   const searchParams = useSearchParams();
   const [listingSaved, setListingSaved] = useState(false);
   const editListingId = searchParams.get("edit");
@@ -31,5 +31,21 @@ export default function AddPropertyPage() {
       </main>
       {!listingSaved && <Footer />}
     </div>
+  );
+}
+
+function AddPropertyPageFallback() {
+  return (
+    <div className="flex min-h-svh flex-col items-center justify-center bg-background px-4">
+      <p className="text-sm font-bold text-slate-500">Уншиж байна...</p>
+    </div>
+  );
+}
+
+export default function AddPropertyPage() {
+  return (
+    <Suspense fallback={<AddPropertyPageFallback />}>
+      <AddPropertyPageContent />
+    </Suspense>
   );
 }
