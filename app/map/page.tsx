@@ -25,13 +25,13 @@ export default function MapPage() {
       <main className="relative flex flex-1 overflow-hidden">
         <aside
           className={cn(
-            "relative z-30 flex h-full flex-col overflow-hidden border-r border-slate-100 bg-white shadow-2xl transition-all duration-500 ease-in-out",
+            "absolute inset-y-0 left-0 z-30 flex h-full w-[88%] max-w-sm flex-col overflow-hidden border-r border-slate-100 bg-white shadow-2xl transition-transform duration-300 ease-in-out md:relative md:w-105 md:max-w-none",
             filters.showListings
-              ? "w-full opacity-100 md:w-105"
-              : "pointer-events-none w-0 opacity-0",
+              ? "translate-x-0"
+              : "pointer-events-none -translate-x-[105%]",
           )}
         >
-          <div className="flex h-full min-w-105 flex-col bg-white">
+          <div className="flex h-full min-w-0 flex-col bg-white md:min-w-105">
             <MapFilterPanel
               activeFilterBadges={filters.activeFilterBadges}
               category={filters.category}
@@ -75,7 +75,7 @@ export default function MapPage() {
         </aside>
 
         <div className="relative z-10 flex-1 overflow-hidden bg-slate-100">
-          <div className="absolute left-6 top-6 z-40">
+          <div className="absolute left-4 top-4 z-40 md:left-6 md:top-6">
             <Button
               variant="outline"
               size="icon"

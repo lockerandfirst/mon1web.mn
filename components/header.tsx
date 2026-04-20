@@ -1,12 +1,17 @@
 "use client";
 
-import { useAuth, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import {
+  useAuth,
+  useUser,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation"; // Одоо хаана байгааг мэдэхэд хэрэгтэй
 import { Button } from "@/components/ui/button";
 import {
-  Menu,
   X,
   User,
   Plus,
@@ -16,17 +21,20 @@ import {
   BriefcaseBusiness,
   LayoutDashboard,
   Newspaper,
-  UserSearch,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils"; // classNames нэгтгэх функц
 import { clerkAppearance, clerkUserButtonAppearance } from "@/lib/clerk-theme";
+import { isAgent } from "@/lib/auth";
 
 export function Header() {
   const { isSignedIn } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useUser();
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const isAgentUser = isSignedIn
+    ? isAgent({ publicMetadata: user?.publicMetadata ?? null })
+    : false;
 
   // #region agent log
   useEffect(() => {
@@ -42,11 +50,11 @@ export function Header() {
         hypothesisId: "H3",
         location: "components/header.tsx:31",
         message: "Header state snapshot",
-        data: { pathname, mobileMenuOpen, scrolled, isSignedIn: Boolean(isSignedIn) },
+        data: { pathname, scrolled, isSignedIn: Boolean(isSignedIn) },
         timestamp: Date.now(),
       }),
     }).catch(() => {});
-  }, [pathname, mobileMenuOpen, scrolled, isSignedIn]);
+  }, [pathname, scrolled, isSignedIn]);
   // #endregion
 
   // #region agent log
@@ -70,7 +78,7 @@ export function Header() {
           hypothesisId: "H5",
           location: "components/header.tsx:57",
           message: "Header height observed",
-          data: { pathname, nextHeight, mobileMenuOpen, scrolled },
+          data: { pathname, nextHeight, scrolled },
           timestamp: Date.now(),
         }),
       }).catch(() => {});
@@ -78,7 +86,7 @@ export function Header() {
 
     observer.observe(headerEl);
     return () => observer.disconnect();
-  }, [pathname, mobileMenuOpen, scrolled]);
+  }, [pathname, scrolled]);
   // #endregion
 
   // Scroll хийхэд Header-ийн өнгө өөрчлөгдөх эффект
@@ -136,17 +144,35 @@ export function Header() {
 
     { name: "Хянах самбар", href: "/dashboard", icon: LayoutDashboard },
   ];
+  const mobileNavLinks = isSignedIn
+    ? [
+        { name: "Нүүр", href: "/home", icon: Home },
+        { name: "Зарууд", href: "/listings", icon: LayoutGrid },
+        { name: "Газрын зураг", href: "/map", icon: Map },
+        isAgentUser
+          ? { name: "Хянах", href: "/dashboard", icon: LayoutDashboard }
+          : { name: "Агент", href: "/agent-portal", icon: BriefcaseBusiness },
+        { name: "Профайл", href: "/profile", icon: User },
+      ]
+    : [
+        { name: "Нүүр", href: "/home", icon: Home },
+        { name: "Зарууд", href: "/listings", icon: LayoutGrid },
+        { name: "Газрын зураг", href: "/map", icon: Map },
+        { name: "Мэдээ", href: "/news", icon: Newspaper },
+        { name: "Нэвтрэх", href: "/agent-portal", icon: BriefcaseBusiness },
+      ];
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 z-[9999] w-full border-b py-3 transition-[background-color,border-color,backdrop-filter] duration-300",
-        scrolled
-          ? "border-border bg-background/80 backdrop-blur-md"
-          : "border-transparent bg-background",
-      )}
-    >
-      <div className="container mx-auto flex items-center justify-between px-4 lg:px-8">
+    <>
+      <header
+        className={cn(
+          "fixed top-0 left-0 z-9999 w-full border-b py-3 transition-[background-color,border-color,backdrop-filter] duration-300",
+          scrolled
+            ? "border-border bg-background/80 backdrop-blur-md"
+            : "border-transparent bg-background",
+        )}
+      >
+        <div className="container mx-auto flex items-center justify-between px-4 lg:px-8">
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-3 group">
           <Image
@@ -240,133 +266,40 @@ export function Header() {
           )}
         </div>
 
-        {/* MOBILE TOGGLE */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden rounded-full text-[#ff3bad] hover:bg-muted hover:text-[#2a00ff]"
-          onClick={() =>
-            setMobileMenuOpen((prev) => {
-              const next = !prev;
-              // #region agent log
-              fetch(
-                "http://127.0.0.1:7834/ingest/78590180-74c3-4b1d-a39f-896d406574be",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    "X-Debug-Session-Id": "96ab0a",
-                  },
-                  body: JSON.stringify({
-                    sessionId: "96ab0a",
-                    runId: "pre-fix",
-                    hypothesisId: "H2",
-                    location: "components/header.tsx:182",
-                    message: "Mobile menu toggled",
-                    data: { prev, next, pathname },
-                    timestamp: Date.now(),
-                  }),
-                },
-              ).catch(() => {});
-              // #endregion
-              return next;
-            })
-          }
-        >
-          {mobileMenuOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </Button>
-      </div>
-
-      {/* MOBILE MENU */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-16.25 bg-background/95 backdrop-blur-xl border-b border-border animate-in slide-in-from-top duration-300">
-          <nav className="flex flex-col p-6 gap-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => {
-                  // #region agent log
-                  fetch(
-                    "http://127.0.0.1:7834/ingest/78590180-74c3-4b1d-a39f-896d406574be",
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                        "X-Debug-Session-Id": "96ab0a",
-                      },
-                      body: JSON.stringify({
-                        sessionId: "96ab0a",
-                        runId: "pre-fix",
-                        hypothesisId: "H4",
-                        location: "components/header.tsx:212",
-                        message: "Mobile nav link clicked",
-                        data: { href: link.href, pathnameBeforeClick: pathname },
-                        timestamp: Date.now(),
-                      }),
-                    },
-                  ).catch(() => {});
-                  // #endregion
-                  setMobileMenuOpen(false);
-                }}
-                className={cn(
-                  "flex items-center gap-3 p-3 rounded-xl transition-colors",
-                  pathname === link.href
-                    ? "bg-primary/10 text-[#2a00ff]"
-                    : "text-[#ff3bad]",
-                )}
-              >
-                <link.icon className="h-5 w-5" />
-                <span className="font-medium">{link.name}</span>
-              </Link>
-            ))}
-            <div className="grid grid-cols-2 gap-3 pt-6 border-t border-border mt-2">
-              {!isSignedIn && (
-                <>
-                  <SignInButton mode="modal" appearance={clerkAppearance}>
-                    <Button
-                      variant="outline"
-                      className="w-full gap-2 rounded-xl text-[#ff3bad] border-[#2a00ff]/30 hover:text-[#2a00ff]"
-                    >
-                      Нэвтрэх
-                    </Button>
-                  </SignInButton>
-                  <SignUpButton mode="modal" appearance={clerkAppearance}>
-                    <Button
-                      variant="outline"
-                      className="w-full gap-2 rounded-xl text-[#2a00ff] border-[#2a00ff]/30 hover:text-[#ff3bad]"
-                    >
-                      Бүртгүүлэх
-                    </Button>
-                  </SignUpButton>
-                </>
-              )}
-              {isSignedIn && (
-                <>
-                  <Link href="/dashboard" className="w-full">
-                    <Button
-                      variant="outline"
-                      className="w-full gap-2 rounded-xl text-[#ff3bad] border-[#2a00ff]/30 hover:text-[#2a00ff]"
-                    >
-                      Хянах самбар
-                    </Button>
-                  </Link>
-                  <div className="flex items-center justify-center">
-                    <UserButton appearance={clerkUserButtonAppearance} />
-                  </div>
-                </>
-              )}
-              <Link href="/add-property" className="w-full">
-                <Button className="w-full gap-2 rounded-xl">Зар нэмэх</Button>
-              </Link>
-            </div>
-          </nav>
+        <div className="md:hidden flex items-center gap-2">
+          <Link href="/add-property">
+            <Button
+              size="sm"
+              className="gap-2 rounded-full bg-[#2a00ff] px-4 font-bold text-white hover:bg-[#ff3bad]"
+            >
+              <Plus className="h-4 w-4" />
+              Зар
+            </Button>
+          </Link>
         </div>
-      )}
-    </header>
+        </div>
+      </header>
+
+      {/* MOBILE BOTTOM NAV */}
+      <nav className="fixed inset-x-0 bottom-0 z-9998 border-t border-border/80 bg-background/95 px-3 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur md:hidden">
+        <div className="grid grid-cols-5 gap-1 rounded-4xl border border-border/60 bg-background/80 p-2">
+          {mobileNavLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-bold transition-colors",
+                pathname === link.href
+                  ? "bg-[#2a00ff]/10 text-[#2a00ff]"
+                  : "text-[#ff3bad]",
+              )}
+            >
+              <link.icon className="h-4 w-4" />
+              <span className="truncate">{link.name}</span>
+            </Link>
+          ))}
+        </div>
+      </nav>
+    </>
   );
 }

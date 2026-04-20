@@ -36,7 +36,7 @@ export function useMapFilters() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roomFilter, setRoomFilter] = useState<string>("any");
   const [districtFilter, setDistrictFilter] = useState<string>("any");
-  const [showListings, setShowListings] = useState(true);
+  const [showListings, setShowListings] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<number[]>([0, MAX_PRICE_MILLION]);
   const [sqmRange, setSqmRange] = useState<number[]>([0, MAX_SQM]);
@@ -51,6 +51,11 @@ export function useMapFilters() {
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [rentSubcategory, setRentSubcategory] =
     useState<RentSubcategoryFilter>("any");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setShowListings(window.innerWidth >= 768);
+  }, []);
 
   useEffect(() => {
     if (category !== "rent" && rentSubcategory !== "any") {
