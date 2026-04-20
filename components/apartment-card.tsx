@@ -85,18 +85,15 @@ export const ApartmentCard = memo(
       >
         <Card
           className={cn(
-            "group relative flex h-full w-full flex-col overflow-hidden rounded-[2.5rem] border-slate-100 bg-white pt-0 pb-1 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#ffc6e7]/20",
+            "group relative flex h-full w-full min-w-0 flex-col overflow-hidden rounded-3xl border-slate-100 bg-white pt-0 pb-1 shadow-sm transition-all duration-500",
+            "max-md:shadow-md max-md:ring-1 max-md:ring-slate-100/80",
+            "md:rounded-[2.5rem] md:hover:-translate-y-1 md:hover:shadow-2xl md:hover:shadow-[#ffc6e7]/20",
             variant === "compact" &&
               "lg:grid lg:grid-cols-[minmax(300px,380px)_1fr] lg:gap-0",
           )}
         >
           {/* --- IMAGE SECTION --- */}
-          <div
-            className={cn(
-              "relative aspect-16/10 overflow-hidden bg-slate-50",
-              variant === "compact" && "lg:aspect-auto lg:h-full lg:min-h-70",
-            )}
-          >
+          <div className="relative aspect-2/1 overflow-hidden bg-slate-50 max-sm:aspect-[2.2/1] md:aspect-16/10">
             <AnimatePresence mode="wait">
               <motion.img
                 key={currentImg}
@@ -109,33 +106,35 @@ export const ApartmentCard = memo(
             </AnimatePresence>
 
             {/* Pagination Indicators */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20 pointer-events-none">
+            <div className="absolute bottom-1.5 left-1/2 z-20 flex -translate-x-1/2 gap-0.5 pointer-events-none max-md:scale-90 md:bottom-4 md:gap-1.5 md:scale-100">
               {apartment.images?.slice(0, 5).map((_, i) => (
                 <div
                   key={i}
                   className={cn(
                     "h-1 rounded-full transition-all duration-300",
-                    i === currentImg ? "w-4 bg-[#2a00ff]" : "w-1 bg-white/50",
+                    i === currentImg
+                      ? "w-3 md:w-4 bg-[#2a00ff]"
+                      : "w-1 bg-white/50",
                   )}
                 />
               ))}
             </div>
 
             {/* Price Tag */}
-            <div className="absolute bottom-4 left-4 z-20">
-              <div className="bg-[#2a00ff]/90 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 shadow-2xl">
-                <p className="text-lg font-black text-white tracking-tighter leading-none">
+            <div className="absolute bottom-2 left-2 z-20 max-md:max-w-[58%] md:bottom-4 md:left-4">
+              <div className="rounded-lg border border-white/10 bg-[#2a00ff]/90 px-2 py-1 shadow-xl backdrop-blur-md md:rounded-2xl md:px-4 md:py-2 md:shadow-2xl">
+                <p className="text-xs font-black leading-none tracking-tighter text-white md:text-lg">
                   {formatPrice(apartment.price)}
                 </p>
-                <p className="text-[10px] text-white/70 font-bold uppercase tracking-widest mt-1">
+                <p className="mt-0.5 hidden text-[10px] font-bold uppercase tracking-widest text-white/70 md:mt-1 md:block">
                   {formatPrice(apartment.pricePerSqm)}/м²
                 </p>
               </div>
             </div>
 
-            {/* Navigation Arrows */}
+            {/* Navigation Arrows - Only Desktop */}
             {apartment.images && apartment.images.length > 1 && (
-              <div className="absolute inset-0 flex items-center justify-between px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+              <div className="hidden md:flex absolute inset-0 items-center justify-between px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
                 <Button
                   onClick={prevImg}
                   variant="secondary"
@@ -156,30 +155,29 @@ export const ApartmentCard = memo(
             )}
 
             {/* Badges */}
-            <div className="absolute top-4 left-4 flex gap-1.5 z-20">
+            <div className="absolute top-3 left-3 md:top-4 md:left-4 flex gap-1.5 z-20">
               {apartment.featured && (
-                <Badge className="bg-[#ff3bad] hover:bg-[#ff3bad] border-none shadow-lg text-[10px] font-black px-2.5 py-1 uppercase tracking-wider text-white">
+                <Badge className="bg-[#ff3bad] hover:bg-[#ff3bad] border-none shadow-lg text-[8px] md:text-[10px] font-black px-2 py-0.5 md:px-2.5 md:py-1 uppercase tracking-wider text-white">
                   ОНЦЛОХ
                 </Badge>
               )}
               {apartment.verified && (
-                <Badge className="bg-white/90 text-[#2a00ff] border-none shadow-lg gap-1 text-[10px] font-black px-2.5 py-1 backdrop-blur-md uppercase tracking-wider">
-                  <BadgeCheck className="h-3.5 w-3.5 fill-[#2a00ff] text-white" />{" "}
-                  Баталгаажсан
+                <Badge className="bg-white/90 text-[#2a00ff] border-none shadow-lg gap-1 text-[8px] md:text-[10px] font-black px-2 py-0.5 md:px-2.5 md:py-1 backdrop-blur-md uppercase tracking-wider">
+                  <BadgeCheck className="h-3 w-3 md:h-3.5 md:w-3.5 fill-[#2a00ff] text-white" />{" "}
+                  Verified
                 </Badge>
               )}
             </div>
 
-            {/* Favorite Toggle */}
             <Button
               onClick={handleFavorite}
-              className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/10 backdrop-blur-md border-white/20 hover:bg-white transition-all z-20"
+              className="absolute top-2 right-2 z-20 h-8 w-8 rounded-full border-white/20 bg-white/10 backdrop-blur-md transition-all hover:bg-white md:top-4 md:right-4 md:h-10 md:w-10"
               variant="outline"
               size="icon"
             >
               <Heart
                 className={cn(
-                  "h-5 w-5 transition-colors",
+                  "h-4 w-4 md:h-5 md:w-5 transition-colors",
                   isFavorite
                     ? "fill-[#ff3bad] text-[#ff3bad]"
                     : "text-white group-hover:text-[#ff3bad]",
@@ -189,69 +187,74 @@ export const ApartmentCard = memo(
           </div>
 
           {/* --- CONTENT SECTION --- */}
-          <CardContent
-            className={cn(
-              "flex flex-1 flex-col p-5",
-              variant === "compact" &&
-                "lg:p-7 lg:flex lg:flex-col lg:justify-between",
-            )}
-          >
-            <h3 className="text-lg font-black text-slate-900 leading-tight line-clamp-1 group-hover:text-[#2a00ff] transition-colors uppercase tracking-tight mb-2">
+          <CardContent className="flex min-w-0 flex-1 flex-col px-3 py-2.5 md:p-5">
+            <h3 className="mb-1 line-clamp-1 text-sm font-black uppercase leading-tight tracking-tight text-slate-900 transition-colors group-hover:text-[#2a00ff] md:mb-2 md:text-lg">
               {apartment.title}
             </h3>
 
-            <div className="flex items-center gap-1.5 text-slate-400 text-[11px] mb-5 font-bold uppercase tracking-wider">
-              <MapPin className="h-3.5 w-3.5 text-[#ff3bad] shrink-0" />
-              <span className="truncate font-black">
+            <div className="mb-2 flex items-center gap-1 text-[9px] font-bold uppercase leading-tight tracking-wider text-slate-400 md:mb-5 md:text-[11px]">
+              <MapPin className="h-2.5 w-2.5 shrink-0 text-[#ff3bad] md:h-3.5 md:w-3.5" />
+              <span className="min-w-0 truncate font-black md:truncate">
                 {apartment.location}, {apartment.district}
               </span>
             </div>
 
-            {/* COMPACT INFO GRID */}
-            <div className="mb-5 grid grid-cols-2 gap-0 overflow-hidden rounded-2xl border-y border-slate-100 bg-[#fff9fd] py-4 md:grid-cols-4">
-              <div className="flex flex-col items-center border-b border-r border-slate-200 md:border-b-0">
-                <Bed className="h-4 w-4 text-[#2a00ff] mb-1" />
-                <span className="text-[10px] font-black text-slate-900 uppercase tracking-tighter">
-                  {apartment.rooms} өрөө
+            {/* SPECS — max-md: tight grid; md+: original column borders */}
+            <div className="mb-2 grid grid-cols-4 items-stretch divide-x divide-slate-200/90 overflow-hidden rounded-xl border border-slate-100/90 bg-[#fff9fd] py-1 md:mb-5 md:divide-x-0 md:rounded-2xl md:border-none md:bg-[#fff9fd] md:py-4 md:px-0">
+              {/* Room */}
+              <div className="flex min-w-0 flex-col items-center justify-center gap-0 px-0.5 py-0.5 text-center md:flex-col md:gap-0.5 md:border-r md:border-slate-200 md:px-1 md:py-0">
+                <Bed className="h-2.5 w-2.5 shrink-0 text-[#2a00ff] md:h-4 md:w-4" />
+                <span className="text-[8px] font-black uppercase leading-tight text-slate-900 md:text-[10px]">
+                  {apartment.rooms}
+                  <span className="hidden md:ml-0.5 md:inline">өрөө</span>
                 </span>
               </div>
-              <div className="flex flex-col items-center border-b border-slate-200 md:border-b-0 md:border-r">
-                <Bath className="h-4 w-4 text-[#2a00ff] mb-1" />
-                <span className="text-[10px] font-black text-slate-900 uppercase tracking-tighter">
-                  {apartment.bathrooms} угаалга
+
+              {/* Bath */}
+              <div className="flex min-w-0 flex-col items-center justify-center gap-0 px-0.5 py-0.5 text-center md:flex-col md:gap-0.5 md:border-r md:border-slate-200 md:px-1 md:py-0">
+                <Bath className="h-2.5 w-2.5 shrink-0 text-[#2a00ff] md:h-4 md:w-4" />
+                <span className="text-[8px] font-black uppercase leading-tight text-slate-900 md:text-[10px]">
+                  {apartment.bathrooms}
+                  <span className="hidden md:ml-0.5 md:inline">угаалга</span>
                 </span>
               </div>
-              <div className="flex flex-col items-center border-r border-slate-200">
-                <Square className="h-4 w-4 text-[#2a00ff] mb-1" />
-                <span className="text-[10px] font-black text-slate-900 uppercase tracking-tighter">
+
+              {/* Sqm */}
+              <div className="flex min-w-0 flex-col items-center justify-center gap-0 px-0.5 py-0.5 text-center md:flex-col md:gap-0.5 md:border-r md:border-slate-200 md:px-1 md:py-0">
+                <Square className="h-2.5 w-2.5 shrink-0 text-[#2a00ff] md:h-4 md:w-4" />
+                <span className="text-[8px] font-black uppercase leading-tight text-slate-900 md:text-[10px]">
                   {apartment.sqm}м²
                 </span>
               </div>
-              <div className="flex flex-col items-center">
-                <Hash className="h-4 w-4 text-[#2a00ff] mb-1" />
-                <span className="text-[10px] font-black text-slate-900 uppercase tracking-tighter">
-                  {apartment.floor || "6"}-р д.
+
+              {/* Floor */}
+              <div className="flex min-w-0 flex-col items-center justify-center gap-0 px-0.5 py-0.5 text-center md:flex-col md:gap-0.5 md:px-1 md:py-0">
+                <Hash className="h-2.5 w-2.5 shrink-0 text-[#2a00ff] md:h-4 md:w-4" />
+                <span className="text-[8px] font-black uppercase leading-tight text-slate-900 md:text-[10px]">
+                  {apartment.floor || "6"}
+                  <span className="hidden md:inline">-р д.</span>
                 </span>
               </div>
             </div>
 
-            <div className="mt-auto flex items-center justify-between gap-4">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="relative h-9 w-9">
+            {/* FOOTER SECTION */}
+            <div className="mt-auto flex min-w-0 items-center justify-between gap-1.5 pt-0.5 md:gap-4 md:pt-0">
+              <div className="flex min-w-0 flex-1 items-center gap-1.5 md:max-w-none md:flex-none md:gap-3">
+                <div className="relative h-8 w-8 shrink-0 md:h-9 md:w-9">
                   <img
                     src={apartment.agent.avatar}
                     className="h-full w-full rounded-full border border-slate-200 object-cover shadow-sm"
                     alt="Agent"
                   />
-                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#2a00ff] border-2 border-white rounded-full" />
+                  <div className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-white bg-[#2a00ff] md:h-2.5 md:w-2.5" />
                 </div>
                 <div className="flex min-w-0 flex-col leading-none">
-                  <span className="truncate text-xs font-black uppercase tracking-tight text-slate-900">
-                    {apartment.agent.name}
+                  <span className="truncate text-[10px] font-black uppercase tracking-tight text-slate-900 md:text-xs">
+                    {apartment.agent.name.split(" ")[0]}
                   </span>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Star className="h-2.5 w-2.5 fill-[#ff3bad] text-[#ff3bad]" />
-                    <span className="text-[10px] text-slate-400 font-black">
+                  <div className="mt-0.5 flex items-center gap-1 md:mt-1">
+                    <Star className="h-2 w-2 fill-[#ff3bad] text-[#ff3bad] md:h-2.5 md:w-2.5" />
+                    <span className="text-[9px] font-black text-slate-400 md:text-[10px]">
                       {apartment.agent.rating}
                     </span>
                   </div>
@@ -260,7 +263,7 @@ export const ApartmentCard = memo(
 
               <Button
                 size="sm"
-                className="h-10 rounded-xl font-black text-[10px] px-6 bg-[#2a00ff] hover:bg-[#ff3bad] transition-all uppercase tracking-widest shadow-lg shadow-[#2a00ff]/20"
+                className="h-8 max-md:min-w-15 shrink-0 rounded-lg bg-[#2a00ff] px-3 text-[8px] font-black uppercase tracking-widest text-white shadow-md transition-all hover:bg-[#ff3bad] md:h-10 md:rounded-xl md:px-6 md:text-[10px] md:shadow-lg"
               >
                 {actionLabel}
               </Button>
@@ -271,5 +274,4 @@ export const ApartmentCard = memo(
     );
   },
 );
-
 ApartmentCard.displayName = "ApartmentCard";

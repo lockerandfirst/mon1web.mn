@@ -136,16 +136,21 @@ export function Header() {
       >
         <div className="container mx-auto flex items-center justify-between px-4 lg:px-8">
           {/* LOGO */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link
+            href="/"
+            className="flex items-center gap-2 md:gap-3 group shrink-0"
+          >
             <Image
               src="/ZAAAA.png"
               alt="Mon1 logo"
               width={30}
               height={30}
-              className="w-25 object-contain " // 'invert grayscale'-ийг устгав
+              /* w-16: Mobile width (small & clean)
+       md:w-25: Desktop width (original size)
+    */
+              className="w-16 md:w-25 object-contain transition-all"
             />
           </Link>
-
           {/* DESKTOP NAV */}
           <nav className="hidden md:flex items-center bg-muted/50 rounded-full px-2 py-1 border border-border/50">
             {navLinks.map((link) => (
@@ -189,7 +194,6 @@ export function Header() {
               </Link>
             ))}
           </nav>
-
           {/* ACTIONS */}
           <div className="hidden md:flex items-center gap-3">
             {!isSignedIn && (
@@ -226,12 +230,11 @@ export function Header() {
             </Link>
             {isSignedIn ? <ClerkAppUserButton /> : null}
           </div>
-
           <div className="flex items-center gap-2 md:hidden">
             <Link href="/add-property">
               <Button
                 size="sm"
-                className="gap-2 rounded-full bg-[#2a00ff] px-4 font-bold text-white hover:bg-[#ff3bad]"
+                className="gap-2 rounded-xl bg-[#2a00ff] px-4 font-bold text-white hover:bg-[#ff3bad]"
               >
                 <Plus className="h-4 w-4" />
                 Зар
