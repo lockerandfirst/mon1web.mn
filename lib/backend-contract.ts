@@ -116,6 +116,7 @@ export interface CreateListingRequestPayload {
   features: string[];
   imageUrls: string[];
   nearbyServiceIds: string[];
+  nearbyServices?: BackendNearbyService[];
   serviceType: BackendServiceType;
   selectedAgentId: string | null;
   submittedBy: BackendSubmittedBy;
@@ -142,6 +143,7 @@ export interface CreateListingPayloadInput {
   features?: string[];
   imageUrls?: string | string[];
   surroundings?: string[];
+  nearbyServices?: BackendNearbyService[];
   serviceType: BackendServiceType;
   selectedAgentId: string | null;
   submittedBy: BackendSubmittedBy;
@@ -292,6 +294,7 @@ export function buildCreateListingPayload(
     features: (input.features ?? []).map((feature) => feature.trim()),
     imageUrls: toImageUrls(input.imageUrls),
     nearbyServiceIds: input.surroundings ?? [],
+    nearbyServices: input.nearbyServices ?? [],
     serviceType: input.serviceType,
     selectedAgentId:
       input.serviceType === "agent" ? input.selectedAgentId ?? null : null,

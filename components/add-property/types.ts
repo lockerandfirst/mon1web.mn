@@ -1,4 +1,5 @@
 export type ServiceType = "self" | "agent";
+import type { NearbyService } from "@/lib/data";
 
 export type PaymentMethodOption = "cash" | "mortgage" | "installment";
 
@@ -24,6 +25,7 @@ export type FormData = {
   serviceType: ServiceType;
   selectedAgentId: string | null;
   surroundings: string[];
+  nearbyServices: NearbyService[];
   features: string[];
   imageUrls: string;
   /** Зарын зураг (локал файл) */

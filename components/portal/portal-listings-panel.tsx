@@ -16,9 +16,11 @@ export function PortalListingsPanel({
 
   if (total === 0) {
     return (
-      <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-12 text-center shadow-sm">
-        <p className="text-lg font-black text-[#1a0b3b]">Зар одоогоор алга</p>
-        <p className="mt-2 text-sm font-semibold text-slate-500">
+      <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-5 text-center shadow-sm md:p-12">
+        <p className="text-base font-black text-[#1a0b3b] md:text-lg">
+          Зар одоогоор алга
+        </p>
+        <p className="mt-2 text-xs font-semibold text-slate-500 md:text-sm">
           Шинэ зар нэмснээр энд харагдана.
         </p>
       </div>
@@ -26,7 +28,7 @@ export function PortalListingsPanel({
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-3">
       {marketplace.map((apartment, index) => (
         <ApartmentCard key={apartment.id} apartment={apartment} index={index} />
       ))}

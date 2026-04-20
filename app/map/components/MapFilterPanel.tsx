@@ -99,10 +99,6 @@ export function MapFilterPanel(props: Props) {
           <Badge className="rounded-md border-none bg-blue-50 px-2 py-1 text-[9px] font-black text-blue-600 max-md:px-2 max-md:py-1 md:rounded-lg md:px-3 md:py-1.5 md:text-[10px]">
             {resultCount} ҮР ДҮН
           </Badge>
-          <Button onClick={props.onResetFilters} variant="outline" className="h-7 shrink-0 rounded-md border-slate-200 bg-white px-2 text-[8px] font-black uppercase tracking-[0.14em] text-slate-500 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 max-md:h-6 max-md:px-1.5 md:rounded-lg md:px-2.5 md:text-[9px]">
-            <SlidersHorizontal className="mr-1 h-3 w-3" />
-            Цэвэрлэх
-          </Button>
         </div>
       </div>
 

@@ -31,11 +31,11 @@ export function FeaturedListings() {
 
           <Link href="/listings" className="w-full md:w-auto">
             <Button
-              variant="outline"
-              className="w-full md:w-auto rounded-xl md:rounded-3xl h-11 md:h-14 px-8 border-slate-200 font-bold uppercase text-[10px] md:text-xs"
+              variant="ghost"
+              className="group h-11 w-full rounded-xl border border-[#eeebff] bg-white px-4 text-[10px] font-black uppercase tracking-wide text-[#2a00ff] transition-all hover:border-[#dcd3ff] hover:bg-[#fff9fd] md:h-14 md:w-auto md:rounded-3xl md:px-8 md:text-xs md:tracking-widest"
             >
               Бүх зар
-              <ArrowRight className="h-4 w-4 ml-2" />
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 md:h-5 md:w-5" />
             </Button>
           </Link>
         </div>

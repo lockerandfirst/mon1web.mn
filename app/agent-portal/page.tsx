@@ -13,7 +13,6 @@ function PortalShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-[#fafafa] selection:bg-blue-600/10">
       {children}
-      <Footer />
     </div>
   );
 }
@@ -51,9 +50,9 @@ export default function AgentPortalPage() {
   return (
     <PortalShell>
       <main className="flex-1 overflow-x-hidden">
-        <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 px-4 pt-20 pb-20 md:px-0">
+        <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 px-4 pt-16 pb-14 md:px-0 md:pt-18 md:pb-16">
           <div className="container relative z-10 mx-auto w-full px-4 md:px-0">
-            <div className="grid items-center gap-16 lg:grid-cols-2">
+            <div className="grid items-center gap-8 md:gap-10 lg:grid-cols-2 lg:gap-14">
               <AgentHero />
               <AgentLoginForm />
             </div>
@@ -61,7 +60,7 @@ export default function AgentPortalPage() {
         </section>
         <section
           id="agent-apply"
-          className="container mx-auto w-full scroll-mt-24 px-4 py-24 md:px-0"
+          className="container mx-auto w-full scroll-mt-24 px-4 py-14 md:px-0 md:py-18"
         >
           <PortalAgentSignupSection />
         </section>

@@ -28,7 +28,7 @@ export function BasicInfoStep({
           onChange={(v) => updateField("title", v)}
         />
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
           <ChoiceRow
             label="Өрөө"
             activeValue={formData.rooms}
@@ -45,14 +45,14 @@ export function BasicInfoStep({
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
           <FieldCard label="Үнэ (₮)" icon={DollarSign} iconColor="text-[#ff3bad]">
             <Input
               type="number"
               value={formData.price}
               onChange={(e) => updateField("price", e.target.value)}
               placeholder="280000000"
-              className="h-18 rounded-[1.8rem] border-none bg-[#f8f6ff] pl-14 text-2xl font-black text-[#1a0b3b] focus:ring-8 focus:ring-[#2a00ff]/5"
+              className="h-12 rounded-xl border-none bg-[#f8f6ff] pl-10 text-lg font-black text-[#1a0b3b] focus:ring-8 focus:ring-[#2a00ff]/5 md:h-14 md:rounded-[1.4rem] md:pl-12 md:text-xl"
             />
           </FieldCard>
           <FieldCard label="Талбай (м²)" icon={Ruler} iconColor="text-[#2a00ff]">
@@ -61,7 +61,7 @@ export function BasicInfoStep({
               value={formData.sqm}
               onChange={(e) => updateField("sqm", e.target.value)}
               placeholder="80"
-              className="h-18 rounded-[1.8rem] border-none bg-[#f8f6ff] pl-14 text-2xl font-black text-[#1a0b3b] focus:ring-8 focus:ring-[#ff2bad]/5"
+              className="h-12 rounded-xl border-none bg-[#f8f6ff] pl-10 text-lg font-black text-[#1a0b3b] focus:ring-8 focus:ring-[#ff2bad]/5 md:h-14 md:rounded-[1.4rem] md:pl-12 md:text-xl"
             />
           </FieldCard>
         </div>

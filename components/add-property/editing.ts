@@ -25,6 +25,7 @@ export function applyListingToForm(
   updateField("selectedAgentId", listing.selectedAgentId ?? null);
   updateField("features", listing.features ?? []);
   updateField("surroundings", []);
+  updateField("nearbyServices", listing.nearbyServices ?? []);
   updateField("imageUrls", (listing.images ?? []).join("\n"));
   updateField("paymentFlexible", listing.paymentMethod === "any");
   updateField(

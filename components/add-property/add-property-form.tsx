@@ -140,8 +140,20 @@ export function AddPropertyForm({
       selectedAgent || agents.find((agent) => agent.verified) || agents[0];
 
     const { images: _images, ...listingFields } = formData;
+    const nearbyTypeToSurroundingId: Record<string, string> = {
+      school: "school",
+      supermarket: "shop",
+      bus: "bus",
+      hospital: "hospital",
+    };
+    const autoSurroundings = formData.nearbyServices
+      .map((item) => nearbyTypeToSurroundingId[item.type])
+      .filter((item): item is string => Boolean(item));
     const requestPayload = buildCreateListingPayload({
       ...listingFields,
+      surroundings:
+        autoSurroundings.length > 0 ? autoSurroundings : formData.surroundings,
+      nearbyServices: formData.nearbyServices,
       submittedBy: {
         name: user?.fullName || "Хэрэглэгч",
         email: user?.primaryEmailAddress?.emailAddress || "user@mon1.local",
@@ -155,10 +167,16 @@ export function AddPropertyForm({
     );
 
     const currentListings = readMarketplaceListings();
-    const nextState = upsertEditedListing(editListingId, nextListing, currentListings);
+    const nextState = upsertEditedListing(
+      editListingId,
+      nextListing,
+      currentListings,
+    );
     writeMarketplaceListings(nextState.listings);
     toast.success(
-      nextState.didEdit ? "Зар амжилттай шинэчлэгдлээ" : "Амжилттай бүртгэгдлээ",
+      nextState.didEdit
+        ? "Зар амжилттай шинэчлэгдлээ"
+        : "Амжилттай бүртгэгдлээ",
     );
     setShowSuccess(true);
     onSuccess?.();
@@ -200,9 +218,7 @@ export function AddPropertyForm({
   }, [currentStep]);
 
   if (showSuccess) {
-    return (
-      <SuccessState onGoHome={() => router.push("/home")} />
-    );
+    return <SuccessState onGoHome={() => router.push("/home")} />;
   }
 
   const renderStep = () => {
@@ -224,17 +240,16 @@ export function AddPropertyForm({
           />
         );
       default:
-        return (
-          <FinalStep
-            formData={formData}
-            updateField={updateField}
-          />
-        );
+        return <FinalStep formData={formData} updateField={updateField} />;
     }
   };
 
   const nextLabelByStep =
-    currentStep === 3 ? (editListingId ? "Зар шинэчлэх" : "Зар нэмэх") : "Үргэлжлүүлэх";
+    currentStep === 3
+      ? editListingId
+        ? "Зар шинэчлэх"
+        : "Зар нэмэх"
+      : "Үргэлжлүүлэх";
   const handleNextStep = () => {
     if (currentStep === 1) {
       goToStep(2);
@@ -255,10 +270,10 @@ export function AddPropertyForm({
   };
 
   return (
-    <div ref={formTopRef} className="space-y-8 pb-20">
+    <div ref={formTopRef} className="space-y-5 pb-0 md:pb-20 md:space-y-8">
       <Toaster position="top-center" richColors />
       <FormStepper currentStep={currentStep} />
-      <div className="flex flex-col gap-10 md:flex-row md:items-start">
+      <div className="flex flex-col gap-5 md:gap-10 md:flex-row md:items-start">
         <div className="min-w-0 w-full md:flex-[1_1_70%]">
           <AnimatePresence initial={false} mode="sync">
             <motion.div
@@ -272,7 +287,7 @@ export function AddPropertyForm({
               {renderStep()}
             </motion.div>
           </AnimatePresence>
-          <div className="sticky bottom-4 z-40 mt-6 rounded-4xl border border-slate-100 bg-white/95 p-3 shadow-xl backdrop-blur">
+          <div className="sticky bottom-2 z-40 mt-4 rounded-3xl border border-slate-100 bg-white/95 p-2 shadow-xl backdrop-blur md:bottom-4 md:mt-6 md:rounded-4xl md:p-3">
             <StepNavigation
               step={currentStep}
               onBack={currentStep > 1 ? handlePrevStep : undefined}

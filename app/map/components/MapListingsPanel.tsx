@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { BadgeCheck, Heart, MapPin, Search } from "lucide-react";
 import { formatPrice, type Apartment } from "@/lib/data";
 import { Button } from "@/components/ui/button";
@@ -26,7 +25,12 @@ export function MapListingsPanel({
   onToggleFavorite,
 }: Props) {
   return (
-    <div className={cn("scrollbar-hide flex-1 space-y-2 overflow-y-auto bg-slate-50/30 px-3 py-3 pt-1 scroll-smooth max-md:space-y-2 max-md:px-3 max-md:py-3 md:space-y-3 md:px-4 md:py-5 md:pt-2", className)}>
+    <div
+      className={cn(
+        "scrollbar-hide flex-1 space-y-2 lg:mb-0 mb-20 overflow-y-auto bg-slate-50/30 px-3 py-3 pt-1 scroll-smooth max-md:space-y-2 max-md:px-3 max-md:py-3 md:space-y-3 md:px-4 md:py-5 md:pt-2",
+        className,
+      )}
+    >
       {filteredApartments.length === 0 ? (
         <div className="flex h-full min-h-72 items-center justify-center">
           <div className="w-full rounded-[28px] border border-dashed border-slate-200 bg-white/90 px-6 py-10 text-center shadow-sm">
@@ -49,14 +53,10 @@ export function MapListingsPanel({
           </div>
         </div>
       ) : (
-        <AnimatePresence mode="popLayout">
+        <>
           {filteredApartments.map((apt) => (
-            <motion.div
-              layout
+            <div
               key={apt.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
               onClick={() => onSelectApartment(apt.id)}
               className={cn(
                 "group relative cursor-pointer rounded-2xl border bg-white p-2 transition-all duration-300 max-md:rounded-2xl max-md:p-2 md:rounded-3xl md:p-3",
@@ -125,9 +125,9 @@ export function MapListingsPanel({
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
-        </AnimatePresence>
+        </>
       )}
     </div>
   );

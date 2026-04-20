@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Loader2, User, Phone, Mail, MapPin } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,23 +35,23 @@ export function ApplicationForm() {
   };
 
   return (
-    <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden">
-      <CardHeader className="bg-slate-50 border-b p-10">
-        <CardTitle className="text-4xl font-black text-[#2a00ff] tracking-tighter uppercase mb-2 italic">
+    <Card className="overflow-hidden rounded-4xl border-none bg-white shadow-xl md:rounded-[3rem] md:shadow-2xl">
+      <CardHeader className="border-b bg-slate-50 p-4 md:p-10">
+        <CardTitle className="mb-1 text-2xl font-black italic tracking-tight text-[#2a00ff] uppercase md:mb-2 md:text-4xl md:tracking-tighter">
           Агент болох хүсэлт
         </CardTitle>
-        <p className="text-slate-500 font-bold italic">
+        <p className="text-sm font-bold italic text-slate-500 md:text-base">
           Бид тантай эргэн холбогдох болно.
         </p>
       </CardHeader>
 
-      <CardContent className="p-10">
+      <CardContent className="p-4 md:p-10">
         <AnimatePresence mode="wait">
           {submitted ? (
             <SuccessMessage />
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2">
+            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+              <div className="grid gap-4 md:grid-cols-2 md:gap-6">
                 <FormField
                   label="Бүтэн нэр"
                   placeholder="Г. Бат-Эрдэнэ"
@@ -67,7 +67,7 @@ export function ApplicationForm() {
                 />
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2 md:gap-6">
                 <FormField
                   label="И-мэйл хаяг"
                   placeholder="example@mail.mn"
@@ -83,21 +83,21 @@ export function ApplicationForm() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+              <div className="space-y-1.5 md:space-y-2">
+                <Label className="ml-1 text-[9px] font-black uppercase tracking-wide text-slate-400 md:text-[10px] md:tracking-widest">
                   Уулзах хэлбэр
                 </Label>
-                <div className="h-14 flex items-center px-5 bg-blue-50 border border-blue-100 rounded-xl text-blue-700 font-black text-xs uppercase italic">
+                <div className="flex h-11 items-center rounded-xl border border-blue-100 bg-blue-50 px-4 text-[11px] font-black italic uppercase text-blue-700 md:h-14 md:px-5 md:text-xs">
                   Биеэр уулзах (Go Meet Only)
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+              <div className="space-y-1.5 md:space-y-2">
+                <Label className="ml-1 text-[9px] font-black uppercase tracking-wide text-slate-400 md:text-[10px] md:tracking-widest">
                   Туршлага болон нэмэлт мэдээлэл
                 </Label>
                 <Textarea
-                  className="bg-slate-50 border-slate-200 rounded-2xl p-6 h-32 focus:bg-white transition-all font-bold text-slate-900 placeholder:text-slate-300"
+                  className="h-28 rounded-xl border-slate-200 bg-slate-50 p-3.5 text-sm font-bold text-slate-900 transition-all placeholder:text-slate-300 focus:bg-white md:h-32 md:rounded-2xl md:p-6"
                   placeholder="Өөрийн туршлагаа товч бичнэ үү..."
                   value={formData.bio}
                   onChange={(e) => handleChange("bio", e.target.value)}
@@ -105,16 +105,15 @@ export function ApplicationForm() {
                 />
               </div>
 
-              <div className="pt-4">
-                {/* FIXED VISIBILITY: Using slate-900 with clear white text and high-contrast shadow */}
+              <div className="pt-2 md:pt-4">
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-20 bg-slate-900 text-white hover:bg-blue-600 rounded-2xl text-xl font-black tracking-tighter shadow-2xl shadow-slate-200 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 text-sm font-black tracking-tight text-white shadow-lg shadow-slate-200 transition-all active:scale-[0.98] hover:bg-blue-600 md:h-20 md:gap-3 md:rounded-2xl md:text-xl md:tracking-tighter md:shadow-2xl"
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="animate-spin h-6 w-6" />
+                      <Loader2 className="h-4 w-4 animate-spin md:h-6 md:w-6" />
                       <span>УНШИЖ БАЙНА</span>
                     </>
                   ) : (
@@ -137,13 +136,13 @@ const FormField = ({
   value,
   onChange,
 }: any) => (
-  <div className="space-y-2">
-    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+  <div className="space-y-1.5 md:space-y-2">
+    <Label className="ml-1 text-[9px] font-black uppercase tracking-wide text-slate-400 md:text-[10px] md:tracking-widest">
       {label}
     </Label>
     <Input
       type={type}
-      className="h-14 bg-slate-50 border-slate-200 rounded-xl focus:bg-white font-black px-5 text-slate-900 placeholder:text-slate-300 transition-all"
+      className="h-11 rounded-xl border-slate-200 bg-slate-50 px-4 text-sm font-black text-slate-900 transition-all placeholder:text-slate-300 focus:bg-white md:h-14 md:px-5 md:text-base"
       placeholder={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
@@ -156,15 +155,15 @@ const SuccessMessage = () => (
   <motion.div
     initial={{ scale: 0.9, opacity: 0 }}
     animate={{ scale: 1, opacity: 1 }}
-    className="text-center py-20"
+    className="py-10 text-center md:py-20"
   >
-    <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-8">
-      <CheckCircle2 className="h-12 w-12 text-blue-600" />
+    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 md:mb-8 md:h-24 md:w-24">
+      <CheckCircle2 className="h-8 w-8 text-blue-600 md:h-12 md:w-12" />
     </div>
-    <h2 className="text-5xl font-black tracking-tighter uppercase mb-4 italic text-slate-900">
+    <h2 className="mb-2 text-3xl font-black italic tracking-tight text-slate-900 uppercase md:mb-4 md:text-5xl md:tracking-tighter">
       Хүлээн авлаа
     </h2>
-    <p className="text-slate-500 text-lg font-bold italic max-w-xs mx-auto">
+    <p className="mx-auto max-w-xs text-sm font-bold italic text-slate-500 md:text-lg">
       Бид таны мэдээллийг шалгаад тун удахгүй эргэн холбогдох болно.
     </p>
   </motion.div>

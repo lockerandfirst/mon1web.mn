@@ -110,33 +110,36 @@ export default function BuyRequestPage() {
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
-      <main className="container mx-auto px-4 py-12  lg:py-12">
-        <div className="mx-auto max-w-4xl mt-13">
-          <div className="mb-16 flex items-center justify-between px-6">
+      <main className="container mx-auto px-2.5 py-5 md:px-4 md:py-12 lg:py-12">
+        <div className="mx-auto mt-11 max-w-4xl md:mt-13">
+          <div className="mb-6 mt-11 rounded-3xl border border-slate-50 bg-white px-2.5 py-3 shadow-[0_45px_90px_-55px_rgba(42,0,255,0.45)] md:mb-16 md:mt-14 md:rounded-[3rem] md:px-7 md:py-5">
             {[1, 2, 3].map((num) => (
-              <div key={num} className="flex items-center gap-4">
+              <div
+                key={num}
+                className="flex min-w-fit items-center gap-1 md:min-w-0 md:flex-1 md:gap-3"
+              >
                 <div
                   className={cn(
-                    "flex h-12 w-12 items-center justify-center rounded-2xl border font-black shadow-sm transition-all",
+                    "flex h-8 w-8 items-center justify-center rounded-lg border text-[10px] font-black shadow-sm transition-all md:h-10 md:w-10 md:rounded-xl md:text-sm",
                     step >= num
                       ? "rotate-3 border-[#2a00ff] bg-[#2a00ff] text-white"
-                      : "border-slate-100 bg-white text-slate-300",
+                      : "border-[#ffe3f5] bg-[#fff7fc] text-[#ff9ce0]",
                   )}
                 >
                   {step > num ? (
-                    <CheckCircle2 className="h-6 w-6" />
+                    <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" />
                   ) : (
                     `0${num}`
                   )}
                 </div>
-                <div className="hidden flex-col md:flex">
+                <div className="hidden min-w-0 flex-col md:flex">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
                     Алхам
                   </span>
                   <span
                     className={cn(
-                      "text-xs font-black uppercase tracking-widest",
-                      step >= num ? "text-[#2a00ff]" : "text-slate-300",
+                      "text-xs font-black uppercase tracking-[0.2em]",
+                      step >= num ? "text-[#2a00ff]" : "text-[#ff9ce0]",
                     )}
                   >
                     {num === 1
@@ -147,9 +150,12 @@ export default function BuyRequestPage() {
                           : "Санхүү"
                         : "Дэлгэрэнгүй"}
                   </span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-300">
+                    {num === 1 ? "Сонголт" : num === 2 ? "Байршил" : "Нийтлэх"}
+                  </span>
                 </div>
                 {num < 3 && (
-                  <div className="mx-2 h-0.5 w-12 bg-slate-100 md:w-24" />
+                  <div className="mx-0.5 h-0.5 w-6 bg-[#f4ecff] md:mx-1 md:w-20" />
                 )}
               </div>
             ))}
@@ -160,19 +166,19 @@ export default function BuyRequestPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="rounded-[4rem] border border-slate-50 bg-white p-10 shadow-[0_50px_100px_-30px_rgba(42,0,255,0.08)] md:p-16"
+            className="rounded-3xl border border-slate-50 bg-white p-3 shadow-[0_50px_100px_-30px_rgba(42,0,255,0.08)] md:rounded-[4rem] md:p-16"
           >
             {step === 1 && (
-              <div className="space-y-12">
-                <div className="space-y-4 text-center">
-                  <h2 className="text-4xl font-black uppercase leading-none tracking-tighter italic text-slate-900 md:text-6xl">
+              <div className="space-y-5 md:space-y-12">
+                <div className="space-y-2 text-center md:space-y-4">
+                  <h2 className="text-[22px] font-black uppercase leading-none tracking-tight italic text-slate-900 md:text-6xl md:tracking-tighter">
                     Та ямар <span className="text-[#2a00ff]">үл хөдлөх</span>
                     <br />
                     хайж байна вэ?
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                <div className="grid grid-cols-3 gap-1.5 md:grid-cols-4 md:gap-4">
                   {LISTING_PROPERTY_CATEGORIES.map((cat) => {
                     const Icon = ICON_MAP[cat.value] || Landmark;
                     const isActive = formData.propertyType === cat.value;
@@ -183,7 +189,7 @@ export default function BuyRequestPage() {
                         type="button"
                         onClick={() => updateField("propertyType", cat.value)}
                         className={cn(
-                          "group relative flex min-h-44 flex-col items-center justify-center gap-4 overflow-hidden rounded-[2.5rem] border-2 p-8 transition-all duration-300",
+                          "group relative flex min-h-20 flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 p-1.5 transition-all duration-300 md:min-h-44 md:gap-4 md:rounded-[2.5rem] md:p-8",
                           isActive
                             ? "scale-105 border-[#2a00ff] bg-[#2a00ff]/5 shadow-xl shadow-[#2a00ff]/10"
                             : "border-slate-50 bg-slate-50/50 hover:border-slate-200 hover:bg-white",
@@ -198,25 +204,25 @@ export default function BuyRequestPage() {
                               damping: 28,
                             }}
                             style={{ backgroundColor: "#ff2bad", opacity: 1 }}
-                            className="pointer-events-none absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full !bg-[#ff2bad] !opacity-100 text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)]"
+                            className="pointer-events-none absolute right-1 top-1 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[#ff2bad]! opacity-100! text-white shadow-[0_12px_30px_-12px_rgba(255,43,173,0.95)] md:right-3 md:top-3 md:h-11 md:w-11"
                           >
-                            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ffb7e3] via-[#ff72c7] to-[#ff2bad]" />
+                            <span className="absolute inset-0 rounded-full bg-linear-to-br from-[#ffb7e3] via-[#ff72c7] to-[#ff2bad]" />
                             <span className="absolute left-2 top-2 h-2.5 w-2.5 rounded-full bg-white/60" />
                             <span className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-white/75" />
-                            <Sparkles className="relative z-10 h-4 w-4 fill-current" />
+                            <Sparkles className="relative z-10 h-2 w-2 fill-current md:h-4 md:w-4" />
                           </motion.span>
                         )}
 
                         <div className="pointer-events-none absolute inset-x-6 bottom-4 h-8 rounded-full bg-[#ff2bad]/8 blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
                         <Icon
                           className={cn(
-                            "relative z-1 h-10 w-10 transition-transform group-hover:scale-110",
+                            "relative z-1 h-5 w-5 transition-transform group-hover:scale-110 md:h-10 md:w-10",
                             isActive ? "text-[#2a00ff]" : "text-slate-300",
                           )}
                         />
                         <span
                           className={cn(
-                            "relative z-1 text-center text-[10px] font-black uppercase tracking-[0.15em]",
+                            "relative z-1 text-center text-[7px] font-black uppercase tracking-[0.04em] md:text-[10px] md:tracking-[0.15em]",
                             isActive ? "text-[#2a00ff]" : "text-slate-500",
                           )}
                         >
@@ -227,7 +233,7 @@ export default function BuyRequestPage() {
                   })}
                 </div>
 
-                <div className="mx-auto max-w-md space-y-3">
+                <div className="mx-auto max-w-md space-y-2.5 md:space-y-3">
                   <label className="ml-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
                     <Phone className="h-3 w-3" /> Холбогдох утас
                   </label>
@@ -237,16 +243,16 @@ export default function BuyRequestPage() {
                       updateField("contactPhone", e.target.value)
                     }
                     placeholder="99XX-XXXX"
-                    className="h-16 rounded-3xl border-none bg-slate-50 px-8 text-center text-xl font-bold text-slate-900 transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
+                    className="h-11 rounded-xl border-none bg-slate-50 px-4 text-center text-sm font-bold text-slate-900 transition-all focus:ring-8 focus:ring-[#2a00ff]/5 md:h-16 md:rounded-3xl md:px-8 md:text-xl"
                   />
                 </div>
               </div>
             )}
 
             {step === 2 && (
-              <div className="space-y-12">
-                <div className="space-y-4 text-center">
-                  <h2 className="text-4xl font-black uppercase leading-none tracking-tighter italic text-slate-900 md:text-6xl">
+              <div className="space-y-5 md:space-y-12">
+                <div className="space-y-2 text-center md:space-y-4">
+                  <h2 className="text-[22px] font-black uppercase leading-none tracking-tight italic text-slate-900 md:text-6xl md:tracking-tighter">
                     {isBarterRequest ? (
                       <>
                         Байршил & <span className="text-[#ff2bad]">Бартер</span>
@@ -259,15 +265,15 @@ export default function BuyRequestPage() {
                   </h2>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                <div className="space-y-4 md:space-y-6">
+                  <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4">
                     {DISTRICTS.map((district) => (
                       <button
                         key={district}
                         type="button"
                         onClick={() => updateField("district", district)}
                         className={cn(
-                          "h-16 rounded-3xl border-2 font-black uppercase tracking-widest transition-all",
+                          "h-10 rounded-xl border-2 text-[10px] font-black uppercase tracking-wide transition-all md:h-16 md:rounded-3xl md:text-base md:tracking-widest",
                           formData.district === district
                             ? "scale-105 border-[#ff2bad] bg-[#ff2bad]/5 text-[#ff2bad] shadow-lg shadow-[#ff2bad]/10"
                             : "border-slate-50 bg-slate-50 text-slate-400",
@@ -278,7 +284,7 @@ export default function BuyRequestPage() {
                     ))}
                   </div>
 
-                  <div className="mx-auto max-w-xl space-y-3">
+                  <div className="mx-auto max-w-xl space-y-2.5 md:space-y-3">
                     <label className="ml-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
                       Байршил / Хороолол
                     </label>
@@ -286,13 +292,13 @@ export default function BuyRequestPage() {
                       value={formData.location}
                       onChange={(e) => updateField("location", e.target.value)}
                       placeholder="Зайсан, Яармаг, 120 мянгат..."
-                      className="h-16 rounded-3xl border-none bg-slate-50 px-8 text-xl font-bold"
+                    className="h-11 rounded-xl border-none bg-slate-50 px-4 text-sm font-bold md:h-16 md:rounded-3xl md:px-8 md:text-xl"
                     />
                   </div>
                 </div>
 
                 {isBarterRequest ? (
-                  <div className="grid gap-6 pt-4 md:grid-cols-2">
+                  <div className="grid gap-4 pt-2 md:grid-cols-2 md:gap-6 md:pt-4">
                     <div className="space-y-3">
                       <label className="ml-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
                         Та юу санал болгож байна?
@@ -303,7 +309,7 @@ export default function BuyRequestPage() {
                           updateField("barterOffer", e.target.value)
                         }
                         placeholder="Жишээ: Prius 50, зуслангийн газар, cash нэмнэ..."
-                        className="min-h-45 rounded-4xl border-none bg-slate-50 p-6 text-base font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
+                        className="min-h-32 rounded-2xl border-none bg-slate-50 p-3.5 text-sm font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5 md:min-h-45 md:rounded-4xl md:p-6 md:text-base"
                       />
                     </div>
                     <div className="space-y-3">
@@ -316,7 +322,7 @@ export default function BuyRequestPage() {
                           updateField("barterTarget", e.target.value)
                         }
                         placeholder="Жишээ: 2 өрөө байр, Хан-Уул дүүрэг, сургууль ойр..."
-                        className="min-h-45 rounded-4xl border-none bg-slate-50 p-6 text-base font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
+                        className="min-h-32 rounded-2xl border-none bg-slate-50 p-3.5 text-sm font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5 md:min-h-45 md:rounded-4xl md:p-6 md:text-base"
                       />
                     </div>
                     <div className="md:col-span-2 max-w-md">
@@ -329,17 +335,17 @@ export default function BuyRequestPage() {
                           updateField("cashDifference", e.target.value)
                         }
                         placeholder="Жишээ: 50 сая хүртэл cash нэмнэ"
-                        className="mt-3 h-16 rounded-3xl border-none bg-slate-50 px-8 text-lg font-bold"
+                        className="mt-2 h-11 rounded-xl border-none bg-slate-50 px-4 text-sm font-bold md:mt-3 md:h-16 md:rounded-3xl md:px-8 md:text-lg"
                       />
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-6 pt-6">
+                  <div className="space-y-4 pt-3 md:space-y-6 md:pt-6">
                     <div className="text-center">
                       <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                         Таны төсөв
                       </label>
-                      <div className="flex h-20 items-center justify-center">
+                      <div className="flex h-12 items-center justify-center md:h-20">
                         <AnimatePresence mode="wait">
                           {formData.budget ? (
                             <motion.div
@@ -349,17 +355,17 @@ export default function BuyRequestPage() {
                               exit={{ opacity: 0, y: -10 }}
                               className="flex items-baseline gap-3"
                             >
-                              <span className="text-5xl font-black tracking-tighter text-[#2a00ff] md:text-7xl">
+                              <span className="text-2xl font-black tracking-tight text-[#2a00ff] md:text-7xl md:tracking-tighter">
                                 {Number(formData.budget).toLocaleString(
                                   "en-US",
                                 )}
                               </span>
-                              <span className="text-2xl font-black text-slate-300">
+                              <span className="text-base font-black text-slate-300 md:text-2xl">
                                 ₮
                               </span>
                             </motion.div>
                           ) : (
-                            <span className="text-5xl font-black tracking-tighter text-slate-100 md:text-7xl">
+                            <span className="text-2xl font-black tracking-tight text-slate-100 md:text-7xl md:tracking-tighter">
                               0
                             </span>
                           )}
@@ -373,12 +379,12 @@ export default function BuyRequestPage() {
                         value={formData.budget}
                         onChange={(e) => updateField("budget", e.target.value)}
                         placeholder="Дүнгээ бичнэ үү..."
-                        className="h-20 rounded-4xl border-none bg-slate-100/50 px-8 text-center text-xl font-bold transition-all placeholder:text-slate-300 focus:ring-8 focus:ring-[#2a00ff]/5"
+                        className="h-12 rounded-2xl border-none bg-slate-100/50 px-4 text-center text-sm font-bold transition-all placeholder:text-slate-300 focus:ring-8 focus:ring-[#2a00ff]/5 md:h-20 md:rounded-4xl md:px-8 md:text-xl"
                       />
                       {formData.budget &&
                         Number(formData.budget) >= 1000000 && (
                           <div className="mt-4 flex justify-center">
-                            <div className="rounded-2xl bg-[#ff2bad]/10 px-6 py-2 text-xs font-black uppercase tracking-widest text-[#ff2bad]">
+                            <div className="rounded-xl bg-[#ff2bad]/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wide text-[#ff2bad] md:rounded-2xl md:px-6 md:py-2 md:text-xs md:tracking-widest">
                               {Number(formData.budget) >= 1000000000
                                 ? `${(Number(formData.budget) / 1000000000).toFixed(1)} Тэрбум`
                                 : `${(Number(formData.budget) / 1000000).toFixed(0)} Сая`}
@@ -392,9 +398,9 @@ export default function BuyRequestPage() {
             )}
 
             {step === 3 && (
-              <div className="space-y-12">
+              <div className="space-y-5 md:space-y-12">
                 <div className="text-center">
-                  <h2 className="text-4xl font-black uppercase tracking-tighter italic text-slate-900 md:text-6xl">
+                  <h2 className="text-[22px] font-black uppercase tracking-tight italic text-slate-900 md:text-6xl md:tracking-tighter">
                     {isBarterRequest ? (
                       <>
                         Бартерын <span className="text-[#2a00ff]">нөхцөл</span>
@@ -408,12 +414,12 @@ export default function BuyRequestPage() {
                 </div>
 
                 {isBarterRequest ? (
-                  <div className="space-y-6">
-                    <div className="rounded-[2.5rem] bg-[#f8f6ff] p-6">
+                  <div className="space-y-4 md:space-y-6">
+                    <div className="rounded-2xl bg-[#f8f6ff] p-3.5 md:rounded-[2.5rem] md:p-6">
                       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2a00ff]">
                         Бартерын тайлбар
                       </p>
-                      <p className="mt-3 text-base font-medium leading-7 text-slate-600">
+                      <p className="mt-2 text-sm font-medium leading-6 text-slate-600 md:mt-3 md:text-base md:leading-7">
                         Солих нөхцөл, зөвшөөрөх сонголт, яаралтай эсэх, нэмэлт
                         cash, хүлээн зөвшөөрөх байршлаа энд тодорхой бичээрэй.
                       </p>
@@ -423,12 +429,12 @@ export default function BuyRequestPage() {
                       value={formData.notes}
                       onChange={(e) => updateField("notes", e.target.value)}
                       placeholder="Жишээ: River Garden, Zaisan орчим 2-3 өрөө сонирхоно. Машин + cash хувилбар боломжтой. Яаралтай..."
-                      className="min-h-55 rounded-[2.5rem] border-none bg-slate-50 p-8 text-lg font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
+                      className="min-h-32 rounded-2xl border-none bg-slate-50 p-3.5 text-sm font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5 md:min-h-55 md:rounded-[2.5rem] md:p-8 md:text-lg"
                     />
                   </div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-2 gap-2.5 md:gap-6">
                       <div className="space-y-3">
                         <label className="ml-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
                           Өрөөний тоо
@@ -436,7 +442,7 @@ export default function BuyRequestPage() {
                         <Input
                           value={formData.rooms}
                           onChange={(e) => updateField("rooms", e.target.value)}
-                          className="h-16 rounded-3xl border-none bg-slate-50 px-8 text-xl font-bold"
+                          className="h-11 rounded-xl border-none bg-slate-50 px-3.5 text-sm font-bold md:h-16 md:rounded-3xl md:px-8 md:text-xl"
                         />
                       </div>
                       <div className="space-y-3">
@@ -446,7 +452,7 @@ export default function BuyRequestPage() {
                         <Input
                           value={formData.sqm}
                           onChange={(e) => updateField("sqm", e.target.value)}
-                          className="h-16 rounded-3xl border-none bg-slate-50 px-8 text-xl font-bold"
+                          className="h-11 rounded-xl border-none bg-slate-50 px-3.5 text-sm font-bold md:h-16 md:rounded-3xl md:px-8 md:text-xl"
                         />
                       </div>
                     </div>
@@ -455,35 +461,35 @@ export default function BuyRequestPage() {
                       value={formData.notes}
                       onChange={(e) => updateField("notes", e.target.value)}
                       placeholder="Жишээ: Цонх урагшаа харсан, сургууль болон цэцэрлэгтэй ойр..."
-                      className="min-h-50 rounded-[2.5rem] border-none bg-slate-50 p-8 text-lg font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5"
+                      className="min-h-32 rounded-2xl border-none bg-slate-50 p-3.5 text-sm font-medium resize-none transition-all focus:ring-8 focus:ring-[#2a00ff]/5 md:min-h-50 md:rounded-[2.5rem] md:p-8 md:text-lg"
                     />
                   </>
                 )}
               </div>
             )}
 
-            <div className="mt-16 flex gap-6">
+            <div className="mt-6 flex gap-2.5 md:mt-16 md:gap-6">
               {step > 1 && (
                 <button
                   type="button"
                   onClick={prevStep}
-                  className="flex h-20 w-24 items-center justify-center rounded-4xl border-2 border-slate-100 bg-white transition-all hover:bg-slate-50 active:scale-90"
+                  className="flex h-10 w-12 items-center justify-center rounded-xl border-2 border-slate-100 bg-white transition-all hover:bg-slate-50 active:scale-90 md:h-20 md:w-24 md:rounded-4xl"
                 >
-                  <ChevronLeft className="h-8 w-8 text-slate-400" />
+                  <ChevronLeft className="h-4 w-4 text-slate-400 md:h-8 md:w-8" />
                 </button>
               )}
 
               <Button
                 onClick={step === 3 ? handleSubmit : nextStep}
                 disabled={isPending || !isLoaded}
-                className="h-20 flex-1 rounded-4xl bg-[#2a00ff] text-base font-black uppercase tracking-[0.25em] text-white shadow-2xl shadow-[#2a00ff]/30 transition-all hover:-translate-y-1 hover:bg-[#ff2bad] active:translate-y-0 disabled:opacity-50"
+                className="h-10 flex-1 rounded-xl bg-[#2a00ff] text-[10px] font-black uppercase tracking-widest text-white shadow-2xl shadow-[#2a00ff]/30 transition-all hover:-translate-y-1 hover:bg-[#ff2bad] active:translate-y-0 disabled:opacity-50 md:h-20 md:rounded-4xl md:text-base md:tracking-[0.25em]"
               >
                 {isPending ? (
-                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin md:h-8 md:w-8" />
                 ) : (
                   <>
                     {step === 3 ? "Хүсэлт илгээх" : "Дараах алхам"}
-                    <ChevronRight className="ml-3 h-5 w-5" />
+                    <ChevronRight className="ml-1.5 h-3.5 w-3.5 md:ml-3 md:h-5 md:w-5" />
                   </>
                 )}
               </Button>

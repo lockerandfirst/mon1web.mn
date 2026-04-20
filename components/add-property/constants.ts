@@ -164,6 +164,7 @@ export const DEFAULT_FORM: FormData = {
   serviceType: "agent",
   selectedAgentId: AGENT_OPTIONS[0]?.id ?? null,
   surroundings: [],
+  nearbyServices: [],
   features: [],
   imageUrls: "",
   images: [],

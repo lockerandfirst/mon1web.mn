@@ -19,7 +19,7 @@ export function FinalStep({ formData, updateField }: any) {
         description="Давхар, барилгын мэдээлэл, тайлбар, нийтлэх аргаа эндээс шийднэ."
       >
         {/* Floor Info */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
           <PlainField
             label="Хэдэн давхарт вэ?"
             value={formData.floor}
@@ -35,7 +35,7 @@ export function FinalStep({ formData, updateField }: any) {
         </div>
 
         {/* Year & Payment */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
           <PlainField
             label="Ашиглалтад орсон он"
             value={formData.commissionYear}
@@ -49,12 +49,12 @@ export function FinalStep({ formData, updateField }: any) {
             onChange={(v: string) => updateField("contactPhone", v)}
           />
         </div>
-        <div className="grid grid-cols-1 gap-6">
-          <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-4 md:gap-6">
+          <div className="space-y-2.5 md:space-y-3">
             <p className="ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
               Төлбөрийн нөхцөл
             </p>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5 md:gap-3">
               <Button
                 type="button"
                 variant="outline"
@@ -68,14 +68,14 @@ export function FinalStep({ formData, updateField }: any) {
                   }
                 }}
                 className={cn(
-                  "h-auto min-h-14 justify-start rounded-4xl border-2 px-5 py-3 text-left font-black transition-all",
+                  "h-auto min-h-11 justify-start rounded-2xl border-2 px-4 py-2.5 text-left font-black transition-all md:min-h-14 md:rounded-4xl md:px-5 md:py-3",
                   formData.paymentFlexible
                     ? "border-[#2a00ff] bg-[#eef0ff] text-[#1a0b3b]"
                     : "border-slate-100 bg-[#f8f6ff] text-slate-600 hover:border-[#2a00ff]/30",
                 )}
               >
                 Дурын / тохиролцоно
-                <span className="mt-1 block text-xs font-semibold text-[#6d4d84]">
+                <span className="mt-0.5 block text-[11px] font-semibold text-[#6d4d84] md:mt-1 md:text-xs">
                   Нөхцөлгүй тохиролцоно
                 </span>
               </Button>
@@ -114,7 +114,7 @@ export function FinalStep({ formData, updateField }: any) {
                         }
                       }}
                       className={cn(
-                        "h-14 rounded-4xl border-2 text-sm font-black transition-all",
+                        "h-11 rounded-2xl border-2 text-xs font-black transition-all md:h-14 md:rounded-4xl md:text-sm",
                         active
                           ? "border-[#2a00ff] bg-white text-[#2a00ff] shadow-md shadow-[#2a00ff]/15"
                           : "border-slate-100 bg-white text-slate-400 hover:border-[#ff3bad]/40",
@@ -125,7 +125,7 @@ export function FinalStep({ formData, updateField }: any) {
                   );
                 })}
               </div>
-              <p className="text-[11px] font-semibold text-slate-400">
+              <p className="text-[10px] font-semibold text-slate-400 md:text-[11px]">
                 Олон сонголт хийх бол Бэлэн / Зээл / Лизинг-ийг даралтаар нэмнэ.
                 Дурын идэвхтэй үед товч дарахад дурын горимоос гарч тухайн
                 нөхцөл сонгогдоно.
@@ -147,15 +147,15 @@ export function FinalStep({ formData, updateField }: any) {
             );
           }}
         />
-        <div className="rounded-4xl border border-[#ebe3ff] bg-[#f8f6ff] p-6">
+        <div className="hidden rounded-3xl border border-[#ebe3ff] bg-[#f8f6ff] p-4 md:block md:rounded-4xl md:p-6">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2a00ff]">
             Тайлбарт оруулах санал
           </p>
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div className="mt-3 grid grid-cols-1 gap-2.5 md:mt-4 md:gap-3 md:grid-cols-2">
             {FEATURE_GUIDE.map((item) => (
               <div
                 key={item}
-                className="rounded-[1.25rem] bg-white px-4 py-3 text-sm font-semibold text-[#6d4d84]"
+                className="rounded-xl bg-white px-3 py-2.5 text-xs font-semibold text-[#6d4d84] md:rounded-[1.25rem] md:px-4 md:py-3 md:text-sm"
               >
                 {item}
               </div>
@@ -168,7 +168,7 @@ export function FinalStep({ formData, updateField }: any) {
             value={formData.description}
             onChange={(e) => updateField("description", e.target.value)}
             placeholder="Давуу талуудаа бичнэ үү..."
-            className="min-h-60 rounded-4xl border-none bg-[#fff9fd] p-6 pr-32 text-base font-bold text-[#1a0b3b] resize-none focus:ring-8 focus:ring-[#2a00ff]/5"
+            className="min-h-40 rounded-3xl border-none bg-[#fff9fd] p-4 pr-4 text-sm font-bold text-[#1a0b3b] resize-none focus:ring-8 focus:ring-[#2a00ff]/5 md:min-h-56 md:rounded-4xl md:p-6 md:pr-10 md:text-base"
           />
         </div>
 
@@ -182,14 +182,14 @@ export function FinalStep({ formData, updateField }: any) {
           }}
         />
 
-        <div className="rounded-3xl border border-[#ebe3ff] bg-[#f8f6ff] p-5">
+        <div className="rounded-2xl border border-[#ebe3ff] bg-[#f8f6ff] p-4 md:rounded-3xl md:p-5">
           <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#2a00ff]/70">
             Нийтлэх төрөл
           </p>
 
           <div
             className={cn(
-              "rounded-2xl border-2 p-4 transition-all duration-300 shadow-sm",
+              "rounded-xl border-2 p-3 transition-all duration-300 shadow-sm md:rounded-2xl md:p-4",
               formData.serviceType === "agent"
                 ? "border-[#2a00ff] bg-white" // High contrast when ON
                 : "border-slate-200 bg-slate-50", // Clearly visible when OFF
@@ -197,20 +197,20 @@ export function FinalStep({ formData, updateField }: any) {
           >
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-[13px] font-black text-[#1a0b3b]">
+                <p className="text-xs font-black text-[#1a0b3b] md:text-[13px]">
                   Агентаар заруулах
                 </p>
-                <p className="text-[11px] font-bold text-slate-500 mt-0.5">
+                <p className="mt-0.5 text-[10px] font-bold text-slate-500 md:text-[11px]">
                   {formData.serviceType === "agent"
                     ? "Мэргэжлийн агент таны байрыг борлуулна"
-                    : "Та өөрөө хариуцна"}
+                    : "Та өөрөө хариуцаж байраа борлуулна"}
                 </p>
               </div>
 
               <div className="flex items-center gap-3">
                 <span
                   className={cn(
-                    "rounded-lg px-2.5 py-1.5 text-[10px] font-black transition-colors",
+                    "rounded-lg px-2 py-1 text-[9px] font-black transition-colors md:px-2.5 md:py-1.5 md:text-[10px]",
                     formData.serviceType === "agent"
                       ? "bg-[#2a00ff] text-white"
                       : "bg-slate-200 text-slate-500",
@@ -225,7 +225,7 @@ export function FinalStep({ formData, updateField }: any) {
                     updateField("serviceType", checked ? "agent" : "self")
                   }
                   className={cn(
-                    "scale-125 transition-colors",
+                    "scale-110 transition-colors md:scale-125",
                     "data-[state=checked]:bg-[#2a00ff] data-[state=unchecked]:bg-slate-300", // Track color
                     "[&_span]:bg-[#2a00ff] data-[state=checked]:[&_span]:bg-white", // Thumb is blue when OFF, white when ON
                   )}

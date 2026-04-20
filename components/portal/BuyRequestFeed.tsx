@@ -70,7 +70,9 @@ export function BuyRequestFeed({
     <div className="space-y-6">
       {sorted.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-[#ff3bad]/30 bg-white p-10 text-center shadow-sm">
-          <p className="text-lg font-black text-[#1a0b3b]">Нээлттэй хүсэлт алга</p>
+          <p className="text-lg font-black text-[#1a0b3b]">
+            Нээлттэй хүсэлт алга
+          </p>
           <p className="mt-2 text-sm font-semibold text-slate-500">
             Шинэ хүсэлт оруулахад энд харагдана.
           </p>
@@ -87,7 +89,11 @@ export function BuyRequestFeed({
               }}
             >
               <div className="relative aspect-16/10 bg-slate-50">
-                <img src={request.image} alt="" className="h-full w-full object-cover" />
+                <img
+                  src={request.image}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
                 <span className="absolute left-4 top-4 rounded-full bg-[#ff3bad] px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white">
                   Авна
                 </span>
@@ -109,8 +115,8 @@ export function BuyRequestFeed({
                     : `${request.budget.toLocaleString("mn-MN")}₮`}
                 </p>
                 <p className="mt-1 text-[11px] font-semibold text-slate-400">
-                  {getPropertyTypeLabel(request.propertyType)} · {request.rooms} өрөө ·{" "}
-                  {request.sqm}м²
+                  {getPropertyTypeLabel(request.propertyType)} · {request.rooms}{" "}
+                  өрөө · {request.sqm}м²
                 </p>
                 {(request.agentRecommendations?.length ?? 0) > 0 ? (
                   <p className="mt-2 text-xs font-bold text-[#ff3bad]">
@@ -147,7 +153,9 @@ export function BuyRequestFeed({
           className="max-w-lg rounded-4xl border-slate-200 bg-white text-slate-900 shadow-sm"
         >
           <DialogHeader>
-            <DialogTitle className="font-black text-slate-900">Өөрийн зар холбох</DialogTitle>
+            <DialogTitle className="font-black text-slate-900">
+              Өөрийн зар холбох
+            </DialogTitle>
             <DialogDescription className="text-sm font-semibold text-slate-500">
               {target?.title}
             </DialogDescription>
@@ -160,16 +168,18 @@ export function BuyRequestFeed({
             <ul className="max-h-64 space-y-2 overflow-y-auto pr-1">
               {agentPickListings.map((row) => (
                 <li key={`${row.source}-${row.id}`}>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setPickedId(row.id)}
                     className={pickCls(pickedId === row.id)}
                   >
-                    <span className="text-sm font-black text-slate-900">{row.title}</span>
+                    <span className="text-sm font-black text-slate-900">
+                      {row.title}
+                    </span>
                     <span className="mt-1 text-xs font-bold text-slate-500">
                       {row.district} · {row.price.toLocaleString("mn-MN")}₮
                     </span>
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -177,7 +187,9 @@ export function BuyRequestFeed({
           <DialogFooter className="flex-col gap-2 sm:flex-col">
             <Button
               type="button"
-              disabled={!pickedId || !connectedAgentId || agentPickListings.length === 0}
+              disabled={
+                !pickedId || !connectedAgentId || agentPickListings.length === 0
+              }
               className="h-11 w-full rounded-4xl bg-[#2a00ff] font-black text-white hover:bg-[#2400d9] disabled:opacity-50"
               onClick={submitRecommend}
             >

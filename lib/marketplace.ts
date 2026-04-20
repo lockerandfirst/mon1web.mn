@@ -196,7 +196,10 @@ export function createMarketplaceListing(
     verified: false,
     featured: false,
     agent: fallbackAgent,
-    nearbyServices: buildNearbyServices(input.nearbyServiceIds),
+    nearbyServices:
+      input.nearbyServices && input.nearbyServices.length > 0
+        ? input.nearbyServices
+        : buildNearbyServices(input.nearbyServiceIds),
     coordinates:
       parseCoordinates(input.location) || { lat: 47.9184, lng: 106.9177 },
     createdAt: new Date().toISOString(),
@@ -236,7 +239,10 @@ export function createMarketplaceListingFromPayload(
     verified: false,
     featured: false,
     agent: fallbackAgent,
-    nearbyServices: buildNearbyServices(input.nearbyServiceIds),
+    nearbyServices:
+      input.nearbyServices && input.nearbyServices.length > 0
+        ? input.nearbyServices
+        : buildNearbyServices(input.nearbyServiceIds),
     coordinates:
       parseCoordinates(input.location) || { lat: 47.9184, lng: 106.9177 },
     createdAt: new Date().toISOString(),

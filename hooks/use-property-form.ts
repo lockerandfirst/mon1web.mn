@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { DEFAULT_FORM } from "@/components/add-property/constants";
 import type { FormData } from "@/components/add-property/types";
 import { inferDistrictFromNominatim } from "@/lib/infer-ub-district";
+import { fetchNearbyServicesFromOsm } from "@/lib/free-nearby-services";
 
 const DEFAULT_COORDINATES = {
   lat: 47.9188,
@@ -38,6 +39,7 @@ export function usePropertyForm() {
   const [currentCoordinates, setCurrentCoordinates] =
     useState<Coordinates | null>(null);
   const [locationDetail, setLocationDetail] = useState<string | null>(null);
+  const [isNearbyLoading, setIsNearbyLoading] = useState(false);
 
   const updateField = useCallback(
     <K extends keyof FormData>(field: K, value: FormData[K]) => {
@@ -98,6 +100,22 @@ export function usePropertyForm() {
     },
     [updateField],
   );
+
+  const resolveNearbyServices = useCallback(
+    async (nextCoordinates: Coordinates) => {
+      setIsNearbyLoading(true);
+      try {
+        const nearby = await fetchNearbyServicesFromOsm(nextCoordinates);
+        updateField("nearbyServices", nearby);
+      } catch (error) {
+        console.error("Nearby services fetch failed", error);
+        updateField("nearbyServices", []);
+      } finally {
+        setIsNearbyLoading(false);
+      }
+    },
+    [updateField],
+  );
   const handleAiOptimize = async () => {
     if (!formData.description.trim()) {
       toast.error("Эхлээд тайлбар бичнэ үү");
@@ -140,7 +158,10 @@ export function usePropertyForm() {
         setCurrentCoordinates(nextCoordinates);
         setCoordinates(nextCoordinates);
         setIsLocating(false);
-        await resolveLocationDetails(nextCoordinates);
+        await Promise.all([
+          resolveLocationDetails(nextCoordinates),
+          resolveNearbyServices(nextCoordinates),
+        ]);
         toast.success("GPS байршил тогтоолоо");
       },
       () => {
@@ -166,9 +187,12 @@ export function usePropertyForm() {
       setCoordinates(nextCoordinates);
       setLocationMode("pin");
       setLocationHint("Pin шинэчлэгдлээ. Байршлын мэдээллийг шалгаж байна...");
-      await resolveLocationDetails(nextCoordinates);
+      await Promise.all([
+        resolveLocationDetails(nextCoordinates),
+        resolveNearbyServices(nextCoordinates),
+      ]);
     },
-    [resolveLocationDetails],
+    [resolveLocationDetails, resolveNearbyServices],
   );
 
   return {
@@ -186,6 +210,7 @@ export function usePropertyForm() {
       coordinates,
       currentCoordinates,
       locationDetail,
+      isNearbyLoading,
       locationHint,
       setLocationHint,
       handleUseCurrentLocation,

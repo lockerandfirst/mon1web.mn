@@ -10,9 +10,10 @@ import {
   LayoutDashboard,
   User,
 } from "lucide-react";
-import { SignInButton } from "@clerk/nextjs";
+import { SignInButton, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { clerkAppearance } from "@/lib/clerk-theme";
+import { isAgent } from "@/lib/auth";
 
 type HeaderMobileBottomNavProps = {
   isSignedIn: boolean;
@@ -22,16 +23,31 @@ export function HeaderMobileBottomNav({
   isSignedIn,
 }: HeaderMobileBottomNavProps) {
   const pathname = usePathname();
+  const isAgentPortalRoute = pathname.startsWith("/agent-portal");
+
+  if (isAgentPortalRoute) {
+    return null;
+  }
+
+  const { user, isLoaded } = useUser();
+  const hasAgentRole =
+    pathname.startsWith("/agent-portal") ||
+    (isSignedIn &&
+      isLoaded &&
+      isAgent({ publicMetadata: user?.publicMetadata ?? null }));
 
   const mainLinks = [
     { name: "Нүүр", href: "/home", icon: Home },
     { name: "Зарууд", href: "/listings", icon: LayoutGrid },
     { name: "Газрын зураг", href: "/map", icon: Map },
-    { name: "Мэдээ", href: "/news", icon: Newspaper },
+    hasAgentRole
+      ? { name: "Агент", href: "/agent-portal", icon: LayoutDashboard }
+      : { name: "Мэдээ", href: "/news", icon: Newspaper },
   ];
 
-  const dashboardActive =
-    pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const dashboardActive = hasAgentRole
+    ? pathname === "/agent-portal" || pathname.startsWith("/agent-portal/")
+    : pathname === "/dashboard" || pathname.startsWith("/dashboard/");
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-9998 border-t border-border/80 bg-background/95 px-3 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur lg:hidden">
@@ -54,7 +70,7 @@ export function HeaderMobileBottomNav({
 
         {isSignedIn ? (
           <Link
-            href="/dashboard"
+            href={hasAgentRole ? "/agent-portal" : "/dashboard"}
             className={cn(
               "flex flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-bold transition-colors",
               dashboardActive

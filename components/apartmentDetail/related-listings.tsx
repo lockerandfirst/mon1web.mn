@@ -36,10 +36,10 @@ export function RelatedListings({ currentId }: RelatedListingsProps) {
 
         <Button
           variant="ghost"
-          className="group h-11 rounded-xl border border-transparent px-4 text-[10px] font-black uppercase tracking-wide text-blue-600 transition-all hover:border-blue-100 hover:bg-blue-50 md:h-16 md:rounded-3xl md:px-8 md:text-xs md:tracking-widest"
+          className="group h-11 rounded-xl border border-[#eeebff] bg-white px-4 text-[10px] font-black uppercase tracking-wide text-[#2a00ff] transition-all hover:border-[#dcd3ff] hover:bg-[#fff9fd] md:h-14 md:rounded-3xl md:px-8 md:text-xs md:tracking-widest"
         >
           Бүх зарыг үзэх
-          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-2 md:h-5 md:w-5" />
+          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 md:h-5 md:w-5" />
         </Button>
       </div>
 

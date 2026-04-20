@@ -27,7 +27,7 @@ export function ListingTable({ listings, onView, onEdit }: ListingTableProps) {
 
   return (
     <>
-      <div className="space-y-2 p-2 md:hidden lg:mt-0 -mt-9">
+      <div className="space-y-2 p-2 md:hidden lg:mb-0 -mb-6  lg:mt-0 -mt-9">
         {listings.map((listing) => {
           const createdAt = listing.createdAt
             ? new Date(listing.createdAt)
