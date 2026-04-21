@@ -1,29 +1,27 @@
-import { DistrictGrid } from "../selection-grids";
-
-import { FieldCard } from "../inputs";
-
+import { useEffect } from "react";
+import dynamic from "next/dynamic";
 import { MapPin, Crosshair, Loader2, Navigation, Clock } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
 import { Button } from "@/components/ui/button";
+import { NEARBY_SERVICE_UNNAMED_LABEL } from "@/lib/free-nearby-services";
 
+import { cn } from "@/lib/utils";
+
+import { DistrictGrid } from "../selection-grids";
+import { FieldCard } from "../inputs";
 import { FormSection } from "../form-shell";
+
 const LocationPickerMap = dynamic(
   () => import("../location-picker-map").then((mod) => mod.LocationPickerMap),
   {
-    ssr: false, // This tells Next.js NOT to load the map on the server
+    ssr: false,
     loading: () => (
       <div className="h-72 w-full animate-pulse rounded-3xl bg-slate-100" />
     ),
   },
 );
-
-import { cn } from "@/lib/utils";
-
-import { useEffect } from "react";
-import dynamic from "next/dynamic";
 
 export function LocationStep({
   formData,
@@ -46,6 +44,15 @@ export function LocationStep({
     supermarket: "Дэлгүүр",
     bus: "Автобус",
     hospital: "Эмнэлэг",
+  };
+
+  const setNearbyServiceName = (index: number, name: string) => {
+    updateField(
+      "nearbyServices",
+      formData.nearbyServices.map((s: { type: string; name: string; distance: string; walkTime: string }, i: number) =>
+        i === index ? { ...s, name } : s,
+      ),
+    );
   };
 
   // AUTO-SYNC: When the map finds a locationDetail, put it in the address field
@@ -83,7 +90,7 @@ export function LocationStep({
                 : "border-slate-100 bg-white text-slate-500 hover:border-[#2a00ff]/30",
             )}
           >
-            <div className="flex items-start gap-2.5 text-align-center text alig md:gap-4">
+            <div className="flex items-start gap-2.5 md:gap-4">
               <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#f3f0fb] text-[#2a00ff] md:h-11 md:w-11 md:rounded-2xl">
                 {isLocating ? (
                   <Loader2 className="h-4 w-4 animate-spin md:h-5 md:w-5" />
@@ -175,7 +182,7 @@ export function LocationStep({
 
         {/* 5. Auto nearby services (free OSM) */}
         <div className="space-y-3 rounded-3xl border border-slate-100 bg-[#fff9fd] p-3 md:rounded-4xl md:p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
               Ойр орчимд
             </p>
@@ -201,9 +208,32 @@ export function LocationStep({
                   <p className="text-[9px] font-black uppercase tracking-wide text-slate-400">
                     {nearbyTypeLabels[service.type] || service.type}
                   </p>
-                  <p className="truncate text-sm font-black text-[#1a0b3b]">
-                    {service.name}
-                  </p>
+                  <div className="mt-1 space-y-1">
+                    <Input
+                      value={
+                        service.name === NEARBY_SERVICE_UNNAMED_LABEL
+                          ? ""
+                          : service.name
+                      }
+                      placeholder="Нэр оруулах (жишээ нь: 47-р сургууль)"
+                      aria-label={`${nearbyTypeLabels[service.type] || service.type} — нэр`}
+                      className="h-10 rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-[#1a0b3b] placeholder:text-slate-400 placeholder:font-semibold"
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setNearbyServiceName(
+                          idx,
+                          v.trim() === ""
+                            ? NEARBY_SERVICE_UNNAMED_LABEL
+                            : v,
+                        );
+                      }}
+                    />
+                    {service.name === NEARBY_SERVICE_UNNAMED_LABEL ? (
+                      <p className="text-[10px] font-semibold leading-snug text-slate-400">
+                        «Нэргүй цэг» гэж гарвал энд өөрийнхөөр нэрлэнэ үү.
+                      </p>
+                    ) : null}
+                  </div>
                   <div className="mt-1.5 flex items-center gap-3 text-[11px] font-bold text-slate-500">
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="h-3 w-3 text-[#2a00ff]" />

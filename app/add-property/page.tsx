@@ -16,10 +16,10 @@ function AddPropertyPageContent() {
     <div className="flex min-h-svh flex-col bg-background">
       <main
         className={cn(
-          "mx-auto w-full flex-1 px-4",
+          "mx-auto w-full flex-1 px-3 sm:px-4",
           listingSaved
-            ? "flex flex-col items-center justify-center py-12"
-            : "container max-w-7xl py-10",
+            ? "flex flex-col items-center justify-center px-4 py-12 pt-[calc(env(safe-area-inset-top,0px)+4.75rem)]"
+            : "container max-w-7xl pt-[calc(env(safe-area-inset-top,0px)+4.75rem)] pb-[max(6.5rem,env(safe-area-inset-bottom,0px)+5rem)] md:pb-10 md:pt-10",
         )}
       >
         <div className={cn(!listingSaved && "mx-auto max-w-7xl")}>

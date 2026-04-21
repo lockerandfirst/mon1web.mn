@@ -16,7 +16,7 @@ import {
 import { usePropertyForm } from "@/hooks/use-property-form";
 import { applyListingToForm, upsertEditedListing } from "./editing";
 
-import { PROPERTY_TYPE_OPTIONS } from "./constants";
+import { FORM_STEPS, PROPERTY_TYPE_OPTIONS } from "./constants";
 import { FormStepper, StepNavigation } from "./form-shell";
 import { SidebarPanel } from "./sidebar-panel";
 import { SuccessState } from "./success-state";
@@ -45,8 +45,6 @@ export function AddPropertyForm({
     updateField,
     pricePerSqm,
     locationState,
-    isAiProcessing,
-    handleAiOptimize,
   } = usePropertyForm();
 
   const propertyLabel = useMemo(
@@ -221,6 +219,34 @@ export function AddPropertyForm({
     return <SuccessState onGoHome={() => router.push("/home")} />;
   }
 
+  const stepMeta = FORM_STEPS[currentStep - 1];
+
+  const nextLabelByStep =
+    currentStep === 3
+      ? editListingId
+        ? "Зар шинэчлэх"
+        : "Зар нэмэх"
+      : "Үргэлжлүүлэх";
+
+  const handleNextStep = () => {
+    if (currentStep === 1) {
+      goToStep(2);
+      return;
+    }
+    if (currentStep === 2) {
+      goToStep(3);
+      return;
+    }
+    handleSubmit();
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep <= 1) {
+      return;
+    }
+    goToStep(currentStep - 1);
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -244,35 +270,17 @@ export function AddPropertyForm({
     }
   };
 
-  const nextLabelByStep =
-    currentStep === 3
-      ? editListingId
-        ? "Зар шинэчлэх"
-        : "Зар нэмэх"
-      : "Үргэлжлүүлэх";
-  const handleNextStep = () => {
-    if (currentStep === 1) {
-      goToStep(2);
-      return;
-    }
-    if (currentStep === 2) {
-      goToStep(3);
-      return;
-    }
-    handleSubmit();
-  };
-
-  const handlePrevStep = () => {
-    if (currentStep <= 1) {
-      return;
-    }
-    goToStep(currentStep - 1);
-  };
-
   return (
-    <div ref={formTopRef} className="space-y-5 pb-0 md:pb-20 md:space-y-8">
+    <div ref={formTopRef} className="space-y-4 pb-0 md:space-y-8 md:pb-20">
       <Toaster position="top-center" richColors />
-      <FormStepper currentStep={currentStep} />
+      <div className="flex flex-col gap-1 md:gap-1.5">
+        <FormStepper currentStep={currentStep} />
+        {stepMeta ? (
+          <p className="line-clamp-1 text-center text-[10px] font-bold text-slate-500 md:hidden">
+            <span className="text-[#2a00ff]">Одоо:</span> {stepMeta.label}
+          </p>
+        ) : null}
+      </div>
       <div className="flex flex-col gap-5 md:gap-10 md:flex-row md:items-start">
         <div className="min-w-0 w-full md:flex-[1_1_70%]">
           <AnimatePresence initial={false} mode="sync">
@@ -287,7 +295,7 @@ export function AddPropertyForm({
               {renderStep()}
             </motion.div>
           </AnimatePresence>
-          <div className="sticky bottom-2 z-40 mt-4 rounded-3xl border border-slate-100 bg-white/95 p-2 shadow-xl backdrop-blur md:bottom-4 md:mt-6 md:rounded-4xl md:p-3">
+          <div className="sticky bottom-[max(0.5rem,env(safe-area-inset-bottom,0px))] z-40 mt-4 rounded-3xl border border-slate-200/80 bg-white/95 p-2 shadow-[0_-8px_30px_-12px_rgba(26,11,59,0.12)] backdrop-blur-md supports-backdrop-filter:bg-white/90 md:bottom-4 md:mt-6 md:rounded-4xl md:border-slate-100 md:p-3 md:shadow-xl">
             <StepNavigation
               step={currentStep}
               onBack={currentStep > 1 ? handlePrevStep : undefined}

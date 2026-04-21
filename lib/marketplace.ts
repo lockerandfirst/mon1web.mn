@@ -1,4 +1,4 @@
-import type { Agent, Apartment } from "@/lib/data";
+import type { Agent, Apartment, NearbyService } from "@/lib/data";
 import type {
   BackendServiceType,
   CreateListingRequestPayload,
@@ -41,6 +41,7 @@ interface CreateMarketplaceListingInput {
   propertyType: string;
   features?: string[];
   nearbyServiceIds?: string[];
+  nearbyServices?: NearbyService[];
   imageUrls?: string[];
   serviceType?: BackendServiceType;
   selectedAgentId: string | null;

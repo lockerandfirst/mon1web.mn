@@ -35,6 +35,7 @@ export const PROPERTY_TYPE_ICONS: Record<string, LucideIcon> = {
   land: Map,
   office: Building2,
   industrial: Factory,
+  barter: Landmark,
 };
 
 export const DISTRICTS = [

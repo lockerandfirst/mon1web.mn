@@ -1,5 +1,8 @@
 import type { NearbyService } from "@/lib/data";
 
+/** OSM дээр `name` байхгүй үед — форм дээр засварлаж болно */
+export const NEARBY_SERVICE_UNNAMED_LABEL = "Нэргүй цэг";
+
 type Coordinates = { lat: number; lng: number };
 
 type OverpassElement = {
@@ -93,7 +96,7 @@ export async function fetchNearbyServicesFromOsm(
       const point = normalizeElementCoordinates(element);
       if (!type || !point) return null;
       const meters = haversineMeters(coordinates, point);
-      const name = element.tags?.name || "Нэргүй цэг";
+      const name = element.tags?.name || NEARBY_SERVICE_UNNAMED_LABEL;
       return { type, meters, name };
     })
     .filter((item): item is { type: NearbyService["type"]; meters: number; name: string } => Boolean(item))

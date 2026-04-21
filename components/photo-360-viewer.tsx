@@ -1,105 +1,114 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { 
-  RotateCcw, ZoomIn, ZoomOut, Maximize2, Minimize2, 
-  Play, Pause, Move, Info
-} from "lucide-react"
+import { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  RotateCcw,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Minimize2,
+  Play,
+  Pause,
+  Move,
+  Info,
+} from "lucide-react";
 
 interface Photo360ViewerProps {
-  images: string[]
-  title?: string
+  images: string[];
+  title?: string;
 }
 
 export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [currentFrame, setCurrentFrame] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [startX, setStartX] = useState(0)
-  const [isAutoRotate, setIsAutoRotate] = useState(false)
-  const [zoom, setZoom] = useState(1)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [showInstructions, setShowInstructions] = useState(true)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [currentFrame, setCurrentFrame] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [isAutoRotate, setIsAutoRotate] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(true);
 
-  // Simulate 360 view with multiple images (in real app, this would be 36-72 images)
-  const totalFrames = images.length > 1 ? images.length : 36 // Default to 36 frames if only one image
+  const totalFrames = images.length > 1 ? images.length : 36;
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowInstructions(false), 3000)
-    return () => clearTimeout(timer)
-  }, [])
+    const timer = setTimeout(() => setShowInstructions(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
-  // Auto-rotate effect
   useEffect(() => {
-    if (!isAutoRotate) return
+    if (!isAutoRotate) return;
     const interval = setInterval(() => {
-      setCurrentFrame(prev => (prev + 1) % totalFrames)
-    }, 100)
-    return () => clearInterval(interval)
-  }, [isAutoRotate, totalFrames])
+      setCurrentFrame((prev) => (prev + 1) % totalFrames);
+    }, 100);
+    return () => clearInterval(interval);
+  }, [isAutoRotate, totalFrames]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true)
-    setStartX(e.clientX)
-    setShowInstructions(false)
-  }
+    setIsDragging(true);
+    setStartX(e.clientX);
+    setShowInstructions(false);
+  };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return
-    const deltaX = e.clientX - startX
+    if (!isDragging) return;
+    const deltaX = e.clientX - startX;
     if (Math.abs(deltaX) > 10) {
-      const frameChange = deltaX > 0 ? 1 : -1
-      setCurrentFrame(prev => (prev + frameChange + totalFrames) % totalFrames)
-      setStartX(e.clientX)
+      const frameChange = deltaX > 0 ? 1 : -1;
+      setCurrentFrame(
+        (prev) => (prev + frameChange + totalFrames) % totalFrames,
+      );
+      setStartX(e.clientX);
     }
-  }
+  };
 
   const handleMouseUp = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true)
-    setStartX(e.touches[0].clientX)
-    setShowInstructions(false)
-  }
+    setIsDragging(true);
+    setStartX(e.touches[0].clientX);
+    setShowInstructions(false);
+  };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return
-    const deltaX = e.touches[0].clientX - startX
+    if (!isDragging) return;
+    const deltaX = e.touches[0].clientX - startX;
     if (Math.abs(deltaX) > 10) {
-      const frameChange = deltaX > 0 ? 1 : -1
-      setCurrentFrame(prev => (prev + frameChange + totalFrames) % totalFrames)
-      setStartX(e.touches[0].clientX)
+      const frameChange = deltaX > 0 ? 1 : -1;
+      setCurrentFrame(
+        (prev) => (prev + frameChange + totalFrames) % totalFrames,
+      );
+      setStartX(e.touches[0].clientX);
     }
-  }
+  };
 
-  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.25, 2))
-  const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.25, 0.5))
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 2));
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
   const handleReset = () => {
-    setCurrentFrame(0)
-    setZoom(1)
-    setIsAutoRotate(false)
-  }
+    setCurrentFrame(0);
+    setZoom(1);
+    setIsAutoRotate(false);
+  };
 
   const toggleFullscreen = () => {
     if (!isFullscreen) {
-      containerRef.current?.requestFullscreen?.()
+      containerRef.current?.requestFullscreen?.();
     } else {
-      document.exitFullscreen?.()
+      document.exitFullscreen?.();
     }
-    setIsFullscreen(!isFullscreen)
-  }
+    setIsFullscreen(!isFullscreen);
+  };
 
   // Get current image based on frame
   const getCurrentImage = () => {
     if (images.length > 1) {
-      return images[currentFrame % images.length]
+      return images[currentFrame % images.length];
     }
     // If only one image, we'll simulate rotation with CSS transform
-    return images[0]
-  }
+    return images[0];
+  };
 
   return (
     <div
@@ -122,9 +131,9 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
         <div
           className="w-full h-full transition-transform duration-75"
           style={{
-            transform: `scale(${zoom}) ${images.length === 1 ? `rotateY(${currentFrame * 10}deg)` : ''}`,
-            transformStyle: 'preserve-3d',
-            perspective: '1000px',
+            transform: `scale(${zoom}) ${images.length === 1 ? `rotateY(${currentFrame * 10}deg)` : ""}`,
+            transformStyle: "preserve-3d",
+            perspective: "1000px",
           }}
         >
           <img
@@ -136,12 +145,13 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
         </div>
       </div>
 
-      {/* Rotation Indicator */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-sm rounded-full px-4 py-2">
         <div className="flex items-center gap-3">
-          <span className="text-white/80 text-sm">{Math.round((currentFrame / totalFrames) * 360)}°</span>
+          <span className="text-white/80 text-sm">
+            {Math.round((currentFrame / totalFrames) * 360)}°
+          </span>
           <div className="w-24 h-1.5 bg-white/20 rounded-full overflow-hidden">
-            <div 
+            <div
               className="h-full bg-primary rounded-full transition-all"
               style={{ width: `${(currentFrame / totalFrames) * 100}%` }}
             />
@@ -149,7 +159,6 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
         </div>
       </div>
 
-      {/* Instructions Overlay */}
       {showInstructions && (
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
           <div className="text-center text-white">
@@ -160,7 +169,6 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
         </div>
       )}
 
-      {/* Controls */}
       <div className="absolute top-4 right-4 flex items-center gap-2">
         <Button
           variant="ghost"
@@ -168,7 +176,11 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
           className="bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"
           onClick={() => setIsAutoRotate(!isAutoRotate)}
         >
-          {isAutoRotate ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          {isAutoRotate ? (
+            <Pause className="h-4 w-4" />
+          ) : (
+            <Play className="h-4 w-4" />
+          )}
         </Button>
         <Button
           variant="ghost"
@@ -202,7 +214,11 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
           className="bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"
           onClick={toggleFullscreen}
         >
-          {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          {isFullscreen ? (
+            <Minimize2 className="h-4 w-4" />
+          ) : (
+            <Maximize2 className="h-4 w-4" />
+          )}
         </Button>
       </div>
 
@@ -228,5 +244,5 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
         <Info className="h-4 w-4" />
       </Button>
     </div>
-  )
+  );
 }
