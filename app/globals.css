@@ -30,25 +30,26 @@
   --brand-blue-600: #2a00ff;
   --brand-blue-700: #2300d9;
   --brand-blue-800: #1b00b3;
-  --brand-blue-900: #14008c;
+  --brand-blue-900: #2a00ff;
   /* Brand refresh with Bloomberg blue to pink gradient accents */
   --background: oklch(0.99 0 0);
-  --foreground: oklch(0.141 0 0);
+  /* Deep brand blue — avoid “black” neutrals on light UI */
+  --foreground: var(--brand-blue-900);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0 0);
+  --card-foreground: var(--brand-blue-900);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0 0);
+  --popover-foreground: var(--brand-blue-900);
   /* Primary: Brand Magenta */
   --primary: var(--brand-start);
   --primary-foreground: oklch(1 0 0);
   /* Secondary: Warm neutral gray */
   --secondary: oklch(0.96 0 0);
-  --secondary-foreground: oklch(0.141 0 0);
+  --secondary-foreground: var(--brand-blue-900);
   --muted: oklch(0.965 0 0);
   --muted-foreground: oklch(0.45 0 0);
   /* Accent: Same as primary for consistency */
   --accent: oklch(0.96 0 0);
-  --accent-foreground: oklch(0.141 0 0);
+  --accent-foreground: var(--brand-blue-900);
   --destructive: oklch(0.577 0.215 25.331);
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.92 0 0);
@@ -59,10 +60,10 @@
   --chart-2: var(--brand-end);
   --chart-3: #553bff;
   --chart-4: #ff73c3;
-  --chart-5: #14008c;
+  --chart-5: #2a00ff;
   --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.141 0 0);
+  --sidebar-foreground: var(--brand-blue-900);
   --sidebar-primary: var(--brand-start);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.965 0 0);
@@ -95,7 +96,7 @@
   --chart-2: var(--brand-end);
   --chart-3: #553bff;
   --chart-4: #ff73c3;
-  --chart-5: #14008c;
+  --chart-5: #2a00ff;
   --sidebar: oklch(0.12 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: var(--brand-start);
@@ -219,24 +220,26 @@
     background-color: #2200e6 !important;
   }
 
+  /* Near-black text → deep brand blue (no gray/black body copy on marketing UI). */
   .text-black,
-  .text-slate-950,
   .text-slate-900,
-  .text-zinc-950,
+  .text-slate-950,
   .text-zinc-900,
+  .text-zinc-950,
   .text-gray-900,
+  .text-gray-950,
   .text-stone-900,
+  .text-stone-950,
   .text-neutral-900,
-  .text-foreground,
   .hover\:text-slate-900:hover,
-  .hover\:text-zinc-900:hover,
-  .hover\:text-black:hover,
-  .data-\[state\=active\]\:text-zinc-900[data-state="active"] {
-    color: var(--brand-start) !important;
+  .hover\:text-black:hover {
+    color: var(--brand-blue-900) !important;
   }
 
   .bg-black,
   .bg-slate-900,
+  .bg-stone-950,
+  .bg-stone-900,
   .bg-zinc-950,
   .bg-zinc-900,
   .bg-neutral-900,

@@ -90,7 +90,7 @@ export default function MedeeePage() {
                   href={item.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-4xl border border-white bg-white/70 p-5 shadow-[0_20px_40px_-16px_rgba(0,0,0,0.1)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff00c8]/30 hover:shadow-[0_40px_80px_-20px_rgba(255,0,200,0.15)] md:rounded-[2.5rem] md:p-8 md:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)]"
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-4xl border border-white bg-white/70 p-5 shadow-[0_20px_40px_-16px_rgba(42,0,255,0.12)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff00c8]/30 hover:shadow-[0_40px_80px_-20px_rgba(255,0,200,0.15)] md:rounded-[2.5rem] md:p-8 md:shadow-[0_32px_64px_-16px_rgba(42,0,255,0.1)]"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-3 md:gap-4">

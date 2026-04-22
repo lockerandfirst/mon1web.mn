@@ -64,14 +64,14 @@ export function RelatedListings({ currentId }: RelatedListingsProps) {
       </div>
 
       {/* Optional: Bottom Banner for "Mon1" Premium feel */}
-      <div className="relative mt-8 overflow-hidden rounded-4xl bg-[#1a0b3b] p-5 text-center text-white shadow-2xl md:mt-16 md:rounded-[3rem] md:p-12">
+      <div className="relative mt-8 overflow-hidden rounded-4xl bg-[#2a00ff] p-5 text-center text-white shadow-2xl md:mt-16 md:rounded-[3rem] md:p-12">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 rounded-full bg-blue-600/20 blur-[100px]" />
         <h4 className="relative z-10 text-xl font-black italic uppercase tracking-tight md:text-3xl md:tracking-tighter">
           Өөрийн үл хөдлөх хөрөнгөө{" "}
-          <span className="text-blue-500">үнэгүй</span> байршуулаарай
+          <span className="text-[#ff3bad]">үнэгүй</span> байршуулаарай
         </h4>
         <Link href="/add-property">
-          <Button className="relative z-10 mt-4 h-11 rounded-xl bg-white px-5 text-[11px] font-black uppercase text-[#1a0b3b] hover:bg-blue-50 md:mt-8 md:h-16 md:rounded-2xl md:px-12 md:text-base">
+          <Button className="relative z-10 mt-4 h-11 rounded-xl bg-white px-5 text-[11px] font-black uppercase text-[#2a00ff] hover:bg-blue-50 md:mt-8 md:h-16 md:rounded-2xl md:px-12 md:text-base">
             Зар нэмэх
           </Button>
         </Link>

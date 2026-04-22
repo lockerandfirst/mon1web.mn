@@ -8,11 +8,18 @@ import { ApartmentCard } from "@/components/apartment-card";
 export function PortalListingsPanel({
   marketplace,
   catalog,
+  claimedSaleListings,
 }: {
   marketplace: MarketplaceListing[];
   catalog: Apartment[];
+  /** `agent_saling` — «Би заръя»-аар хадгалсан зарууд */
+  claimedSaleListings: MarketplaceListing[];
 }) {
-  const total = marketplace.length + catalog.length;
+  const marketplaceIds = new Set(marketplace.map((l) => l.id));
+  const claimedOnly = claimedSaleListings.filter(
+    (l) => !marketplaceIds.has(l.id),
+  );
+  const total = claimedOnly.length;
 
   if (total === 0) {
     return (
@@ -21,7 +28,7 @@ export function PortalListingsPanel({
           Зар одоогоор алга
         </p>
         <p className="mt-2 text-xs font-semibold text-slate-500 md:text-sm">
-          Шинэ зар нэмснээр энд харагдана.
+          «Зарна» табаас «Би заръя» дарж хариуцсан зарууд энд харагдана.
         </p>
       </div>
     );
@@ -29,12 +36,9 @@ export function PortalListingsPanel({
 
   return (
     <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-3">
-      {marketplace.map((apartment, index) => (
-        <ApartmentCard key={apartment.id} apartment={apartment} index={index} />
-      ))}
-      {catalog.map((apartment, index) => (
+      {claimedOnly.map((apartment, index) => (
         <ApartmentCard
-          key={apartment.id}
+          key={`claimed-${apartment.id}`}
           apartment={apartment}
           index={marketplace.length + index}
         />

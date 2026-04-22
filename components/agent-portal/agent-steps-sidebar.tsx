@@ -52,14 +52,14 @@ export function AgentStepsSidebar() {
 
 function SupportCard({ phone, email }: { phone: string; email: string }) {
   return (
-    <div className="group rounded-3xl border-2 border-dashed border-zinc-200 bg-white p-4 transition-colors hover:border-blue-600/30 md:rounded-[2.5rem] md:p-8">
+    <div className="group rounded-3xl border-2 border-dashed border-[#2a00ff]/20 bg-white p-4 transition-colors hover:border-[#2a00ff]/40 md:rounded-[2.5rem] md:p-8">
       <div className="mb-2.5 flex items-center gap-2 md:mb-4 md:gap-3">
         <Phone className="h-4 w-4 text-[#2a00ff] md:h-5 md:w-5" />
-        <p className="text-[9px] font-black tracking-wide text-zinc-400 uppercase md:text-[10px] md:tracking-tight">
+        <p className="text-[9px] font-black tracking-wide text-[#2a00ff]/55 uppercase md:text-[10px] md:tracking-tight">
           Direct Support
         </p>
       </div>
-      <p className="text-xl font-black italic tracking-tight text-zinc-950 md:text-2xl md:tracking-tighter">
+      <p className="text-xl font-black italic tracking-tight text-[#2a00ff] md:text-2xl md:tracking-tighter">
         {phone}
       </p>
       <p className="mt-1 cursor-pointer text-xs font-bold text-[#2a00ff] underline md:text-sm">

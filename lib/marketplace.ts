@@ -216,12 +216,16 @@ export function createMarketplaceListingFromPayload(
   input: CreateListingRequestPayload,
   fallbackAgent: Agent,
 ): MarketplaceListing {
+  const pricePerSqm =
+    typeof input.pricePerSqm === "number" && input.pricePerSqm > 0
+      ? input.pricePerSqm
+      : Math.round(input.price / Math.max(input.sqm, 1));
   return {
     id: `user-${Date.now()}`,
     title: input.title,
     price: input.price,
     paymentMethod: input.paymentMethod,
-    pricePerSqm: Math.round(input.price / Math.max(input.sqm, 1)),
+    pricePerSqm,
     sqm: input.sqm,
     rooms: input.rooms,
     bathrooms: input.bathrooms,
@@ -245,7 +249,11 @@ export function createMarketplaceListingFromPayload(
         ? input.nearbyServices
         : buildNearbyServices(input.nearbyServiceIds),
     coordinates:
-      parseCoordinates(input.location) || { lat: 47.9184, lng: 106.9177 },
+      input.coordinates &&
+      Number.isFinite(input.coordinates.lat) &&
+      Number.isFinite(input.coordinates.lng)
+        ? input.coordinates
+        : parseCoordinates(input.location) || { lat: 47.9184, lng: 106.9177 },
     createdAt: new Date().toISOString(),
     workflowStatus: "pending",
     serviceType: input.serviceType,

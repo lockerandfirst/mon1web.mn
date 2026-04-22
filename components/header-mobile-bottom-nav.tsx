@@ -48,8 +48,10 @@ export function HeaderMobileBottomNav({
   const pathname = usePathname();
   const { user, isLoaded } = useUser();
   const isAgentPortalRoute = pathname.startsWith("/agent-portal");
+  const isFormFlowRoute =
+    pathname.startsWith("/add-property") || pathname.startsWith("/buy-request");
 
-  if (isAgentPortalRoute) {
+  if (isAgentPortalRoute || isFormFlowRoute) {
     return null;
   }
 

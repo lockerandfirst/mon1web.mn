@@ -1,13 +1,10 @@
 import { agents, formatPrice, type Agent } from "@/lib/data";
 import type { CreateBuyRequestPayload } from "@/lib/backend-contract";
-import {
-  getPlaceholderImage,
-  getPropertyTypeLabel,
-} from "@/lib/property-types";
+import { getPropertyTypeLabel } from "@/lib/property-types";
 
 const BUY_REQUESTS_KEY = "mon1-buy-requests";
 
-export type BuyRequestStatus = "open" | "claimed";
+export type BuyRequestStatus = "open" | "claimed" | "closed";
 
 export interface BuyRequestAgentRecommendation {
   listingId: string;
@@ -34,11 +31,12 @@ export interface BuyRequest {
     email: string;
   };
   assignedAgentId: string | null;
-  image: string;
+  image?: string;
   agentRecommendations?: BuyRequestAgentRecommendation[];
 }
 
 interface CreateBuyRequestInput {
+  title?: string;
   propertyType: string;
   district: string;
   location: string;
@@ -109,14 +107,14 @@ export function createBuyRequest(input: CreateBuyRequestInput): BuyRequest {
           .join("\n")
       : "";
   const notes = [barterDetails, input.notes.trim()].filter(Boolean).join("\n\n");
-  const title =
+  const fallbackTitle =
     input.propertyType === "barter"
       ? `${input.district || input.location || "Тодорхойгүй байршил"} орчимд бартер сонирхоно`
       : `${input.district} дэх ${rooms} өрөө ${propertyTypeLabel} авна`;
 
   return {
     id: `buy-${Date.now()}`,
-    title,
+    title: input.title?.trim() || fallbackTitle,
     propertyType: input.propertyType || "apartment",
     district: input.district,
     location: input.location,
@@ -129,7 +127,6 @@ export function createBuyRequest(input: CreateBuyRequestInput): BuyRequest {
     workflowStatus: "open",
     submittedBy: input.submittedBy,
     assignedAgentId: null,
-    image: getPlaceholderImage(input.propertyType),
     agentRecommendations: [],
   };
 }
@@ -153,14 +150,14 @@ export function createBuyRequestFromPayload(
           .join("\n")
       : "";
   const notes = [barterDetails, input.notes].filter(Boolean).join("\n\n");
-  const title =
+  const fallbackTitle =
     input.propertyType === "barter"
       ? `${input.district || input.location || "Тодорхойгүй байршил"} орчимд бартер сонирхоно`
       : `${input.district} дэх ${input.rooms} өрөө ${propertyTypeLabel} авна`;
 
   return {
     id: `buy-${Date.now()}`,
-    title,
+    title: input.title?.trim() || fallbackTitle,
     propertyType: input.propertyType || "apartment",
     district: input.district,
     location: input.location,
@@ -173,7 +170,6 @@ export function createBuyRequestFromPayload(
     workflowStatus: "open",
     submittedBy: input.submittedBy,
     assignedAgentId: null,
-    image: getPlaceholderImage(input.propertyType),
     agentRecommendations: [],
   };
 }

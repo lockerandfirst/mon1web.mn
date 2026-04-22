@@ -128,10 +128,11 @@ export const PAYMENT_METHOD_OPTIONS = [
   { value: "installment", label: "Лизинг" },
 ] as const;
 
+/** Add-property & buy-request — same three-step flow (labels + mobile hint). */
 export const FORM_STEPS = [
-  { step: 1, label: "Үндсэн", hint: "Төрөл" },
-  { step: 2, label: "Байршил", hint: "Орчин" },
-  { step: 3, label: "Нийтлэх", hint: "Тайлбар" },
+  { step: 1, label: "Төрөл", hint: "Сонгох" },
+  { step: 2, label: "Байршил", hint: "Оруулах" },
+  { step: 3, label: "Дуусгах", hint: "Илгээх" },
 ] as const;
 
 export const FEATURE_GUIDE = [

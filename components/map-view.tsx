@@ -164,7 +164,7 @@ export function MapView({
           align-items: center;
           transform: translate(-50%, -100%);
           cursor: pointer;
-          filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+          filter: drop-shadow(0 4px 12px rgba(42, 0, 255, 0.18));
           transition: all 0.2s ease;
         }
 

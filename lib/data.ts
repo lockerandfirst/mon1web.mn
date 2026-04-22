@@ -23,6 +23,8 @@ export interface Apartment {
   nearbyServices: NearbyService[];
   coordinates: { lat: number; lng: number };
   createdAt: string;
+  /** Нийтийн зарын дэлгэрэнгүй үзэлт (backend `view_count`) */
+  viewCount?: number;
 }
 
 export interface Agent {

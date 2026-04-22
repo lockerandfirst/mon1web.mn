@@ -86,29 +86,32 @@ export function Footer() {
               </ul>
             </div>
 
-            <div className="md:mt-10">
-              <h3 className="text-slate-900 font-black uppercase tracking-widest text-[9px] md:text-[11px] mb-3 italic md:hidden">
+            {/* Phones: only in the 2-col row with quick links on small screens */}
+            <div className="md:hidden">
+              <h3 className="text-slate-900 font-black uppercase tracking-widest text-[9px] mb-3 italic">
                 Холбоо барих
               </h3>
-              <div className="space-y-2 md:space-y-4">
+              <div className="space-y-2">
                 <a
                   href="tel:+97694948873"
-                  className="flex items-center gap-2 text-slate-900 font-black italic text-[11px] md:text-lg tracking-tighter"
+                  className="flex items-center gap-2 text-slate-900 font-black italic text-[11px] tracking-tighter"
                 >
-                  <Phone className="h-3 w-3 text-blue-600 md:hidden" /> 94948873
+                  <Phone className="h-3 w-3 shrink-0 text-blue-600" />
+                  94948873
                 </a>
                 <a
                   href="tel:+97694498873"
-                  className="flex items-center gap-2 text-slate-900 font-black italic text-[11px] md:text-lg tracking-tighter"
+                  className="flex items-center gap-2 text-slate-900 font-black italic text-[11px] tracking-tighter"
                 >
-                  <Phone className="h-3 w-3 text-blue-600 md:hidden" /> 94498873
+                  <Phone className="h-3 w-3 shrink-0 text-blue-600" />
+                  94498873
                 </a>
               </div>
             </div>
           </div>
 
-          {/* Newsletter - Simplified for mobile */}
-          <div className="lg:col-span-4 space-y-4 md:space-y-10 mb-3">
+          {/* Newsletter + contact phones under email on md+ */}
+          <div className="lg:col-span-4 space-y-4 md:space-y-6 mb-3">
             <div className="relative group w-full">
               <Input
                 placeholder="И-мэйл..."
@@ -121,6 +124,28 @@ export function Footer() {
               >
                 <Send className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
+            </div>
+
+            <div className="hidden md:block pt-2">
+              <h3 className="text-slate-900 font-black uppercase text-[11px] mb-4 italic">
+                Холбоо барих
+              </h3>
+              <div className="flex flex-col gap-3">
+                <a
+                  href="tel:+97694948873"
+                  className="flex items-center gap-3 text-slate-900 font-black italic text-lg min-w-0"
+                >
+                  <Phone className="h-5 w-5 shrink-0 text-blue-600" />
+                  <span className="">94948873 </span>
+                </a>
+                <a
+                  href="tel:+97694498873"
+                  className="flex items-center gap-3 text-slate-900 font-black italic text-lg  min-w-0"
+                >
+                  <Phone className="h-5 w-5 shrink-0 text-blue-600" />
+                  <span className="">94498873</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>

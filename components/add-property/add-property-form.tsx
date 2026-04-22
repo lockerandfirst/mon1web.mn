@@ -1,13 +1,15 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
+import { FlaskConical } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Toaster, toast } from "sonner";
 
 import { agents } from "@/lib/data";
 import { buildCreateListingPayload } from "@/lib/backend-contract";
+import { apiFetch } from "@/lib/backend-api";
 import {
   createMarketplaceListingFromPayload,
   readMarketplaceListings,
@@ -16,13 +18,14 @@ import {
 import { usePropertyForm } from "@/hooks/use-property-form";
 import { applyListingToForm, upsertEditedListing } from "./editing";
 
-import { FORM_STEPS, PROPERTY_TYPE_OPTIONS } from "./constants";
+import { PROPERTY_TYPE_OPTIONS } from "./constants";
 import { FormStepper, StepNavigation } from "./form-shell";
 import { SidebarPanel } from "./sidebar-panel";
 import { SuccessState } from "./success-state";
 import { BasicInfoStep } from "./steps/BasicInfoSteps";
 import { FinalStep } from "./steps/FinalStep";
 import { LocationStep } from "./steps/LocationStep";
+import { Button } from "@/components/ui/button";
 
 type AddPropertyFormProps = {
   onSuccess?: () => void;
@@ -34,10 +37,12 @@ export function AddPropertyForm({
   editListingId,
 }: AddPropertyFormProps = {}) {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const router = useRouter();
   const formTopRef = useRef<HTMLDivElement>(null);
   const hydratedRef = useRef(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     currentStep,
     setCurrentStep,
@@ -129,10 +134,15 @@ export function AddPropertyForm({
     return true;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateBeforeSubmit()) {
       return;
     }
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
 
     const fallbackAgent =
       selectedAgent || agents.find((agent) => agent.verified) || agents[0];
@@ -152,6 +162,7 @@ export function AddPropertyForm({
       surroundings:
         autoSurroundings.length > 0 ? autoSurroundings : formData.surroundings,
       nearbyServices: formData.nearbyServices,
+      coordinates: locationState.coordinates,
       submittedBy: {
         name: user?.fullName || "Хэрэглэгч",
         email: user?.primaryEmailAddress?.emailAddress || "user@mon1.local",
@@ -159,25 +170,69 @@ export function AddPropertyForm({
       },
     });
 
-    const nextListing = createMarketplaceListingFromPayload(
-      requestPayload,
-      fallbackAgent,
-    );
+    const token = await getToken();
+    try {
+      const listingResponse = await apiFetch<{
+        success: boolean;
+        data: { id: string };
+      }>("/api/listings", {
+        method: "POST",
+        token,
+        body: requestPayload,
+      });
 
-    const currentListings = readMarketplaceListings();
-    const nextState = upsertEditedListing(
-      editListingId,
-      nextListing,
-      currentListings,
-    );
-    writeMarketplaceListings(nextState.listings);
-    toast.success(
-      nextState.didEdit
-        ? "Зар амжилттай шинэчлэгдлээ"
-        : "Амжилттай бүртгэгдлээ",
-    );
-    setShowSuccess(true);
-    onSuccess?.();
+      if (formData.images.length > 0) {
+        const multipart = new FormData();
+        for (const file of formData.images.slice(0, 10)) {
+          multipart.append("images", file);
+        }
+
+        const uploadResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000"}/api/properties/${listingResponse.data.id}/images`,
+          {
+            method: "POST",
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+            body: multipart,
+          },
+        );
+
+        if (!uploadResponse.ok) {
+          const text = await uploadResponse.text();
+          throw new Error(text || "Image upload failed");
+        }
+      }
+
+      toast.success("Амжилттай бүртгэгдлээ");
+      setShowSuccess(true);
+      onSuccess?.();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Сервертэй холбогдоход алдаа гарлаа";
+      toast.error("Зураг хадгалах үед алдаа гарлаа");
+      console.error("[add-property] submit failed", message);
+
+      // Fallback keeps existing UX when listing API itself is unavailable.
+      const nextListing = createMarketplaceListingFromPayload(
+        requestPayload,
+        fallbackAgent,
+      );
+      const currentListings = readMarketplaceListings();
+      const nextState = upsertEditedListing(
+        editListingId,
+        nextListing,
+        currentListings,
+      );
+      writeMarketplaceListings(nextState.listings);
+      toast.success(
+        nextState.didEdit
+          ? "Зар амжилттай шинэчлэгдлээ (локал)"
+          : "Амжилттай бүртгэгдлээ (локал)",
+      );
+      setShowSuccess(true);
+      onSuccess?.();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const goToStep = useCallback(
@@ -219,8 +274,6 @@ export function AddPropertyForm({
     return <SuccessState onGoHome={() => router.push("/home")} />;
   }
 
-  const stepMeta = FORM_STEPS[currentStep - 1];
-
   const nextLabelByStep =
     currentStep === 3
       ? editListingId
@@ -237,7 +290,7 @@ export function AddPropertyForm({
       goToStep(3);
       return;
     }
-    handleSubmit();
+    void handleSubmit();
   };
 
   const handlePrevStep = () => {
@@ -245,6 +298,32 @@ export function AddPropertyForm({
       return;
     }
     goToStep(currentStep - 1);
+  };
+
+  const handleDebugFill = () => {
+    if (process.env.NODE_ENV !== "development") {
+      return;
+    }
+    updateField("title", "Debug: Хан-Уулд 3 өрөө байр");
+    updateField("propertyType", "apartment");
+    updateField("district", "Хан-Уул");
+    updateField("location", "Zaisan");
+    updateField("address", "Хан-Уул, 15-р хороо, Зайсан");
+    updateField("price", "420000000");
+    updateField("paymentFlexible", false);
+    updateField("paymentMethods", ["cash", "mortgage"]);
+    updateField("sqm", "98");
+    updateField("rooms", "3");
+    updateField("bathrooms", "2");
+    updateField("floor", "12");
+    updateField("totalFloors", "16");
+    updateField("commissionYear", "2021");
+    updateField("description", "Debug тест зар: орчин, төлбөрийн нөхцөл, байршил бөглөгдсөн.");
+    updateField("contactPhone", "99112233");
+    updateField("serviceType", "agent");
+    updateField("selectedAgentId", agents[0]?.id ?? null);
+    updateField("surroundings", ["school", "shop", "bus"]);
+    updateField("features", ["Parking", "Elevator", "Security", "Balcony"]);
   };
 
   const renderStep = () => {
@@ -271,37 +350,45 @@ export function AddPropertyForm({
   };
 
   return (
-    <div ref={formTopRef} className="space-y-4 pb-0 md:space-y-8 md:pb-20">
+    <div
+      ref={formTopRef}
+      className="space-y-3 pb-0 md:mb-0 -mb-20 md:space-y-8 md:pb-20"
+    >
       <Toaster position="top-center" richColors />
-      <div className="flex flex-col gap-1 md:gap-1.5">
-        <FormStepper currentStep={currentStep} />
-        {stepMeta ? (
-          <p className="line-clamp-1 text-center text-[10px] font-bold text-slate-500 md:hidden">
-            <span className="text-[#2a00ff]">Одоо:</span> {stepMeta.label}
-          </p>
-        ) : null}
-      </div>
+      {process.env.NODE_ENV === "development" ? (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-9 rounded-xl border-[#2a00ff]/20 text-xs font-black text-[#2a00ff]"
+            onClick={handleDebugFill}
+          >
+            <FlaskConical className="mr-1.5 h-4 w-4" />
+            Debug бөглөх
+          </Button>
+        </div>
+      ) : null}
+      <FormStepper currentStep={currentStep} />
       <div className="flex flex-col gap-5 md:gap-10 md:flex-row md:items-start">
         <div className="min-w-0 w-full md:flex-[1_1_70%]">
-          <AnimatePresence initial={false} mode="sync">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.28, ease: "easeOut" }}
-              className="w-full min-w-0"
-            >
-              {renderStep()}
-            </motion.div>
-          </AnimatePresence>
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: "easeOut" }}
+            className="w-full min-w-0"
+          >
+            {renderStep()}
+          </motion.div>
           <div className="sticky bottom-[max(0.5rem,env(safe-area-inset-bottom,0px))] z-40 mt-4 rounded-3xl border border-slate-200/80 bg-white/95 p-2 shadow-[0_-8px_30px_-12px_rgba(26,11,59,0.12)] backdrop-blur-md supports-backdrop-filter:bg-white/90 md:bottom-4 md:mt-6 md:rounded-4xl md:border-slate-100 md:p-3 md:shadow-xl">
             <StepNavigation
               step={currentStep}
               onBack={currentStep > 1 ? handlePrevStep : undefined}
               onNext={handleNextStep}
-              nextLabel={nextLabelByStep}
+              nextLabel={isSubmitting ? "Түр хүлээнэ үү..." : nextLabelByStep}
               submit={currentStep === 3}
+              pending={isSubmitting}
+              nextDisabled={isSubmitting}
             />
           </div>
         </div>

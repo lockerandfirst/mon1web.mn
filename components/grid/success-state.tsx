@@ -14,7 +14,8 @@ export function SuccessState({ onReset }: { onReset: () => void }) {
         <span className="text-[#ff3bad]"> бүртгэгдлээ!</span>
       </h2>
       <p className="mt-6 max-w-md text-xl font-bold italic leading-relaxed text-[#ff9ce0]">
-        Таны зар хадгалагдлаа. Баталгаажуулалтын дараа жагсаалтад орно.
+        Таны зар хадгалагдлаа. Агент таны мэдээллийг шалгаад тун удахгүй эргэн
+        холбогдох болно.
       </p>
     </div>
   );

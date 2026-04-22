@@ -15,14 +15,6 @@ type Coordinates = {
   lng: number;
 };
 
-function formatGpsLocationLabel(
-  coords: Coordinates,
-  detailLabel?: string | null,
-) {
-  const base = `GPS ${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`;
-  return detailLabel ? `${base} - ${detailLabel}` : base;
-}
-
 export function usePropertyForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(DEFAULT_FORM);
@@ -79,22 +71,16 @@ export function usePropertyForm() {
           updateField("district", inferredDistrict);
         }
 
-        // 1. Send the clean, unfiltered address to the input
+        // 1. Хаяг болон «байршил» текст — GPS координатыг энд битгий оруул (зөвхөн coordinates талбарт явна).
         updateField("address", cleanAddress || "Байршил олдсонгүй");
-        updateField(
-          "location",
-          formatGpsLocationLabel(
-            nextCoordinates,
-            cleanAddress || null,
-          ),
-        );
+        updateField("location", (cleanAddress || "").trim());
 
         // 2. Update the UI state
         setLocationDetail(cleanAddress);
         setLocationHint("Location updated");
       } catch (error) {
         console.error("Resolve failed", error);
-        updateField("location", formatGpsLocationLabel(nextCoordinates));
+        updateField("location", "");
         setLocationHint("Could not retrieve address.");
       }
     },

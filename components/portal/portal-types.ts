@@ -9,5 +9,6 @@ export type AgentPortalPickListing = {
   title: string;
   district: string;
   price: number;
-  source: "marketplace" | "catalog";
+  imageUrl?: string;
+  source: "marketplace" | "catalog" | "claimed";
 };

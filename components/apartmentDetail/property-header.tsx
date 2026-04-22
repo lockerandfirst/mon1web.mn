@@ -10,9 +10,22 @@ const paymentMethodLabels = {
   any: "Дурын / тохиролцоно",
 } as const;
 
-export function PropertyHeader({ apt }: { apt: Apartment }) {
+export function PropertyHeader({
+  apt,
+  viewCount,
+}: {
+  apt: Apartment;
+  /** record-view хариунаас — байхгүй бол `apt.viewCount` */
+  viewCount?: number | null;
+}) {
   const propertyTypeLabel = getPropertyTypeLabel(apt.propertyType);
   const isCommissioned = apt.commissionYear <= new Date().getFullYear();
+  const displayViews =
+    typeof viewCount === "number"
+      ? viewCount
+      : typeof apt.viewCount === "number"
+        ? apt.viewCount
+        : null;
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -40,6 +53,15 @@ export function PropertyHeader({ apt }: { apt: Apartment }) {
           {apt.address}, {apt.district}
         </span>
       </div>
+
+      {displayViews !== null ? (
+        <p className="text-xs font-bold uppercase tracking-wide text-slate-400 md:text-sm">
+          Үзэлт:{" "}
+          <span className="font-black text-blue-600">
+            {displayViews.toLocaleString("mn-MN")}
+          </span>
+        </p>
+      ) : null}
     </div>
   );
 }

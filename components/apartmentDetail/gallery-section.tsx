@@ -54,7 +54,7 @@ export function GallerySection({ images }: { images: string[] }) {
           </Button>
         </div>
 
-        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-black/20 p-1.5 backdrop-blur-md md:bottom-7 md:gap-2 md:p-2.5">
+        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-[#2a00ff]/25 p-1.5 backdrop-blur-md md:bottom-7 md:gap-2 md:p-2.5">
           {images.map((_, i) => (
             <div
               key={i}

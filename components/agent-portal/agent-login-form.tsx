@@ -18,8 +18,8 @@ export function AgentLoginForm() {
 
   if (!authLoaded || (isSignedIn && !userLoaded)) {
     return (
-      <div className="flex min-h-[320px] items-center justify-center rounded-[3rem] border border-slate-100 bg-white/70 p-8">
-        <p className="text-sm font-bold text-slate-500">Уншиж байна...</p>
+      <div className="flex min-h-[320px] items-center justify-center rounded-[3rem] border border-[#2a00ff]/12 bg-white/70 p-8">
+        <p className="text-sm font-bold text-[#2a00ff]/70">Уншиж байна...</p>
       </div>
     );
   }
@@ -39,7 +39,7 @@ export function AgentLoginForm() {
         className="relative"
       >
         <div className="pointer-events-none absolute inset-0 rounded-full bg-[#2a00ff]/15 blur-[100px] opacity-40" />
-        <Card className="relative overflow-hidden rounded-4xl border border-white bg-white/70 p-1.5 text-slate-900 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)] backdrop-blur-3xl md:rounded-[3rem] md:p-2">
+        <Card className="relative overflow-hidden rounded-4xl border border-white bg-white/70 p-1.5 text-[#2a00ff] shadow-[0_32px_64px_-12px_rgba(42,0,255,0.1)] backdrop-blur-3xl md:rounded-[3rem] md:p-2">
           <CardHeader className="px-4 pt-4 md:px-10 md:pt-10">
             <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#2a00ff] shadow-lg shadow-[#2a00ff]/25 md:mb-6 md:h-14 md:w-14 md:rounded-[1.2rem]">
               <Lock className="h-6 w-6 text-white" />
@@ -47,7 +47,7 @@ export function AgentLoginForm() {
             <CardTitle className="mb-2 text-xl font-black uppercase italic leading-tight tracking-tight md:text-3xl md:tracking-tighter">
               Агентын эрх
             </CardTitle>
-            <p className="text-xs font-semibold leading-relaxed text-slate-500 md:text-sm">
+            <p className="text-xs font-semibold leading-relaxed text-[#2a00ff]/70 md:text-sm">
               Та одоогоор агентын самбарын эрхгүй байна. Доорх хүсэлтийн маягтыг
               бөглөж, бидэнтэй холбогдоно уу.
             </p>
@@ -73,7 +73,7 @@ export function AgentLoginForm() {
     >
       <div className="pointer-events-none absolute inset-0 rounded-full bg-[#2a00ff]/15 blur-[100px] opacity-40" />
 
-      <Card className="relative overflow-hidden rounded-4xl border border-white bg-white/70 p-1.5 text-slate-900 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)] backdrop-blur-3xl md:rounded-[3rem] md:p-2">
+      <Card className="relative overflow-hidden rounded-4xl border border-white bg-white/70 p-1.5 text-[#2a00ff] shadow-[0_32px_64px_-12px_rgba(42,0,255,0.1)] backdrop-blur-3xl md:rounded-[3rem] md:p-2">
         <CardHeader className="px-4 pt-4 md:px-10 md:pt-10">
           <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#2a00ff] shadow-lg shadow-[#2a00ff]/25 md:mb-6 md:h-14 md:w-14 md:rounded-[1.2rem]">
             <Lock className="h-6 w-6 text-white" />
@@ -81,31 +81,31 @@ export function AgentLoginForm() {
           <CardTitle className="mb-1 text-2xl font-black uppercase italic leading-none tracking-tight md:mb-2 md:text-4xl md:tracking-tighter">
             Нэвтрэх
           </CardTitle>
-          <p className="text-[9px] font-black uppercase tracking-wide text-slate-400 md:text-[10px] md:tracking-widest">
+          <p className="text-[9px] font-black uppercase tracking-wide text-[#2a00ff]/55 md:text-[10px] md:tracking-widest">
             Агентын удирдлагын хэсэг
           </p>
         </CardHeader>
 
         <CardContent className="space-y-4 px-4 pb-5 md:space-y-6 md:px-10 md:pb-12">
           <div className="space-y-1.5 md:space-y-2">
-            <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-[#2a00ff]/55">
               Ажлын и-мэйл
             </Label>
             <Input
               readOnly
-              className="h-11 cursor-default rounded-xl border-slate-100 bg-slate-50 text-sm font-semibold text-slate-900 md:h-14 md:rounded-2xl"
+              className="h-11 cursor-default rounded-xl border-[#2a00ff]/15 bg-[#2a00ff]/6 text-sm font-semibold text-[#2a00ff] placeholder:text-[#2a00ff]/35 md:h-14 md:rounded-2xl"
               placeholder="agent@mon1.mn"
             />
           </div>
 
           <div className="space-y-1.5 md:space-y-2">
-            <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-[#2a00ff]/55">
               Нууц код
             </Label>
             <Input
               readOnly
               type="password"
-              className="h-11 cursor-default rounded-xl border-slate-100 bg-slate-50 text-sm font-semibold text-slate-900 md:h-14 md:rounded-2xl"
+              className="h-11 cursor-default rounded-xl border-[#2a00ff]/15 bg-[#2a00ff]/6 text-sm font-semibold text-[#2a00ff] placeholder:text-[#2a00ff]/35 md:h-14 md:rounded-2xl"
               placeholder="••••••••"
             />
           </div>

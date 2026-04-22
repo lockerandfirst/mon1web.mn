@@ -1,0 +1,30 @@
+---
+description: Supabase + Express backend хэрэгжүүлэх заавар
+alwaysApply: true
+---
+
+# Backend Guide (Supabase + Express)
+
+## Тех стек
+- Backend API-г `Express + TypeScript` дээр барина.
+- Өгөгдлийн сангийн үндсэн интеграц нь `Supabase (Postgres)` байна.
+
+## API стандарт
+- Endpoint бүрт оролт шалгалт (validation) заавал хий.
+- Хариуг нэг хэвийн бүтэцтэй буцаа: `success`, `data`, `error`.
+- Алдаа бүрийг HTTP status-тай зөв харьцуул (`400`, `401`, `403`, `404`, `500`).
+
+## Security ба auth
+- Secret болон key-г зөвхөн environment variable-аар ашигла.
+- Service role key-г frontend руу хэзээ ч гаргахгүй.
+- RLS policy-г тойрох шаардлагагүй бол Supabase client-ийг user context дээр ажиллуул.
+
+## Supabase ажиллах зарчим
+- Schema өөрчлөлтийг SQL migration-оор хийнэ.
+- Query хийхдээ table/column нэрийг тогтвортой, type-safe байдлаар ашигла.
+- Шаардлагагүй `select *`-оос зайлсхийж, хэрэгтэй талбаруудаа тодорхой заа.
+
+## Архитектур ба чанар
+- Router, controller/service, data layer-ийг тусгаарла.
+- Нэг файл 300 мөрөөс хэтрэхгүй (төслийн үндсэн дүрэмтэй нийцүүл).
+- Шинэ endpoint бүрт наад захын smoke test эсвэл curl verify алхам нэм.

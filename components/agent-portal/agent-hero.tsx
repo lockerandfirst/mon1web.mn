@@ -13,20 +13,20 @@ export function AgentHero() {
         Official Agent Network
       </div>
 
-      <h1 className="mb-4 text-4xl font-bold leading-[0.9] tracking-tight text-slate-900 md:mb-6 md:text-6xl md:tracking-tighter lg:text-8xl">
+      <h1 className="mb-4 text-4xl font-bold leading-[0.9] tracking-tight text-[#2a00ff] md:mb-6 md:text-6xl md:tracking-tighter lg:text-8xl">
         <div className="mt-1 flex items-baseline max-md:justify-center md:mt-2">
           <div className="bg-linear-to-r from-[#ff3bad] to-[#2a00ff] bg-clip-text text-transparent font-black tracking-tighter">
             <span className="text-[1.2em]">M</span>on
             <span className="text-[1.2em]">1</span>.mn
           </div>
-          <span className="ml-1.5 text-[0.75em] font-bold text-slate-900 md:ml-2 md:text-[0.8em]">
+          <span className="ml-1.5 text-[0.75em] font-bold text-[#2a00ff] md:ml-2 md:text-[0.8em]">
             -тэй
           </span>
         </div>
         хамт хөгжицгөөя
       </h1>
 
-      <p className="mb-6 max-w-md text-sm font-semibold italic text-slate-500 max-md:mx-auto md:mb-8 md:text-lg">
+      <p className="mb-6 max-w-md text-sm font-semibold italic text-[#2a00ff]/70 max-md:mx-auto md:mb-8 md:text-lg">
         Баталгаажсан агент болсноор эзэмшигчдийн шууд хүсэлтийг хүлээн авч,
         борлуулалтаа хурдасга.
       </p>
@@ -38,12 +38,12 @@ export function AgentHero() {
         ].map((stat, i) => (
           <div
             key={i}
-            className="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm md:rounded-3xl md:p-5"
+            className="rounded-2xl border border-[#2a00ff]/12 bg-white px-4 py-3 shadow-sm md:rounded-3xl md:p-5"
           >
-            <p className="text-2xl font-black italic tracking-tight text-slate-900 md:text-3xl md:tracking-tighter">
+            <p className="text-2xl font-black italic tracking-tight text-[#2a00ff] md:text-3xl md:tracking-tighter">
               {stat.val}
             </p>
-            <p className="text-[9px] font-black uppercase tracking-wide text-slate-400 md:text-[10px] md:tracking-widest">
+            <p className="text-[9px] font-black uppercase tracking-wide text-[#2a00ff]/55 md:text-[10px] md:tracking-widest">
               {stat.label}
             </p>
           </div>

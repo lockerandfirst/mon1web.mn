@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { BuyRequest } from "@/lib/buy-requests";
-import { getPropertyTypeLabel } from "@/lib/property-types";
+import { getPlaceholderImage, getPropertyTypeLabel } from "@/lib/property-types";
 import { cn } from "@/lib/utils";
 
 export const PortalRequestCard = memo(
@@ -37,6 +37,7 @@ export const PortalRequestCard = memo(
       request.propertyType === "barter" && request.budget <= 0
         ? "Бартер"
         : `${request.budget.toLocaleString("mn-MN")}₮`;
+    const requestImage = request.image || getPlaceholderImage(request.propertyType);
 
     const handleCardClick = () => {
       router.push("/buy-request");
@@ -60,8 +61,8 @@ export const PortalRequestCard = memo(
           <div className="relative aspect-16/10 overflow-hidden bg-slate-50">
             <AnimatePresence mode="wait">
               <motion.img
-                key={request.image}
-                src={request.image}
+                key={requestImage}
+                src={requestImage}
                 alt=""
                 initial={{ opacity: 0.9 }}
                 animate={{ opacity: 1 }}

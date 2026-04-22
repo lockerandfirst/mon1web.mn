@@ -1,5 +1,6 @@
 import type { FormData } from "@/components/add-property/types";
 import type { MarketplaceListing } from "@/lib/marketplace";
+import { stripGpsPrefixFromLocationText } from "@/lib/strip-gps-location-text";
 
 type UpdateField = <K extends keyof FormData>(field: K, value: FormData[K]) => void;
 
@@ -10,8 +11,16 @@ export function applyListingToForm(
   updateField("title", listing.title || "");
   updateField("propertyType", listing.propertyType || "apartment");
   updateField("district", listing.district || "");
-  updateField("location", listing.location || "");
-  updateField("address", listing.address || listing.location || "");
+  updateField(
+    "location",
+    stripGpsPrefixFromLocationText(listing.location || ""),
+  );
+  updateField(
+    "address",
+    stripGpsPrefixFromLocationText(
+      listing.address || listing.location || "",
+    ),
+  );
   updateField("price", `${listing.price || ""}`);
   updateField("sqm", `${listing.sqm || ""}`);
   updateField("rooms", `${listing.rooms || ""}`);

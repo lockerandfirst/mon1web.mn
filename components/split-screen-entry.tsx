@@ -68,7 +68,7 @@ export function SplitScreenEntry() {
 
   return (
     <motion.div
-      className="h-screen w-screen flex overflow-hidden bg-black font-sans"
+      className="h-screen w-screen flex overflow-hidden bg-[#2a00ff] font-sans"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
@@ -81,7 +81,7 @@ export function SplitScreenEntry() {
         onMouseLeave={() => setHoveredSide(null)}
         onClick={() => handleRoleSelect("user")}
       >
-        <div className="absolute inset-0 bg-stone-950">
+        <div className="absolute inset-0 bg-[#2a00ff]">
           <video
             autoPlay
             muted
@@ -94,7 +94,7 @@ export function SplitScreenEntry() {
               type="video/mp4"
             />
           </video>
-          <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/40 to-black/90" />
+          <div className="absolute inset-0 bg-linear-to-b from-[#2a00ff]/25 via-[#2a00ff]/45 to-[#2a00ff]/95" />
         </div>
 
         <div className="relative z-10 h-full flex flex-col justify-center px-12 lg:px-24">
@@ -138,7 +138,7 @@ export function SplitScreenEntry() {
                     <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                       <Sparkles className="h-5 w-5 text-white" />
                     </div>
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-black rounded-full" />
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-[#2a00ff] rounded-full" />
                   </div>
                   <p className="text-white/90 text-sm font-medium pr-4">
                     {typedText}
@@ -152,7 +152,7 @@ export function SplitScreenEntry() {
                 >
                   <Button
                     size="lg"
-                    className="h-16 px-12 min-w-70 rounded-2xl bg-white text-black hover:bg-white/90 transition-all group/btn shadow-xl"
+                    className="h-16 px-12 min-w-70 rounded-2xl bg-white text-[#2a00ff] hover:bg-white/90 transition-all group/btn shadow-xl"
                   >
                     <span className="text-xl font-extrabold uppercase tracking-tight">
                       Байр хайх
@@ -184,7 +184,7 @@ export function SplitScreenEntry() {
         onMouseLeave={() => setHoveredSide(null)}
         onClick={() => handleRoleSelect("agent")}
       >
-        <div className="absolute inset-0 bg-zinc-950">
+        <div className="absolute inset-0 bg-[#2a00ff]">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
         </div>
 

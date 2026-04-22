@@ -17,62 +17,6 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
-  // #region agent log
-  useEffect(() => {
-    fetch("http://127.0.0.1:7834/ingest/78590180-74c3-4b1d-a39f-896d406574be", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Debug-Session-Id": "96ab0a",
-      },
-      body: JSON.stringify({
-        sessionId: "96ab0a",
-        runId: "pre-fix",
-        hypothesisId: "H3",
-        location: "components/header.tsx:31",
-        message: "Header state snapshot",
-        data: { pathname, scrolled, isSignedIn: Boolean(isSignedIn) },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-  }, [pathname, scrolled, isSignedIn]);
-  // #endregion
-
-  // #region agent log
-  useEffect(() => {
-    const headerEl = document.querySelector("header");
-    if (!headerEl || typeof ResizeObserver === "undefined") return;
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      const nextHeight = Math.round(entry.contentRect.height);
-      fetch(
-        "http://127.0.0.1:7834/ingest/78590180-74c3-4b1d-a39f-896d406574be",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Debug-Session-Id": "96ab0a",
-          },
-          body: JSON.stringify({
-            sessionId: "96ab0a",
-            runId: "pre-fix",
-            hypothesisId: "H5",
-            location: "components/header.tsx:57",
-            message: "Header height observed",
-            data: { pathname, nextHeight, scrolled },
-            timestamp: Date.now(),
-          }),
-        },
-      ).catch(() => {});
-    });
-
-    observer.observe(headerEl);
-    return () => observer.disconnect();
-  }, [pathname, scrolled]);
-  // #endregion
-
   // Scroll хийхэд Header-ийн өнгө өөрчлөгдөх эффект
   useEffect(() => {
     const handleScroll = () => {
@@ -82,30 +26,6 @@ export function Header() {
       // around one exact threshold and cause a resize loop.
       setScrolled((prev) => {
         const next = prev ? currentScrollY > 8 : currentScrollY > 24;
-        if (prev !== next) {
-          // #region agent log
-          fetch(
-            "http://127.0.0.1:7834/ingest/78590180-74c3-4b1d-a39f-896d406574be",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "X-Debug-Session-Id": "96ab0a",
-              },
-              body: JSON.stringify({
-                sessionId: "96ab0a",
-                runId: "pre-fix",
-                hypothesisId: "H1",
-                location: "components/header.tsx:50",
-                message: "Scrolled state changed",
-                data: { currentScrollY, prev, next },
-                timestamp: Date.now(),
-              }),
-            },
-          ).catch(() => {});
-          // #endregion
-        }
-
         return next;
       });
     };
@@ -143,6 +63,7 @@ export function Header() {
             <Image
               src="/ZAAAA.png"
               alt="Mon1 logo"
+              loading="eager"
               width={30}
               height={30}
               /* w-16: Mobile width (small & clean)
@@ -157,32 +78,6 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => {
-                  // #region agent log
-                  fetch(
-                    "http://127.0.0.1:7834/ingest/78590180-74c3-4b1d-a39f-896d406574be",
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                        "X-Debug-Session-Id": "96ab0a",
-                      },
-                      body: JSON.stringify({
-                        sessionId: "96ab0a",
-                        runId: "pre-fix",
-                        hypothesisId: "H6",
-                        location: "components/header.tsx:149",
-                        message: "Desktop nav link clicked",
-                        data: {
-                          href: link.href,
-                          pathnameBeforeClick: pathname,
-                        },
-                        timestamp: Date.now(),
-                      }),
-                    },
-                  ).catch(() => {});
-                  // #endregion
-                }}
                 className={cn(
                   "px-4 py-2 text-[16px] font-bold rounded-full transition-all",
                   pathname === link.href
@@ -234,7 +129,7 @@ export function Header() {
             <Link href="/add-property">
               <Button
                 size="sm"
-                className="gap-2 rounded-xl bg-[#2a00ff] px-4 font-bold text-white hover:bg-[#ff3bad]"
+                className="gap-2 rounded-xl bg-primary px-4 font-bold text-primary-foreground shadow-md shadow-primary/15 hover:opacity-95"
               >
                 <Plus className="h-4 w-4" />
                 Зар

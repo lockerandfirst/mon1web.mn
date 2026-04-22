@@ -31,7 +31,7 @@ export default function MapPage() {
             type="button"
             aria-label="Шүүлтүүрийн самбар хаах"
             onClick={() => filters.setShowListings(false)}
-            className="absolute inset-0 z-20 bg-slate-900/35 backdrop-blur-[1px] md:hidden"
+            className="absolute inset-0 z-20 bg-[#2a00ff]/25 backdrop-blur-[1px] md:hidden"
           />
         )}
 

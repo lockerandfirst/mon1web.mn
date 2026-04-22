@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Phone } from "lucide-react";
 
@@ -10,9 +10,11 @@ import {
   FormSection,
   FormStepper,
   StepNavigation,
-  type FormStepDefinition,
 } from "@/components/add-property/form-shell";
-import { PropertyTypeGrid } from "@/components/add-property/selection-grids";
+import {
+  DistrictGrid,
+  PropertyTypeGrid,
+} from "@/components/add-property/selection-grids";
 import { LISTING_PROPERTY_CATEGORIES } from "@/lib/property-types";
 import {
   createBuyRequestFromPayload,
@@ -20,22 +22,24 @@ import {
   writeBuyRequests,
 } from "@/lib/buy-requests";
 import { buildCreateBuyRequestPayload } from "@/lib/backend-contract";
+import { apiFetch } from "@/lib/backend-api";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-
-const DISTRICTS = ["ХУД", "БЗД", "СХД", "БГД", "СБД", "ЧД"];
 
 export default function BuyRequestPage() {
   const router = useRouter();
   const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
   const [step, setStep] = useState(1);
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<"idle" | "success">("idle");
 
   const [formData, setFormData] = useState({
+    title: "",
     propertyType: "apartment",
     district: "",
     location: "",
@@ -50,20 +54,7 @@ export default function BuyRequestPage() {
   });
 
   const isBarterRequest = formData.propertyType === "barter";
-
-  const buyRequestSteps = useMemo((): FormStepDefinition[] => {
-    return [
-      { step: 1, label: "Төрөл", hint: "Сонголт" },
-      {
-        step: 2,
-        label: isBarterRequest ? "Бартер" : "Санхүү",
-        hint: "Байршил",
-      },
-      { step: 3, label: "Дэлгэрэнгүй", hint: "Нийтлэх" },
-    ];
-  }, [isBarterRequest]);
-
-  const stepMeta = buyRequestSteps[step - 1];
+  const isLandRequest = formData.propertyType === "land";
 
   const nextLabel = step === 3 ? "Хүсэлт илгээх" : "Үргэлжлүүлэх";
 
@@ -87,11 +78,20 @@ export default function BuyRequestPage() {
           email: user.primaryEmailAddress?.emailAddress || "user@mon1.local",
         },
       });
-      const nextRequest = createBuyRequestFromPayload(requestPayload);
-
-      const currentRequests = readBuyRequests();
-      writeBuyRequests([nextRequest, ...currentRequests]);
-      setStatus("success");
+      try {
+        const token = await getToken();
+        await apiFetch("/api/buy-requests", {
+          method: "POST",
+          token,
+          body: requestPayload,
+        });
+        setStatus("success");
+      } catch {
+        const nextRequest = createBuyRequestFromPayload(requestPayload);
+        const currentRequests = readBuyRequests();
+        writeBuyRequests([nextRequest, ...currentRequests]);
+        setStatus("success");
+      }
     });
   };
 
@@ -101,22 +101,16 @@ export default function BuyRequestPage() {
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
-      <main className="container mx-auto px-3 pb-[max(6.5rem,env(safe-area-inset-bottom,0px)+5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.75rem)] sm:px-4 md:px-4 md:pb-12 md:pt-10 lg:py-12">
-        <div className="mx-auto max-w-4xl space-y-4 md:space-y-6 md:mt-2">
-          <div className="flex flex-col gap-1 md:gap-1.5">
-            <p className="text-[9px] font-black uppercase tracking-wide text-slate-400 md:hidden">
+      <main className="container mx-auto px-3 pb-[max(0rem,env(safe-area-inset-bottom,0px)+5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.75rem)] sm:px-4 md:px-4 md:pb-12 md:pt-10 lg:py-12">
+        <div className="mx-auto max-w-4xl space-y-3 md:space-y-6 md:mt-2">
+          <div className="flex flex-col items-center gap-0.5 md:gap-1">
+            <p className="w-full text-[9px] font-black uppercase tracking-wide text-slate-400 md:hidden">
               Худалдан авах хүсэлт
             </p>
             <FormStepper
               currentStep={step}
-              steps={buyRequestSteps}
               ariaLabel="Худалдан авах хүсэлтийн алхмууд"
             />
-            {stepMeta ? (
-              <p className="line-clamp-1 text-center text-[10px] font-bold text-slate-500 md:hidden">
-                <span className="text-[#2a00ff]">Одоо:</span> {stepMeta.label}
-              </p>
-            ) : null}
           </div>
 
           <motion.div
@@ -131,8 +125,19 @@ export default function BuyRequestPage() {
                 eyebrow="Хүсэлт"
                 title="Ямар үл хөдлөх"
                 accent="хайж байна вэ?"
-                description="Төрлөө сонгоод холбогдох утсаа оруулна уу — зар нэмэх урсгалтай ижил загвар."
+                description="Гарчиг, төрөл, холбогдох утсаа оруулна уу."
               >
+                <div className="mx-auto max-w-2xl space-y-2.5 md:space-y-3">
+                  <Label className="ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    Хүсэлтийн гарчиг
+                  </Label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => updateField("title", e.target.value)}
+                    placeholder="Жишээ: Хан-Уулд 3 өрөө байр авна"
+                    className="h-11 rounded-xl border-none bg-slate-50 px-4 text-sm font-bold text-slate-900 transition-all focus:ring-8 focus:ring-[#2a00ff]/5 md:h-16 md:rounded-3xl md:px-8 md:text-xl"
+                  />
+                </div>
                 <PropertyTypeGrid
                   value={formData.propertyType}
                   onChange={(v) => updateField("propertyType", v)}
@@ -160,36 +165,23 @@ export default function BuyRequestPage() {
                 eyebrow="Байршил"
                 title="Байршил &"
                 accent={isBarterRequest ? "Бартер" : "Төсөв"}
-                description="Дүүрэг, орчин, төсөв эсвэл бартерын нөхцлөө тодорхойлно уу."
+                description="Дүүргээ сонгоод хороолол, төсөв эсвэл бартерын нөхцлөө тодорхойлно уу."
               >
-                <div className="space-y-4 md:space-y-6">
-                  <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4">
-                    {DISTRICTS.map((district) => (
-                      <button
-                        key={district}
-                        type="button"
-                        onClick={() => updateField("district", district)}
-                        className={cn(
-                          "h-10 rounded-xl border-2 text-[10px] font-black uppercase tracking-wide transition-all md:h-16 md:rounded-3xl md:text-base md:tracking-widest",
-                          formData.district === district
-                            ? "scale-[1.02] border-[#2a00ff] bg-[#2a00ff]/5 text-[#2a00ff] shadow-lg shadow-[#2a00ff]/10"
-                            : "border-slate-50 bg-slate-50 text-slate-400 hover:border-slate-200 hover:bg-white",
-                        )}
-                      >
-                        {district}
-                      </button>
-                    ))}
-                  </div>
+                <div className="space-y-5 md:space-y-6">
+                  <DistrictGrid
+                    value={formData.district}
+                    onChange={(v) => updateField("district", v)}
+                  />
 
-                  <div className="mx-auto max-w-xl space-y-2.5 md:space-y-3">
-                    <label className="ml-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                      Байршил / Хороолол
-                    </label>
+                  <div className="space-y-3 md:space-y-4">
+                    <Label className="ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                      Хороолол эсвэл орчин
+                    </Label>
                     <Input
                       value={formData.location}
                       onChange={(e) => updateField("location", e.target.value)}
                       placeholder="Зайсан, Яармаг, 120 мянгат..."
-                    className="h-11 rounded-xl border-none bg-slate-50 px-4 text-sm font-bold md:h-16 md:rounded-3xl md:px-8 md:text-xl"
+                      className="h-12 rounded-2xl border-none bg-slate-50 px-4 text-sm font-bold text-[#1a0b3b] transition-all focus:ring-8 focus:ring-[#2a00ff]/5 md:h-16 md:rounded-3xl md:px-8 md:text-xl"
                     />
                   </div>
                 </div>
@@ -322,17 +314,24 @@ export default function BuyRequestPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-2 gap-2.5 md:gap-6">
-                      <div className="space-y-3">
-                        <label className="ml-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                          Өрөөний тоо
-                        </label>
-                        <Input
-                          value={formData.rooms}
-                          onChange={(e) => updateField("rooms", e.target.value)}
-                          className="h-11 rounded-xl border-none bg-slate-50 px-3.5 text-sm font-bold md:h-16 md:rounded-3xl md:px-8 md:text-xl"
-                        />
-                      </div>
+                    <div
+                      className={cn(
+                        "grid gap-2.5 md:gap-6",
+                        isLandRequest ? "grid-cols-1" : "grid-cols-2",
+                      )}
+                    >
+                      {!isLandRequest ? (
+                        <div className="space-y-3">
+                          <label className="ml-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            Өрөөний тоо
+                          </label>
+                          <Input
+                            value={formData.rooms}
+                            onChange={(e) => updateField("rooms", e.target.value)}
+                            className="h-11 rounded-xl border-none bg-slate-50 px-3.5 text-sm font-bold md:h-16 md:rounded-3xl md:px-8 md:text-xl"
+                          />
+                        </div>
+                      ) : null}
                       <div className="space-y-3">
                         <label className="ml-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
                           Талбай (м²)
@@ -383,20 +382,21 @@ export default function BuyRequestPage() {
 
 function SuccessUI({ onHome }: { onHome: () => void }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 py-8 text-center sm:px-6">
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
+        className="w-full max-w-sm sm:max-w-md"
       >
-        <div className="mx-auto flex h-40 w-40 rotate-12 items-center justify-center rounded-[3rem] bg-green-50 text-green-500">
-          <CheckCircle2 className="h-20 w-20" />
+        <div className="mx-auto flex h-24 w-24 rotate-12 items-center justify-center rounded-4xl bg-green-50 text-green-500 sm:h-40 sm:w-40 sm:rounded-[3rem]">
+          <CheckCircle2 className="h-12 w-12 sm:h-20 sm:w-20" />
         </div>
-        <h2 className="mt-12 text-6xl font-black uppercase leading-none tracking-tighter italic">
+        <h2 className="mt-8 text-3xl font-black uppercase leading-tight tracking-tight italic sm:mt-12 sm:text-6xl sm:leading-none sm:tracking-tighter">
           Амжилттай <br /> <span className="text-[#2a00ff]">бүртгэгдлээ!</span>
         </h2>
         <Button
           onClick={onHome}
-          className="mt-16 h-20 w-full max-w-sm rounded-4xl bg-[#2a00ff] font-black uppercase tracking-widest text-white shadow-2xl"
+          className="mt-8 h-14 w-full rounded-3xl bg-[#2a00ff] text-sm font-black uppercase tracking-wider text-white shadow-xl sm:mt-16 sm:h-20 sm:max-w-sm sm:rounded-4xl sm:text-base sm:tracking-widest sm:shadow-2xl"
         >
           Нүүр хуудас руу
         </Button>

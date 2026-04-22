@@ -16,7 +16,8 @@ import { FORM_STEPS } from "./constants";
 export type FormStepDefinition = {
   step: number;
   label: string;
-  hint: string;
+  /** Shown on mobile under the stepper; hidden on desktop when using compact stepper. */
+  hint?: string;
 };
 
 export function FormStepper({
@@ -30,17 +31,20 @@ export function FormStepper({
 }) {
   const items = steps ?? FORM_STEPS;
   const maxStep = items.length;
-  const progressPct =
-    maxStep <= 1 ? 100 : ((currentStep - 1) / (maxStep - 1)) * 100;
 
   return (
     <div
-      className="mt-6 rounded-2xl border border-slate-200/80 bg-white px-2 py-1.5 shadow-sm ring-1 ring-slate-100/70 md:mt-14 md:rounded-[3rem] md:border-slate-100/90 md:px-7 md:py-5 md:shadow-[0_45px_90px_-55px_rgba(42,0,255,0.45)] md:ring-0"
+      className={cn(
+        "mx-auto mt-1 w-full max-w-lg rounded-2xl border border-slate-200/70 bg-white/95 px-1 py-1 shadow-sm sm:max-w-7xl md:mt-10 md:rounded-3xl md:border-slate-200/80 md:px-4 md:py-3 md:shadow-sm",
+      )}
       role="navigation"
       aria-label={ariaLabel}
     >
-      {/* Phone: зөвхөн алхамын дугаар — 1 · 2 · 3 */}
-      <div className="flex items-stretch gap-1 md:hidden" role="list">
+      {/* Гар утас: сегмент + шошго — алхмууд тод харагдана */}
+      <div
+        className="flex gap-0.5 rounded-xl bg-slate-100/95 p-0.5 md:hidden"
+        role="list"
+      >
         {items.map((item) => {
           const done = currentStep > item.step;
           const active = currentStep === item.step;
@@ -49,72 +53,68 @@ export function FormStepper({
               key={item.step}
               role="listitem"
               aria-current={active ? "step" : undefined}
-              aria-label={`Алхам ${item.step}`}
+              aria-label={`Алхам ${item.step}: ${item.label}`}
               className={cn(
-                "flex min-h-8 min-w-0 flex-1 items-center justify-center rounded-lg text-[11px] font-black tabular-nums transition-colors",
-                active && "bg-[#2a00ff] text-white",
-                done && !active && "bg-emerald-50 text-emerald-700",
-                !done && !active && "bg-slate-100 text-slate-400",
+                "flex min-h-10 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1 transition-all duration-200",
+                active &&
+                  "bg-white text-[#2a00ff] shadow-sm ring-1 ring-slate-200/60",
+                done &&
+                  !active &&
+                  "text-[#2a00ff] [&>span:last-child]:text-[#ff3bad]/90",
+                !done && !active && "text-slate-400",
               )}
             >
-              {done && !active ? (
-                <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              ) : (
-                item.step
-              )}
+              <span className="flex h-5 items-center text-[11px] font-black tabular-nums leading-none">
+                {done && !active ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
+                ) : (
+                  item.step
+                )}
+              </span>
+              <span className="max-w-full truncate text-[8px] font-bold uppercase leading-none tracking-wide">
+                {item.label}
+              </span>
             </div>
           );
         })}
       </div>
 
-      <div className="mb-4 hidden h-2 overflow-hidden rounded-full bg-slate-100 md:block">
-        <div
-          className="h-full rounded-full bg-linear-to-r from-[#ff3bad] to-[#2a00ff] transition-[width] duration-500 ease-out"
-          style={{ width: `${progressPct}%` }}
-        />
-      </div>
-
-      <div className="mx-auto hidden w-full items-center justify-between gap-2 md:flex">
-        {items.map((item) => (
-          <div
-            key={item.step}
-            className="flex min-w-0 flex-1 items-center gap-2 lg:gap-3"
-          >
-            <div
-              className={cn(
-                "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-black shadow-sm transition-all lg:h-11 lg:w-11",
-                currentStep >= item.step
-                  ? "rotate-3 border-[#2a00ff] bg-[#2a00ff] text-white"
-                  : "border-[#ffe3f5] bg-[#fff7fc] text-[#ff9ce0]",
-              )}
-            >
-              {currentStep > item.step ? (
-                <CheckCircle2 className="h-5 w-5" />
-              ) : (
-                `0${item.step}`
-              )}
-            </div>
-            <div className="min-w-0 flex-col">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                Алхам
-              </span>
+      {/* Desktop: төвд байрлана; зураас зөвхөн алхмуудын хооронд (3-ын дараа хоосон зайгүй) */}
+      <div className="mx-auto hidden w-full max-w-7xl flex-wrap items-center justify-between gap-y-2 md:flex">
+        {items.map((item, idx) => (
+          <div key={item.step} className="flex items-center">
+            <div className="flex shrink-0 items-center gap-2 px-0.5">
+              <div
+                className={cn(
+                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-xs font-black shadow-sm transition-all",
+                  currentStep >= item.step
+                    ? "border-[#2a00ff] bg-[#2a00ff] text-white"
+                    : "border-slate-200 bg-slate-50 text-slate-400",
+                )}
+              >
+                {currentStep > item.step ? (
+                  <CheckCircle2 className="h-4 w-4" aria-hidden />
+                ) : (
+                  item.step
+                )}
+              </div>
               <span
                 className={cn(
-                  "text-xs font-black uppercase tracking-[0.2em] lg:text-sm",
+                  "max-w-22 truncate text-xs font-bold tracking-tight sm:max-w-none",
                   currentStep >= item.step
                     ? "text-[#2a00ff]"
-                    : "text-[#ff9ce0]",
+                    : "text-slate-400",
                 )}
               >
                 {item.label}
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-300">
-                {item.hint}
-              </span>
             </div>
-            {item.step < maxStep && (
-              <div className="mx-1 hidden h-0.5 min-w-8 flex-1 bg-[#f4ecff] sm:block lg:mx-2" />
-            )}
+            {idx < maxStep - 1 ? (
+              <div
+                className="mx-2 h-px w-9 shrink-0 bg-slate-200/90 sm:mx-3 sm:w-20"
+                aria-hidden
+              />
+            ) : null}
           </div>
         ))}
       </div>
@@ -148,7 +148,9 @@ export function FormSection({
           {description}
         </p>
       </div>
-      <CardContent className="space-y-5 p-3 md:space-y-6 md:p-7">{children}</CardContent>
+      <CardContent className="space-y-5 p-3 md:space-y-6 md:p-7">
+        {children}
+      </CardContent>
     </Card>
   );
 }
@@ -250,7 +252,8 @@ export function StepNavigation({
         className={cn(
           "rounded-xl bg-[#2a00ff] text-[11px] font-black uppercase tracking-widest text-white shadow-2xl shadow-[#2a00ff]/25 transition-all hover:-translate-y-1 hover:bg-[#ff3bad] md:rounded-[1.4rem] md:text-sm md:tracking-[0.2em]",
           onBack ? "h-10 flex-1 md:h-14" : "h-10 w-full md:h-14",
-          submit && "h-11 rounded-2xl text-[11px] tracking-widest md:h-16 md:rounded-3xl md:text-base md:tracking-[0.18em]",
+          submit &&
+            "h-11 rounded-2xl text-[11px] tracking-widest md:h-16 md:rounded-3xl md:text-base md:tracking-[0.18em]",
         )}
       >
         {pending ? (

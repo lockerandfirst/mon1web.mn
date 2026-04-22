@@ -2,6 +2,7 @@ import {
   appendPaymentMethodsToDescription,
   resolvePayloadPaymentMethod,
 } from "./create-listing-payment";
+import { stripGpsPrefixFromLocationText } from "./strip-gps-location-text";
 
 export interface ApiListMeta {
   page: number;
@@ -106,6 +107,8 @@ export interface CreateListingRequestPayload {
   address: string;
   price: number;
   paymentMethod: BackendPaymentMethod;
+  /** м² үнэ — backend `price_per_sqm` */
+  pricePerSqm: number;
   sqm: number;
   rooms: number;
   bathrooms: number;
@@ -120,6 +123,8 @@ export interface CreateListingRequestPayload {
   serviceType: BackendServiceType;
   selectedAgentId: string | null;
   submittedBy: BackendSubmittedBy;
+  /** Backend `latitude` / `longitude` */
+  coordinates: BackendCoordinates;
 }
 
 export interface CreateListingPayloadInput {
@@ -147,6 +152,10 @@ export interface CreateListingPayloadInput {
   serviceType: BackendServiceType;
   selectedAgentId: string | null;
   submittedBy: BackendSubmittedBy;
+  /** Газрын зураг / GPS — байхгүй бол build үед default */
+  coordinates?: BackendCoordinates;
+  /** Боловсруулсан м² үнэ; байхгүй бол үнэ ÷ талбай */
+  pricePerSqm?: string | number;
 }
 
 export interface BackendBuyRequest {
@@ -164,10 +173,10 @@ export interface BackendBuyRequest {
   workflowStatus: BackendBuyRequestWorkflowStatus;
   submittedBy: BackendSubmittedBy;
   assignedAgentId: string | null;
-  image: string;
 }
 
 export interface CreateBuyRequestPayload {
+  title: string;
   propertyType: string;
   district: string;
   location: string;
@@ -183,6 +192,7 @@ export interface CreateBuyRequestPayload {
 }
 
 export interface CreateBuyRequestPayloadInput {
+  title?: string;
   propertyType: string;
   district: string;
   location: string;
@@ -263,6 +273,27 @@ function toImageUrls(value?: string | string[]) {
 export function buildCreateListingPayload(
   input: CreateListingPayloadInput,
 ): CreateListingRequestPayload {
+  const sqmNum = toPositiveNumber(input.sqm, 1);
+  const priceNum = toPositiveNumber(input.price, 0);
+  const computedPricePerSqm =
+    sqmNum > 0 && priceNum > 0 ? Math.round(priceNum / sqmNum) : 0;
+  const pricePerSqm =
+    input.pricePerSqm !== undefined && input.pricePerSqm !== ""
+      ? typeof input.pricePerSqm === "number"
+        ? Math.round(input.pricePerSqm)
+        : Math.round(toPositiveNumber(input.pricePerSqm, 0))
+      : computedPricePerSqm;
+
+  const coords = input.coordinates;
+  const coordinates: BackendCoordinates =
+    coords &&
+    Number.isFinite(coords.lat) &&
+    Number.isFinite(coords.lng) &&
+    Math.abs(coords.lat) <= 90 &&
+    Math.abs(coords.lng) <= 180
+      ? { lat: coords.lat, lng: coords.lng }
+      : { lat: 47.9184, lng: 106.9177 };
+
   return {
     title: toListingTitle(
       input.title,
@@ -272,13 +303,18 @@ export function buildCreateListingPayload(
     ),
     propertyType: input.propertyType || "apartment",
     district: input.district.trim(),
-    location: (input.location || input.address).trim(),
-    address: input.address.trim() || input.location.trim(),
-    price: toPositiveNumber(input.price, 0),
+    location: stripGpsPrefixFromLocationText(
+      (input.location || input.address).trim(),
+    ),
+    address: stripGpsPrefixFromLocationText(
+      (input.address.trim() || input.location.trim()),
+    ),
+    price: priceNum,
     paymentMethod: resolvePayloadPaymentMethod(
       input,
     ) as BackendPaymentMethod,
-    sqm: toPositiveNumber(input.sqm, 1),
+    pricePerSqm: pricePerSqm > 0 ? pricePerSqm : computedPricePerSqm,
+    sqm: sqmNum,
     rooms: toRoomCount(input.rooms, 1),
     bathrooms: toPositiveNumber(input.bathrooms, 1),
     floor: toPositiveNumber(input.floor, 1),
@@ -296,9 +332,10 @@ export function buildCreateListingPayload(
     nearbyServiceIds: input.surroundings ?? [],
     nearbyServices: input.nearbyServices ?? [],
     serviceType: input.serviceType,
-    selectedAgentId:
-      input.serviceType === "agent" ? input.selectedAgentId ?? null : null,
+    /** Агент сонгохгүй — бүх зар backend дээр `selected_agent_id` null (агент «Би заръя»-аар авна). */
+    selectedAgentId: null,
     submittedBy: input.submittedBy,
+    coordinates,
   };
 }
 
@@ -306,8 +343,13 @@ export function buildCreateBuyRequestPayload(
   input: CreateBuyRequestPayloadInput,
 ): CreateBuyRequestPayload {
   const isBarter = input.propertyType === "barter";
+  const fallbackTitle =
+    input.propertyType === "barter"
+      ? `${input.district || input.location || "Тодорхойгүй байршил"} орчимд бартер сонирхоно`
+      : `${input.district.trim()} дэх ${toRoomCount(input.rooms, 1)} өрөө ${input.propertyType} авна`;
 
   return {
+    title: input.title?.trim() || fallbackTitle,
     propertyType: input.propertyType || "apartment",
     district: input.district.trim(),
     location: input.location.trim(),
@@ -324,3 +366,11 @@ export function buildCreateBuyRequestPayload(
     submittedBy: input.submittedBy,
   };
 }
+
+/**
+ * Сервер талд хийх зүйлс (одоо ихэнх нь `lib/data`, `lib/marketplace` localStorage):
+ * - Clerk-ийн session JWT-ээр API хамгаалах (`Authorization: Bearer …`).
+ * - `backend-api.examples.json` дахь REST замууд + энэ файлах `Backend*` төрлүүдтэй нийцүүлэх.
+ * - Зар, худалдан авах хүсэлт, агентын профайл, файл хадгалах (S3/CDN), workflow (draft → published).
+ * - Хайлт/шүүлт, хуудаслалт (`ApiListMeta`), газрын зураг координат.
+ */

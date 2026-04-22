@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useState } from "react";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,15 +18,20 @@ import {
   ChevronLeft,
   ChevronRight,
   Hash,
+  UserRound,
 } from "lucide-react";
 import { Apartment, formatPrice } from "@/lib/data";
+import { apiFetch } from "@/lib/backend-api";
 import { cn } from "@/lib/utils";
 
 interface ApartmentCardProps {
   apartment: Apartment;
   index?: number;
   variant?: "default" | "compact";
+  agentDisplayMode?: "agent" | "user";
   onCardClick?: (apartment: Apartment) => void;
+  /** Card-ийн үндсэн даралт өөр зам руу явна; товчийг тусад нь барихад ашиглана */
+  onActionClick?: (apartment: Apartment) => void;
   actionLabel?: string;
 }
 
@@ -34,12 +40,21 @@ export const ApartmentCard = memo(
     apartment,
     index = 0,
     variant = "default",
+    agentDisplayMode = "agent",
     onCardClick,
+    onActionClick,
     actionLabel = "Үзэх",
   }: ApartmentCardProps) => {
     const [isFavorite, setIsFavorite] = useState(false);
     const [currentImg, setCurrentImg] = useState(0);
+    const [agentAvatarFallback, setAgentAvatarFallback] = useState(false);
+    const { isSignedIn } = useUser();
+    const { getToken } = useAuth();
     const router = useRouter();
+    const safeAgentAvatar =
+      !agentAvatarFallback && apartment.agent.avatar?.trim()
+        ? apartment.agent.avatar.trim()
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent((apartment.agent.name || "Agent").slice(0, 24))}&size=128&background=e2e8f0&color=334155`;
 
     const handleCardClick = () => {
       if (onCardClick) {
@@ -66,17 +81,36 @@ export const ApartmentCard = memo(
         );
     };
 
-    const handleFavorite = (e: React.MouseEvent) => {
+    const handleFavorite = async (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      setIsFavorite(!isFavorite);
+      if (!isSignedIn) {
+        router.push("/sign-in");
+        return;
+      }
+
+      const nextFavorite = !isFavorite;
+      setIsFavorite(nextFavorite);
+
+      try {
+        const token = await getToken();
+        await apiFetch("/api/saved-listings", {
+          method: nextFavorite ? "POST" : "DELETE",
+          token,
+          body: {
+            listingId: apartment.id,
+          },
+        });
+      } catch {
+        setIsFavorite(!nextFavorite);
+      }
     };
 
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: index * 0.05 }}
+        transition={{ duration: 0.24, delay: 0 }}
         className={cn(
           "h-full w-full cursor-pointer",
           variant === "compact" && "lg:[&>div]:flex lg:[&>div]:items-stretch",
@@ -120,7 +154,6 @@ export const ApartmentCard = memo(
               ))}
             </div>
 
-            {/* Price Tag */}
             <div className="absolute bottom-2 left-2 z-20 max-md:max-w-[58%] md:bottom-4 md:left-4">
               <div className="rounded-lg border border-white/10 bg-[#2a00ff]/90 px-2 py-1 shadow-xl backdrop-blur-md md:rounded-2xl md:px-4 md:py-2 md:shadow-2xl">
                 <p className="text-sm font-black leading-none tracking-tight text-white md:text-lg md:tracking-tighter">
@@ -241,29 +274,58 @@ export const ApartmentCard = memo(
             <div className="mt-auto flex min-w-0 items-center justify-between gap-1.5 pt-0.5 md:gap-4 md:pt-0">
               <div className="flex min-w-0 flex-1 items-center gap-1.5 md:max-w-none md:flex-none md:gap-3">
                 <div className="relative h-8 w-8 shrink-0 md:h-9 md:w-9">
-                  <img
-                    src={apartment.agent.avatar}
-                    className="h-full w-full rounded-full border border-slate-200 object-cover shadow-sm"
-                    alt="Agent"
-                  />
+                  {agentDisplayMode === "user" ? (
+                    <div className="flex h-full w-full items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-500 shadow-sm">
+                      <UserRound className="h-4 w-4 md:h-5 md:w-5" />
+                    </div>
+                  ) : (
+                    <img
+                      src={safeAgentAvatar}
+                      className="h-full w-full rounded-full border border-slate-200 object-cover shadow-sm"
+                      alt="Agent"
+                      onError={() => setAgentAvatarFallback(true)}
+                    />
+                  )}
                   <div className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-white bg-[#2a00ff] md:h-2.5 md:w-2.5" />
                 </div>
-                <div className="flex min-w-0 flex-col leading-none">
-                  <span className="truncate text-[11px] font-black uppercase tracking-tight text-slate-900 md:text-xs">
-                    {apartment.agent.name.split(" ")[0]}
-                  </span>
-                  <div className="mt-0.5 flex items-center gap-1 md:mt-1">
-                    <Star className="h-2 w-2 fill-[#ff3bad] text-[#ff3bad] md:h-2.5 md:w-2.5" />
-                    <span className="text-[10px] font-black text-slate-400 md:text-[10px]">
-                      {apartment.agent.rating}
+                {agentDisplayMode === "agent" ? (
+                  <div className="flex min-w-0 flex-col leading-none">
+                    <span className="truncate text-[11px] font-black uppercase tracking-tight text-slate-900 md:text-xs">
+                      {apartment.agent.name.split(" ")[0]}
+                    </span>
+                    <div className="mt-0.5 flex items-center gap-1 md:mt-1">
+                      <Star className="h-2 w-2 fill-[#ff3bad] text-[#ff3bad] md:h-2.5 md:w-2.5" />
+                      <span className="text-[10px] font-black text-slate-400 md:text-[10px]">
+                        {apartment.agent.rating}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex min-w-0 flex-col leading-none">
+                    <span className="truncate text-[11px] font-black uppercase tracking-tight text-slate-900 md:text-xs">
+                      Хэрэглэгч
                     </span>
                   </div>
-                </div>
+                )}
               </div>
 
               <Button
+                type="button"
                 size="sm"
                 className="h-8 max-md:min-w-15 shrink-0 rounded-lg bg-[#2a00ff] px-3 text-[10px] font-black uppercase tracking-wide text-white shadow-md transition-all hover:bg-[#ff3bad] md:h-10 md:rounded-xl md:px-6 md:text-[10px] md:tracking-widest md:shadow-lg"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (onActionClick) {
+                    onActionClick(apartment);
+                    return;
+                  }
+                  if (onCardClick) {
+                    onCardClick(apartment);
+                    return;
+                  }
+                  router.push(`/apartment/${apartment.id}`);
+                }}
               >
                 {actionLabel}
               </Button>

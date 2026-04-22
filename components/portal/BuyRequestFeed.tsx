@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useUser } from "@clerk/nextjs";
-import { MapPin } from "lucide-react";
+import { useAuth, useUser } from "@clerk/nextjs";
+import { CheckCircle2, Home, MapPin, Sparkles } from "lucide-react";
 
 import type { AgentPortalPickListing } from "@/components/portal/portal-types";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { isAgent } from "@/lib/auth";
-import {
-  type BuyRequest,
-  persistBuyRequestRecommendation,
-} from "@/lib/buy-requests";
+import { apiFetch } from "@/lib/backend-api";
+import { type BuyRequest } from "@/lib/buy-requests";
 import { getPropertyTypeLabel } from "@/lib/property-types";
 
 export function BuyRequestFeed({
@@ -33,37 +31,48 @@ export function BuyRequestFeed({
   onRefresh: () => void;
 }) {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const canAct = isAgent({ publicMetadata: user?.publicMetadata });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [target, setTarget] = useState<BuyRequest | null>(null);
   const [detailTarget, setDetailTarget] = useState<BuyRequest | null>(null);
   const [pickedId, setPickedId] = useState<string | null>(null);
+  const [recommendSubmitting, setRecommendSubmitting] = useState(false);
   const sorted = useMemo(
     () => [...requests].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     [requests],
   );
 
-  const submitRecommend = () => {
+  const submitRecommend = async () => {
     if (!target || !pickedId || !connectedAgentId) return;
     const pick = agentPickListings.find((p) => p.id === pickedId);
     if (!pick) return;
-    persistBuyRequestRecommendation(target.id, {
-      listingId: pick.id,
-      listingTitle: pick.title,
-      agentId: connectedAgentId,
-    });
-    onRefresh();
-    setDialogOpen(false);
-    setTarget(null);
-    setPickedId(null);
+    setRecommendSubmitting(true);
+    try {
+      const token = await getToken();
+      if (!token) return;
+      await apiFetch(`/api/buy-requests/${target.id}/recommendations`, {
+        method: "POST",
+        token,
+        body: { listingId: pick.id },
+      });
+      onRefresh();
+      setDialogOpen(false);
+      setTarget(null);
+      setPickedId(null);
+    } catch {
+      /* toast optional */
+    } finally {
+      setRecommendSubmitting(false);
+    }
   };
 
   const pickCls = (on: boolean) =>
-    `flex w-full flex-col rounded-3xl border px-4 py-3 text-left transition-colors ${
+    `group flex w-full flex-col rounded-3xl h-30 border p-3 text-left transition-all duration-200 ${
       on
-        ? "border-[#2a00ff] bg-[#f5f3ff]"
-        : "border-slate-200 bg-slate-50 hover:border-[#2a00ff]/40"
+        ? "border-[#2a00ff] bg-[#2a00ff] shadow-lg shadow-[#2a00ff]/20 ring-2 ring-[#2a00ff]/10"
+        : "border-slate-200 bg-white hover:border-[#2a00ff]/40 hover:bg-slate-50"
     }`;
 
   return (
@@ -88,14 +97,12 @@ export function BuyRequestFeed({
                 setDetailOpen(true);
               }}
             >
-              <div className="relative aspect-16/10 bg-slate-50">
-                <img
-                  src={request.image}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-                <span className="absolute left-4 top-4 rounded-full bg-[#ff3bad] px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white">
+              <div className="flex items-center justify-between border-b border-[#ff3bad]/15 bg-[#fff7fc] px-5 py-3">
+                <span className="rounded-full bg-[#ff3bad] px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white">
                   Авна
+                </span>
+                <span className="text-[11px] font-black uppercase tracking-wide text-[#ff3bad]">
+                  {getPropertyTypeLabel(request.propertyType)}
                 </span>
               </div>
               <div className="flex flex-1 flex-col p-5">
@@ -115,8 +122,7 @@ export function BuyRequestFeed({
                     : `${request.budget.toLocaleString("mn-MN")}₮`}
                 </p>
                 <p className="mt-1 text-[11px] font-semibold text-slate-400">
-                  {getPropertyTypeLabel(request.propertyType)} · {request.rooms}{" "}
-                  өрөө · {request.sqm}м²
+                  {request.rooms} өрөө · {request.sqm}м²
                 </p>
                 {(request.agentRecommendations?.length ?? 0) > 0 ? (
                   <p className="mt-2 text-xs font-bold text-[#ff3bad]">
@@ -149,23 +155,33 @@ export function BuyRequestFeed({
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent
-          overlayClassName="bg-black/20 backdrop-blur-[1px]"
-          className="max-w-lg rounded-4xl border-slate-200 bg-white text-slate-900 shadow-sm"
+          overlayClassName="bg-[#2a00ff]/20 backdrop-blur-[1px]"
+          className="pointer-events-auto z-80 w-full max-w-[calc(100vw-2rem)] md:max-w-2xl rounded-4xl border-[#2a00ff]/15 bg-white text-slate-900 shadow-xl"
         >
           <DialogHeader>
-            <DialogTitle className="font-black text-slate-900">
-              Өөрийн зар холбох
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#2a00ff]/20 bg-[#f5f3ff] px-4 py-1.5 text-xs font-black uppercase tracking-wide text-[#2a00ff]">
+              <Sparkles className="h-4 w-4" />
+              Санал болгох
+            </div>
+            <DialogTitle className="pt-2 text-xl font-black text-slate-900 md:text-2xl">
+              Миний заруудаас сонгох
             </DialogTitle>
-            <DialogDescription className="text-sm font-semibold text-slate-500">
-              {target?.title}
+            <DialogDescription className="wrap-break-word text-base font-semibold text-slate-500">
+              Хүсэлт: {target?.title}
             </DialogDescription>
           </DialogHeader>
           {agentPickListings.length === 0 ? (
-            <p className="text-sm font-semibold text-slate-500">
-              Зар олдсонгүй. «Миний зарууд»-аас зар нэмнэ үү.
-            </p>
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-6 text-center">
+              <p className="text-base font-black text-slate-700 md:text-lg">
+                «Миний зарууд» дээр санал болгох зар алга
+              </p>
+              <p className="mt-2 text-sm font-semibold text-slate-500 md:text-base">
+                Эхлээд «Би заръя»-аар авсан зарыг нэмээд дараа нь эндээс
+                сонгоно.
+              </p>
+            </div>
           ) : (
-            <ul className="max-h-64 space-y-2 overflow-y-auto pr-1">
+            <ul className="max-h-[60vh] space-y-3 overflow-y-auto pr-1.5">
               {agentPickListings.map((row) => (
                 <li key={`${row.source}-${row.id}`}>
                   <Button
@@ -173,12 +189,68 @@ export function BuyRequestFeed({
                     onClick={() => setPickedId(row.id)}
                     className={pickCls(pickedId === row.id)}
                   >
-                    <span className="text-sm font-black text-slate-900">
-                      {row.title}
-                    </span>
-                    <span className="mt-1 text-xs font-bold text-slate-500">
-                      {row.district} · {row.price.toLocaleString("mn-MN")}₮
-                    </span>
+                    <div className="flex w-full items-start gap-4">
+                      {/* Thumbnail */}
+                      <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-2xl border border-black/5 bg-slate-100 shadow-sm md:h-24 md:w-32">
+                        <img
+                          src={row.imageUrl || "/placeholder.jpg"}
+                          alt={row.title}
+                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        />
+                        {pickedId === row.id && (
+                          <div className="absolute inset-0 flex items-center justify-center scale-100 bg-[#000000]/20">
+                            <CheckCircle2 className="h-8 w-8 text-white drop-shadow-md" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content Area */}
+                      <div className="flex min-w-0 flex-1 flex-col justify-between self-stretch py-1">
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <p
+                              className={`line-clamp-1 text-sm font-black uppercase tracking-wider ${
+                                pickedId === row.id
+                                  ? "text-white/70"
+                                  : "text-[#2a00ff]"
+                              }`}
+                            >
+                              {row.district}
+                            </p>
+                            <div
+                              className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
+                                pickedId === row.id
+                                  ? "bg-white/20 text-white"
+                                  : "bg-slate-100 text-slate-500"
+                              }`}
+                            >
+                              <Home className="h-3 w-3" />
+                              Миний зар
+                            </div>
+                          </div>
+
+                          <p
+                            className={`line-clamp-2 break-words text-base font-black leading-tight ${
+                              pickedId === row.id
+                                ? "text-white"
+                                : "text-slate-900"
+                            }`}
+                          >
+                            {row.title}
+                          </p>
+                        </div>
+
+                        <p
+                          className={`text-lg font-black ${
+                            pickedId === row.id
+                              ? "text-white"
+                              : "text-[#1a0b3b]"
+                          }`}
+                        >
+                          {row.price.toLocaleString("mn-MN")}₮
+                        </p>
+                      </div>
+                    </div>
                   </Button>
                 </li>
               ))}
@@ -188,12 +260,15 @@ export function BuyRequestFeed({
             <Button
               type="button"
               disabled={
-                !pickedId || !connectedAgentId || agentPickListings.length === 0
+                recommendSubmitting ||
+                !pickedId ||
+                !connectedAgentId ||
+                agentPickListings.length === 0
               }
               className="h-11 w-full rounded-4xl bg-[#2a00ff] font-black text-white hover:bg-[#2400d9] disabled:opacity-50"
-              onClick={submitRecommend}
+              onClick={() => void submitRecommend()}
             >
-              Илгээх
+              {recommendSubmitting ? "Илгээж байна…" : "Илгээх"}
             </Button>
             <Button
               type="button"
@@ -209,7 +284,7 @@ export function BuyRequestFeed({
 
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
         <DialogContent
-          overlayClassName="bg-black/20 backdrop-blur-[1px]"
+          overlayClassName="bg-[#2a00ff]/20 backdrop-blur-[1px]"
           className="max-w-md rounded-4xl border-slate-200 bg-white text-slate-900 shadow-sm"
         >
           <DialogHeader>

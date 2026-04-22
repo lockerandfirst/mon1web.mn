@@ -113,7 +113,7 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
   return (
     <div
       ref={containerRef}
-      className={`relative bg-neutral-900 rounded-xl overflow-hidden ${
+      className={`relative bg-[#2a00ff] rounded-xl overflow-hidden ${
         isFullscreen ? "fixed inset-0 z-50 rounded-none" : "aspect-video"
       }`}
     >
@@ -145,7 +145,7 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
         </div>
       </div>
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-sm rounded-full px-4 py-2">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#2a00ff]/70 backdrop-blur-sm rounded-full px-4 py-2">
         <div className="flex items-center gap-3">
           <span className="text-white/80 text-sm">
             {Math.round((currentFrame / totalFrames) * 360)}°
@@ -160,7 +160,7 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
       </div>
 
       {showInstructions && (
-        <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 bg-[#2a00ff]/35 flex items-center justify-center pointer-events-none">
           <div className="text-center text-white">
             <Move className="h-12 w-12 mx-auto mb-3 animate-pulse" />
             <p className="text-lg font-medium">Чирж эргүүлнэ үү</p>
@@ -173,7 +173,7 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"
+          className="bg-[#2a00ff]/70 hover:bg-[#2300d9]/85 text-white backdrop-blur-sm"
           onClick={() => setIsAutoRotate(!isAutoRotate)}
         >
           {isAutoRotate ? (
@@ -185,7 +185,7 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"
+          className="bg-[#2a00ff]/70 hover:bg-[#2300d9]/85 text-white backdrop-blur-sm"
           onClick={handleZoomOut}
           disabled={zoom <= 0.5}
         >
@@ -194,7 +194,7 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"
+          className="bg-[#2a00ff]/70 hover:bg-[#2300d9]/85 text-white backdrop-blur-sm"
           onClick={handleZoomIn}
           disabled={zoom >= 2}
         >
@@ -203,7 +203,7 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"
+          className="bg-[#2a00ff]/70 hover:bg-[#2300d9]/85 text-white backdrop-blur-sm"
           onClick={handleReset}
         >
           <RotateCcw className="h-4 w-4" />
@@ -211,7 +211,7 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"
+          className="bg-[#2a00ff]/70 hover:bg-[#2300d9]/85 text-white backdrop-blur-sm"
           onClick={toggleFullscreen}
         >
           {isFullscreen ? (
@@ -224,7 +224,7 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
 
       {/* Title */}
       {title && (
-        <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2">
+        <div className="absolute top-4 left-4 bg-[#2a00ff]/70 backdrop-blur-sm rounded-lg px-3 py-2">
           <p className="text-white text-sm font-medium">{title}</p>
         </div>
       )}
@@ -238,7 +238,7 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute bottom-4 right-4 bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"
+        className="absolute bottom-4 right-4 bg-[#2a00ff]/70 hover:bg-[#2300d9]/85 text-white backdrop-blur-sm"
         onClick={() => setShowInstructions(true)}
       >
         <Info className="h-4 w-4" />
