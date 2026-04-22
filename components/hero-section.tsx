@@ -1,8 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { SignInButton, useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { LISTING_PROPERTY_CATEGORIES } from "@/lib/property-types";
+import { clerkAppearance } from "@/lib/clerk-theme";
 import {
   Building2,
   Building,
@@ -31,6 +33,7 @@ const categoryIcons = {
 
 export function HeroSection() {
   const router = useRouter();
+  const { isSignedIn } = useAuth();
 
   const openCategory = (category: string) => {
     router.push(`/listings?category=${category}`);
@@ -98,33 +101,79 @@ export function HeroSection() {
             "max-sm:mb-6 max-sm:flex-col max-sm:gap-2.5",
           ].join(" ")}
         >
-          <button
-            type="button"
-            onClick={() => router.push("/add-property")}
-            className={[
-              "flex h-14 items-center gap-2 rounded-2xl border-2 border-[#ff3bad]",
-              "px-8 font-black uppercase tracking-widest text-[#ff3bad]",
-              "transition-all hover:bg-[#ff3bad] hover:text-white active:scale-95",
-              "lg:h-16 lg:px-10",
-              "max-sm:h-12 max-sm:w-full max-sm:max-w-xs max-sm:justify-center max-sm:px-6 max-sm:text-xs max-sm:tracking-wider",
-            ].join(" ")}
-          >
-            <PlusCircle className="h-5 w-5 max-sm:h-4 max-sm:w-4" />
-            Зарна
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push("/buy-request")}
-            className={[
-              "flex h-14 items-center gap-2 rounded-2xl bg-[#2a00ff] px-8",
-              "font-black uppercase tracking-widest text-white transition-all hover:bg-blue-700 active:scale-95",
-              "lg:h-16 lg:px-10",
-              "max-sm:h-12 max-sm:w-full max-sm:max-w-xs max-sm:justify-center max-sm:px-6 max-sm:text-xs max-sm:tracking-wider",
-            ].join(" ")}
-          >
-            <Search className="h-5 w-5 max-sm:h-4 max-sm:w-4" />
-            Авна
-          </button>
+          {isSignedIn ? (
+            <>
+              <button
+                type="button"
+                onClick={() => router.push("/add-property")}
+                className={[
+                  "flex h-14 items-center gap-2 rounded-2xl border-2 border-[#ff3bad]",
+                  "px-8 font-black uppercase tracking-widest text-[#ff3bad]",
+                  "transition-all hover:bg-[#ff3bad] hover:text-white active:scale-95",
+                  "lg:h-16 lg:px-10",
+                  "max-sm:h-12 max-sm:w-full max-sm:max-w-xs max-sm:justify-center max-sm:px-6 max-sm:text-xs max-sm:tracking-wider",
+                ].join(" ")}
+              >
+                <PlusCircle className="h-5 w-5 max-sm:h-4 max-sm:w-4" />
+                Зарна
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/buy-request")}
+                className={[
+                  "flex h-14 items-center gap-2 rounded-2xl bg-[#2a00ff] px-8",
+                  "font-black uppercase tracking-widest text-white transition-all hover:bg-blue-700 active:scale-95",
+                  "lg:h-16 lg:px-10",
+                  "max-sm:h-12 max-sm:w-full max-sm:max-w-xs max-sm:justify-center max-sm:px-6 max-sm:text-xs max-sm:tracking-wider",
+                ].join(" ")}
+              >
+                <Search className="h-5 w-5 max-sm:h-4 max-sm:w-4" />
+                Авна
+              </button>
+            </>
+          ) : (
+            <>
+              <SignInButton
+                mode="modal"
+                appearance={clerkAppearance}
+                forceRedirectUrl="/add-property"
+                fallbackRedirectUrl="/add-property"
+              >
+                <button
+                  type="button"
+                  className={[
+                    "flex h-14 items-center gap-2 rounded-2xl border-2 border-[#ff3bad]",
+                    "px-8 font-black uppercase tracking-widest text-[#ff3bad]",
+                    "transition-all hover:bg-[#ff3bad] hover:text-white active:scale-95",
+                    "lg:h-16 lg:px-10",
+                    "max-sm:h-12 max-sm:w-full max-sm:max-w-xs max-sm:justify-center max-sm:px-6 max-sm:text-xs max-sm:tracking-wider",
+                  ].join(" ")}
+                >
+                  <PlusCircle className="h-5 w-5 max-sm:h-4 max-sm:w-4" />
+                  Зарна
+                </button>
+              </SignInButton>
+              <SignInButton
+                mode="modal"
+                appearance={clerkAppearance}
+                forceRedirectUrl="/buy-request"
+                fallbackRedirectUrl="/buy-request"
+              >
+                <button
+                  type="button"
+                  className={[
+                    "flex h-14 items-center gap-2 rounded-2xl bg-[#2a00ff] px-8",
+                    "font-black uppercase tracking-widest text-white transition-all hover:bg-blue-700 active:scale-95",
+                    "lg:h-16 lg:px-10",
+                    "max-sm:h-12 max-sm:w-full max-sm:max-w-xs max-sm:justify-center max-sm:px-6 max-sm:text-xs max-sm:tracking-wider",
+                  ].join(" ")}
+                >
+                  <Search className="h-5 w-5 max-sm:h-4 max-sm:w-4" />
+                  Авна
+                </button>
+              </SignInButton>
+            </>
+          )}
         </div>
 
         {/* --- CATEGORIES GRID --- */}

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { createClerkClient } from "@clerk/backend";
 
 import { env } from "../config/env";
+import { ensureAgentRowForAuth } from "../lib/agent-sync";
 import { upsertProfileFromClerkUser } from "../lib/profile-sync";
 import { requireAuth } from "../middleware/require-auth";
 
@@ -20,6 +21,10 @@ profileRouter.post("/sync", requireAuth, async (_req, res) => {
     const clerk = createClerkClient({ secretKey: env.CLERK_SECRET_KEY });
     const user = await clerk.users.getUser(auth.clerkUserId);
     const row = await upsertProfileFromClerkUser(auth.clerkUserId, user);
+    const role = (user.publicMetadata as Record<string, unknown> | null)?.role;
+    if (role === "agent") {
+      await ensureAgentRowForAuth(auth, user);
+    }
     return res.json({ success: true, data: row });
   } catch (e) {
     console.log("[profile/sync] failed", {

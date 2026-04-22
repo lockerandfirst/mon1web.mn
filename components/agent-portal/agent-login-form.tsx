@@ -31,7 +31,7 @@ export function AgentLoginForm() {
     return null;
   }
 
-  if (isSignedIn && !hasAgentRole) {
+  if (!isSignedIn) {
     return (
       <motion.div
         initial={{ opacity: 0, x: 30 }}

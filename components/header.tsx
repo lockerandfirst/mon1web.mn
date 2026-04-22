@@ -114,27 +114,61 @@ export function Header() {
                 </SignUpButton>
               </>
             )}{" "}
-            <Link href="/add-property">
-              <Button
-                size="sm"
-                className="gap-2 bg-primary text-primary-foreground font-bold hover:bg-primary/90 shadow-md shadow-primary/10 rounded-full px-5"
+            {isSignedIn ? (
+              <Link href="/add-property">
+                <Button
+                  size="sm"
+                  className="gap-2 bg-primary text-primary-foreground font-bold hover:bg-primary/90 shadow-md shadow-primary/10 rounded-full px-5"
+                >
+                  <Plus className="h-4 w-4" />
+                  Зар нэмэх
+                </Button>
+              </Link>
+            ) : (
+              <SignInButton
+                mode="modal"
+                appearance={clerkAppearance}
+                forceRedirectUrl="/add-property"
+                fallbackRedirectUrl="/add-property"
               >
-                <Plus className="h-4 w-4" />
-                Зар нэмэх
-              </Button>
-            </Link>
+                <Button
+                  size="sm"
+                  className="gap-2 bg-primary text-primary-foreground font-bold hover:bg-primary/90 shadow-md shadow-primary/10 rounded-full px-5"
+                >
+                  <Plus className="h-4 w-4" />
+                  Зар нэмэх
+                </Button>
+              </SignInButton>
+            )}
             {isSignedIn ? <ClerkAppUserButton /> : null}
           </div>
           <div className="flex items-center gap-2 lg:hidden">
-            <Link href="/add-property">
-              <Button
-                size="sm"
-                className="gap-2 rounded-xl bg-primary px-4 font-bold text-primary-foreground shadow-md shadow-primary/15 hover:opacity-95"
+            {isSignedIn ? (
+              <Link href="/add-property">
+                <Button
+                  size="sm"
+                  className="gap-2 rounded-xl bg-primary px-4 font-bold text-primary-foreground shadow-md shadow-primary/15 hover:opacity-95"
+                >
+                  <Plus className="h-4 w-4" />
+                  Зар
+                </Button>
+              </Link>
+            ) : (
+              <SignInButton
+                mode="modal"
+                appearance={clerkAppearance}
+                forceRedirectUrl="/add-property"
+                fallbackRedirectUrl="/add-property"
               >
-                <Plus className="h-4 w-4" />
-                Зар
-              </Button>
-            </Link>
+                <Button
+                  size="sm"
+                  className="gap-2 rounded-xl bg-primary px-4 font-bold text-primary-foreground shadow-md shadow-primary/15 hover:opacity-95"
+                >
+                  <Plus className="h-4 w-4" />
+                  Зар
+                </Button>
+              </SignInButton>
+            )}
             {isSignedIn ? <ClerkAppUserButton /> : null}
           </div>
         </div>
