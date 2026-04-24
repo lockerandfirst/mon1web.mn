@@ -5,6 +5,7 @@ import { Building2, CalendarRange, CheckCircle2, ChevronDown, Landmark, Search, 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { PROPERTY_CATEGORIES, RENT_SUBCATEGORIES } from "@/lib/property-types";
@@ -49,6 +50,8 @@ type Props = {
   floorRange: number[];
   yearRange: number[];
   resultCount: number;
+  /** Зарууд API-аас ирэх хүртэл үр дүн тоог skeleton-оор солино. */
+  isLoadingResults?: boolean;
   onCategoryChange: (value: CategoryFilter) => void;
   onDistrictChange: (value: string) => void;
   onFloorRangeChange: (value: number[]) => void;
@@ -78,6 +81,7 @@ export function MapFilterPanel(props: Props) {
     priceRange,
     rentSubcategory,
     resultCount,
+    isLoadingResults = false,
     roomFilter,
     searchQuery,
     sqmRange,
@@ -97,7 +101,11 @@ export function MapFilterPanel(props: Props) {
         </div>
         <div className="flex shrink-0 items-center gap-1 max-md:gap-1 md:gap-1.5">
           <Badge className="rounded-md border-none bg-blue-50 px-2 py-1 text-[9px] font-black text-blue-600 max-md:px-2 max-md:py-1 md:rounded-lg md:px-3 md:py-1.5 md:text-[10px]">
-            {resultCount} ҮР ДҮН
+            {isLoadingResults ? (
+              <Skeleton className="inline-block h-3.5 w-18 rounded-md bg-blue-100/80" />
+            ) : (
+              <>{resultCount} ҮР ДҮН</>
+            )}
           </Badge>
         </div>
       </div>
@@ -227,7 +235,7 @@ export function MapFilterPanel(props: Props) {
                 <div className="grid grid-cols-2 gap-1.5 max-md:gap-1.5 md:gap-2">{(["any", "cash", "mortgage", "installment"] as PaymentFilter[]).map((option) => <Button key={option} variant={paymentMethod === option ? "default" : "outline"} onClick={() => props.onPaymentMethodChange(option)} className="h-9 rounded-lg text-[10px] font-bold max-md:h-9 md:h-10 md:rounded-xl md:text-[11px]">{paymentFilterLabels[option]}</Button>)}</div>
                 <div className="grid grid-cols-3 gap-1.5 max-md:gap-1.5 md:gap-2">{(["any", "yes", "no"] as TernaryFilter[]).map((option) => <Button key={option} variant={hasElevator === option ? "default" : "outline"} onClick={() => props.onHasElevatorChange(option)} className="h-9 rounded-lg text-[10px] font-bold max-md:h-9 md:h-10 md:rounded-xl md:text-[11px]">{ternaryFilterLabels[option]}</Button>)}</div>
                 <div className="grid grid-cols-3 gap-1.5 max-md:gap-1.5 md:gap-2">{(["any", "yes", "no"] as TernaryFilter[]).map((option) => <Button key={option} variant={isCommissioned === option ? "default" : "outline"} onClick={() => props.onIsCommissionedChange(option)} className="h-9 rounded-lg text-[10px] font-bold max-md:h-9 md:h-10 md:rounded-xl md:text-[11px]">{ternaryFilterLabels[option]}</Button>)}</div>
-                <div className="space-y-2"><div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 max-md:text-[9px] md:text-[10px]"><Building2 className="h-3 w-3 shrink-0 text-blue-600 md:h-3.5 md:w-3.5" />Давхар</div><Slider value={floorRange} min={1} max={MAX_FLOOR} step={1} onValueChange={props.onFloorRangeChange} className="py-2" /></div>
+                <div className="space-y-2"><div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 max-md:text-[9px] md:text-[10px]"><Building2 className="h-3 w-3 shrink-0 text-blue-600 md:h-3.5 md:w-3.5" />Давхар</div><Slider value={floorRange} min={0} max={MAX_FLOOR} step={1} onValueChange={props.onFloorRangeChange} className="py-2" /></div>
                 <div className="space-y-2"><div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 max-md:text-[9px] md:text-[10px]"><CalendarRange className="h-3 w-3 shrink-0 text-blue-600 md:h-3.5 md:w-3.5" />Ашиглалтанд орсон он</div><Slider value={yearRange} min={MIN_COMMISSION_YEAR} max={MAX_COMMISSION_YEAR} step={1} onValueChange={props.onYearRangeChange} className="py-2" /></div>
               </div>
             </PopoverContent>

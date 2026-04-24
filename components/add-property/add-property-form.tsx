@@ -3,20 +3,20 @@
 import { useAuth, useUser } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
 import { FlaskConical } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Toaster, toast } from "sonner";
 
-import { agents } from "@/lib/data";
 import { buildCreateListingPayload } from "@/lib/backend-contract";
-import { apiFetch } from "@/lib/backend-api";
+import { apiFetch, API_BASE_URL } from "@/lib/backend-api";
+import { debug } from "@/lib/debug";
 import {
-  createMarketplaceListingFromPayload,
-  readMarketplaceListings,
-  writeMarketplaceListings,
-} from "@/lib/marketplace";
+  apartmentFromApiListing,
+  listingSubmittedByFromApiRow,
+} from "@/lib/portal/apartment-from-api-listing";
+import { useVerifiedAgents } from "@/hooks/use-verified-agents";
 import { usePropertyForm } from "@/hooks/use-property-form";
-import { applyListingToForm, upsertEditedListing } from "./editing";
+import { applyListingToForm } from "./editing";
 
 import { PROPERTY_TYPE_OPTIONS } from "./constants";
 import { FormStepper, StepNavigation } from "./form-shell";
@@ -29,16 +29,25 @@ import { Button } from "@/components/ui/button";
 
 type AddPropertyFormProps = {
   onSuccess?: () => void;
+  /** Legacy: `?edit=` query (add-property хуудас) */
   editListingId?: string | null;
+  /** `/edit-listing/[id]` — зарын ID замаас шууд (query-ийн асуудлаас зайлсхийх) */
+  listingIdToEdit?: string | null;
 };
 
 export function AddPropertyForm({
   onSuccess,
   editListingId,
+  listingIdToEdit,
 }: AddPropertyFormProps = {}) {
   const { user } = useUser();
   const { getToken } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editQuery = searchParams.get("edit");
+  /** Эхлээд замын `[id]`, дараа нь query, эцэст props (add-property `?edit=`). */
+  const editId =
+    (listingIdToEdit ?? editQuery ?? editListingId ?? "").trim() || null;
   const formTopRef = useRef<HTMLDivElement>(null);
   const hydratedRef = useRef(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -51,21 +60,14 @@ export function AddPropertyForm({
     pricePerSqm,
     locationState,
   } = usePropertyForm();
+  const { hydrateMapFromListing } = locationState;
+  const { agents: verifiedAgents } = useVerifiedAgents(12);
 
   const propertyLabel = useMemo(
     () =>
       PROPERTY_TYPE_OPTIONS.find((item) => item.value === formData.propertyType)
         ?.label || "Сонгоогүй",
     [formData.propertyType],
-  );
-
-  const selectedAgent = useMemo(
-    () =>
-      formData.selectedAgentId
-        ? (agents.find((agent) => agent.id === formData.selectedAgentId) ??
-          null)
-        : null,
-    [formData.selectedAgentId],
   );
 
   const completionScore = useMemo(() => {
@@ -144,8 +146,25 @@ export function AddPropertyForm({
 
     setIsSubmitting(true);
 
-    const fallbackAgent =
-      selectedAgent || agents.find((agent) => agent.verified) || agents[0];
+    const parseImageUrlsForApi = (imageUrls: string): string[] => {
+      const out: string[] = [];
+      const seen = new Set<string>();
+      for (const line of imageUrls.split("\n")) {
+        const s = line.trim();
+        if (!s) continue;
+        try {
+          const u = new URL(s);
+          if (u.protocol !== "http:" && u.protocol !== "https:") continue;
+        } catch {
+          continue;
+        }
+        if (seen.has(s)) continue;
+        seen.add(s);
+        out.push(s);
+        if (out.length >= 64) break;
+      }
+      return out;
+    };
 
     const { images: _images, ...listingFields } = formData;
     const nearbyTypeToSurroundingId: Record<string, string> = {
@@ -172,14 +191,49 @@ export function AddPropertyForm({
 
     const token = await getToken();
     try {
-      const listingResponse = await apiFetch<{
-        success: boolean;
-        data: { id: string };
-      }>("/api/listings", {
-        method: "POST",
-        token,
-        body: requestPayload,
-      });
+      let targetListingId: string;
+
+      if (editId) {
+        // Edit горим — PATCH дээд дарааллаар ашиглаж зарыг шинэчилнэ.
+        const patchBody = {
+          title: requestPayload.title,
+          propertyType: requestPayload.propertyType,
+          price: requestPayload.price,
+          paymentMethod: requestPayload.paymentMethod,
+          pricePerSqm: requestPayload.pricePerSqm,
+          sqm: requestPayload.sqm,
+          rooms: requestPayload.rooms,
+          bathrooms: requestPayload.bathrooms,
+          floor: requestPayload.floor,
+          totalFloors: requestPayload.totalFloors,
+          commissionYear: requestPayload.commissionYear,
+          location: requestPayload.location,
+          district: requestPayload.district,
+          address: requestPayload.address,
+          description: requestPayload.description,
+          features: requestPayload.features,
+          nearbyServices: requestPayload.nearbyServices,
+          coordinates: requestPayload.coordinates,
+          serviceType: requestPayload.serviceType,
+          contactPhone: formData.contactPhone.trim(),
+          images: parseImageUrlsForApi(formData.imageUrls),
+        };
+        await apiFetch<{ success: boolean; data: { id: string } }>(
+          `/api/listings/${encodeURIComponent(editId)}`,
+          { method: "PATCH", token, body: patchBody },
+        );
+        targetListingId = editId;
+      } else {
+        const listingResponse = await apiFetch<{
+          success: boolean;
+          data: { id: string };
+        }>("/api/listings", {
+          method: "POST",
+          token,
+          body: requestPayload,
+        });
+        targetListingId = listingResponse.data.id;
+      }
 
       if (formData.images.length > 0) {
         const multipart = new FormData();
@@ -188,7 +242,7 @@ export function AddPropertyForm({
         }
 
         const uploadResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000"}/api/properties/${listingResponse.data.id}/images`,
+          `${API_BASE_URL}/api/properties/${encodeURIComponent(targetListingId)}/images`,
           {
             method: "POST",
             headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -202,34 +256,18 @@ export function AddPropertyForm({
         }
       }
 
-      toast.success("Амжилттай бүртгэгдлээ");
+      toast.success(
+        editId ? "Зар амжилттай шинэчлэгдлээ" : "Амжилттай бүртгэгдлээ",
+      );
       setShowSuccess(true);
       onSuccess?.();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Сервертэй холбогдоход алдаа гарлаа";
-      toast.error("Зураг хадгалах үед алдаа гарлаа");
-      console.error("[add-property] submit failed", message);
-
-      // Fallback keeps existing UX when listing API itself is unavailable.
-      const nextListing = createMarketplaceListingFromPayload(
-        requestPayload,
-        fallbackAgent,
-      );
-      const currentListings = readMarketplaceListings();
-      const nextState = upsertEditedListing(
-        editListingId,
-        nextListing,
-        currentListings,
-      );
-      writeMarketplaceListings(nextState.listings);
-      toast.success(
-        nextState.didEdit
-          ? "Зар амжилттай шинэчлэгдлээ (локал)"
-          : "Амжилттай бүртгэгдлээ (локал)",
-      );
-      setShowSuccess(true);
-      onSuccess?.();
+        error instanceof Error
+          ? error.message
+          : "Сервертэй холбогдоход алдаа гарлаа";
+      debug.error("add-property", "submit failed", { message });
+      toast.error(message || "Зар илгээх үед алдаа гарлаа");
     } finally {
       setIsSubmitting(false);
     }
@@ -249,18 +287,64 @@ export function AddPropertyForm({
   );
 
   useEffect(() => {
-    if (!editListingId || hydratedRef.current) {
+    hydratedRef.current = false;
+  }, [editId]);
+
+  useEffect(() => {
+    if (!editId || hydratedRef.current) {
       return;
     }
-    const listing = readMarketplaceListings().find(
-      (item) => item.id === editListingId,
-    );
-    if (!listing) {
-      return;
-    }
-    hydratedRef.current = true;
-    applyListingToForm(listing, updateField);
-  }, [editListingId, updateField]);
+    let cancelled = false;
+
+    const hydrate = async () => {
+      try {
+        const res = await apiFetch<{
+          success: boolean;
+          data: Record<string, unknown>;
+        }>(`/api/listings/${encodeURIComponent(editId)}`);
+        if (cancelled || !res.data) return;
+        const { apartment } = apartmentFromApiListing(res.data);
+        const submittedBy = listingSubmittedByFromApiRow(res.data);
+        const wf =
+          res.data.workflow_status === "published"
+            ? "published"
+            : ("pending" as const);
+        const sel =
+          res.data.selected_agent_id == null
+            ? null
+            : String(res.data.selected_agent_id);
+        hydratedRef.current = true;
+        applyListingToForm(
+          {
+            ...apartment,
+            workflowStatus: wf,
+            selectedAgentId: sel,
+            submittedBy: {
+              name: submittedBy.name,
+              email: submittedBy.email,
+              phone: submittedBy.phone,
+            },
+          },
+          updateField,
+        );
+        hydrateMapFromListing(apartment.coordinates);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "unknown";
+        debug.warn("add-property", "edit hydration failed", { message });
+        if (editId) {
+          toast.error(
+            "Зарын мэдээлэл ачаалж чадсангүй. ID-г шалгаад дахин оролдоно уу.",
+          );
+        }
+      }
+    };
+
+    void hydrate();
+    return () => {
+      cancelled = true;
+    };
+  }, [editId, updateField, hydrateMapFromListing]);
 
   useEffect(() => {
     if (currentStep === 1) {
@@ -276,7 +360,7 @@ export function AddPropertyForm({
 
   const nextLabelByStep =
     currentStep === 3
-      ? editListingId
+      ? editId
         ? "Зар шинэчлэх"
         : "Зар нэмэх"
       : "Үргэлжлүүлэх";
@@ -321,7 +405,7 @@ export function AddPropertyForm({
     updateField("description", "Debug тест зар: орчин, төлбөрийн нөхцөл, байршил бөглөгдсөн.");
     updateField("contactPhone", "99112233");
     updateField("serviceType", "agent");
-    updateField("selectedAgentId", agents[0]?.id ?? null);
+    updateField("selectedAgentId", verifiedAgents[0]?.id ?? null);
     updateField("surroundings", ["school", "shop", "bus"]);
     updateField("features", ["Parking", "Elevator", "Security", "Balcony"]);
   };

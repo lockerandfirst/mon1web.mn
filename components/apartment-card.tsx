@@ -1,7 +1,7 @@
 "use client";
 
-import { memo, useState } from "react";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { memo, useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,16 +18,24 @@ import {
   ChevronLeft,
   ChevronRight,
   Hash,
-  UserRound,
 } from "lucide-react";
 import { Apartment, formatPrice } from "@/lib/data";
-import { apiFetch } from "@/lib/backend-api";
+import { useFavorites } from "@/hooks/use-favorites";
+import {
+  LISTING_IMAGE_FALLBACK,
+  coalesceImageSrc,
+  fallbackLogoClassName,
+  isAppLogoFallbackUrl,
+} from "@/lib/image-fallbacks";
+import { SafeImage } from "@/components/ui/safe-image";
 import { cn } from "@/lib/utils";
 
 interface ApartmentCardProps {
   apartment: Apartment;
   index?: number;
   variant?: "default" | "compact";
+  /** When true, skip the root entrance motion (parent handles stagger / AnimatePresence). */
+  skipEntranceMotion?: boolean;
   agentDisplayMode?: "agent" | "user";
   onCardClick?: (apartment: Apartment) => void;
   /** Card-ийн үндсэн даралт өөр зам руу явна; товчийг тусад нь барихад ашиглана */
@@ -40,21 +48,26 @@ export const ApartmentCard = memo(
     apartment,
     index = 0,
     variant = "default",
+    skipEntranceMotion = false,
     agentDisplayMode = "agent",
     onCardClick,
     onActionClick,
     actionLabel = "Үзэх",
   }: ApartmentCardProps) => {
-    const [isFavorite, setIsFavorite] = useState(false);
     const [currentImg, setCurrentImg] = useState(0);
-    const [agentAvatarFallback, setAgentAvatarFallback] = useState(false);
+    const [listingImgFailed, setListingImgFailed] = useState(false);
     const { isSignedIn } = useUser();
-    const { getToken } = useAuth();
     const router = useRouter();
-    const safeAgentAvatar =
-      !agentAvatarFallback && apartment.agent.avatar?.trim()
-        ? apartment.agent.avatar.trim()
-        : `https://ui-avatars.com/api/?name=${encodeURIComponent((apartment.agent.name || "Agent").slice(0, 24))}&size=128&background=e2e8f0&color=334155`;
+    const favorites = useFavorites();
+    const isFavorite = favorites.isFavorite(apartment.id);
+
+    useEffect(() => {
+      setListingImgFailed(false);
+    }, [currentImg, apartment.id, apartment.images]);
+
+    const listingSlideSrc = listingImgFailed
+      ? LISTING_IMAGE_FALLBACK
+      : coalesceImageSrc(apartment.images?.[currentImg], "listing");
 
     const handleCardClick = () => {
       if (onCardClick) {
@@ -88,35 +101,15 @@ export const ApartmentCard = memo(
         router.push("/sign-in");
         return;
       }
-
-      const nextFavorite = !isFavorite;
-      setIsFavorite(nextFavorite);
-
-      try {
-        const token = await getToken();
-        await apiFetch("/api/saved-listings", {
-          method: nextFavorite ? "POST" : "DELETE",
-          token,
-          body: {
-            listingId: apartment.id,
-          },
-        });
-      } catch {
-        setIsFavorite(!nextFavorite);
-      }
+      await favorites.toggle(apartment.id);
     };
 
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.24, delay: 0 }}
-        className={cn(
-          "h-full w-full cursor-pointer",
-          variant === "compact" && "lg:[&>div]:flex lg:[&>div]:items-stretch",
-        )}
-        onClick={handleCardClick}
-      >
+    const rootClassName = cn(
+      "h-full w-full cursor-pointer",
+      variant === "compact" && "lg:[&>div]:flex lg:[&>div]:items-stretch",
+    );
+
+    const card = (
         <Card
           className={cn(
             "group relative flex h-full w-full min-w-0 flex-col overflow-hidden rounded-3xl border-slate-100 bg-white pt-0 pb-1 shadow-sm transition-all duration-500",
@@ -131,11 +124,17 @@ export const ApartmentCard = memo(
             <AnimatePresence mode="wait">
               <motion.img
                 key={currentImg}
-                src={apartment.images?.[currentImg] || "/placeholder.jpg"}
+                src={listingSlideSrc}
+                onError={() => setListingImgFailed(true)}
                 initial={{ opacity: 0.9 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0.9 }}
-                className="h-full w-full object-cover"
+                className={cn(
+                  "h-full w-full",
+                  isAppLogoFallbackUrl(listingSlideSrc)
+                    ? fallbackLogoClassName("listing")
+                    : "object-cover",
+                )}
               />
             </AnimatePresence>
 
@@ -274,24 +273,24 @@ export const ApartmentCard = memo(
             <div className="mt-auto flex min-w-0 items-center justify-between gap-1.5 pt-0.5 md:gap-4 md:pt-0">
               <div className="flex min-w-0 flex-1 items-center gap-1.5 md:max-w-none md:flex-none md:gap-3">
                 <div className="relative h-8 w-8 shrink-0 md:h-9 md:w-9">
-                  {agentDisplayMode === "user" ? (
-                    <div className="flex h-full w-full items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-500 shadow-sm">
-                      <UserRound className="h-4 w-4 md:h-5 md:w-5" />
-                    </div>
-                  ) : (
-                    <img
-                      src={safeAgentAvatar}
-                      className="h-full w-full rounded-full border border-slate-200 object-cover shadow-sm"
-                      alt="Agent"
-                      onError={() => setAgentAvatarFallback(true)}
-                    />
-                  )}
+                  <SafeImage
+                    src={apartment.agent.avatar}
+                    variant="avatar"
+                    className="h-full w-full rounded-full border border-slate-200 object-cover shadow-sm"
+                    alt={
+                      agentDisplayMode === "user"
+                        ? apartment.agent.name || "Хэрэглэгч"
+                        : "Агент"
+                    }
+                  />
                   <div className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-white bg-[#2a00ff] md:h-2.5 md:w-2.5" />
                 </div>
                 {agentDisplayMode === "agent" ? (
                   <div className="flex min-w-0 flex-col leading-none">
                     <span className="truncate text-[11px] font-black uppercase tracking-tight text-slate-900 md:text-xs">
-                      {apartment.agent.name.split(" ")[0]}
+                      {apartment.agent.name.trim()
+                        ? apartment.agent.name.split(" ")[0]
+                        : "Агент"}
                     </span>
                     <div className="mt-0.5 flex items-center gap-1 md:mt-1">
                       <Star className="h-2 w-2 fill-[#ff3bad] text-[#ff3bad] md:h-2.5 md:w-2.5" />
@@ -303,7 +302,10 @@ export const ApartmentCard = memo(
                 ) : (
                   <div className="flex min-w-0 flex-col leading-none">
                     <span className="truncate text-[11px] font-black uppercase tracking-tight text-slate-900 md:text-xs">
-                      Хэрэглэгч
+                      {apartment.agent.name.trim() || "Хэрэглэгч"}
+                    </span>
+                    <span className="mt-0.5 truncate text-[10px] font-semibold text-slate-400 md:mt-1">
+                      Зар оруулагч
                     </span>
                   </div>
                 )}
@@ -332,6 +334,25 @@ export const ApartmentCard = memo(
             </div>
           </CardContent>
         </Card>
+    );
+
+    if (skipEntranceMotion) {
+      return (
+        <div className={rootClassName} onClick={handleCardClick}>
+          {card}
+        </div>
+      );
+    }
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.24, delay: 0 }}
+        className={rootClassName}
+        onClick={handleCardClick}
+      >
+        {card}
       </motion.div>
     );
   },

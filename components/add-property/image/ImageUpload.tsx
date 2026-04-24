@@ -1,12 +1,27 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import React, { useState } from "react";
+import { Upload, X } from "lucide-react";
+
+function isHttpUrl(s: string) {
+  try {
+    const u = new URL(s);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 export function ImageUpload({
   onImagesChange,
+  existingImageUrls = [],
+  onExistingImageUrlsChange,
 }: {
   onImagesChange: (files: File[]) => void;
+  /** Серверээс ирсэн зургийн URL-ууд (засах горим) */
+  existingImageUrls?: string[];
+  /** Одоогийн серверийн зургуудыг хасахад дуудна */
+  onExistingImageUrlsChange?: (urls: string[]) => void;
 }) {
   const [previews, setPreviews] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -15,32 +30,74 @@ export function ImageUpload({
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    const newFiles = [...selectedFiles, ...files];
+    const cap = 10 - existingImageUrls.length - selectedFiles.length;
+    const nextFiles = cap > 0 ? files.slice(0, cap) : [];
+    if (nextFiles.length === 0) {
+      e.target.value = "";
+      return;
+    }
+
+    const newFiles = [...selectedFiles, ...nextFiles];
     setSelectedFiles(newFiles);
     onImagesChange(newFiles);
 
-    // Create local preview URLs
-    const newPreviews = files.map((file) => URL.createObjectURL(file));
+    const newPreviews = nextFiles.map((file) => URL.createObjectURL(file));
     setPreviews((prev) => [...prev, ...newPreviews]);
+    e.target.value = "";
   };
 
-  const removeImage = (index: number) => {
+  const removeNewImage = (index: number) => {
     const newFiles = selectedFiles.filter((_, i) => i !== index);
     const newPreviews = previews.filter((_, i) => i !== index);
-
-    // Revoke the URL to save memory
     URL.revokeObjectURL(previews[index]);
-
     setSelectedFiles(newFiles);
     setPreviews(newPreviews);
     onImagesChange(newFiles);
   };
+
+  const removeExistingUrl = (url: string) => {
+    if (!onExistingImageUrlsChange) return;
+    onExistingImageUrlsChange(existingImageUrls.filter((u) => u !== url));
+  };
+
+  const showExisting =
+    existingImageUrls.length > 0 && onExistingImageUrlsChange;
 
   return (
     <div className="space-y-4">
       <p className="ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
         Зураг оруулах
       </p>
+
+      {showExisting ? (
+        <div className="space-y-2">
+          <p className="ml-2 text-[10px] font-semibold text-slate-500">
+            Одоогийн зургууд — хасах бол X дарна уу
+          </p>
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
+            {existingImageUrls.filter(isHttpUrl).map((url) => (
+              <div
+                key={url}
+                className="group relative aspect-square overflow-hidden rounded-2xl border-2 border-[#ece3ff]"
+              >
+                <img
+                  src={url}
+                  alt=""
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeExistingUrl(url)}
+                  className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-lg transition-transform hover:scale-110"
+                  aria-label="Зургийг хасах"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {/* Dropzone Area */}
       <div className="relative">
@@ -59,33 +116,39 @@ export function ImageUpload({
             Зураг сонгох эсвэл чирж оруулна уу
           </p>
           <p className="text-[10px] text-slate-400">
-            JPG, PNG, WebP (Дээд тал нь 10 зураг)
+            JPG, PNG, WebP (Нийт дээд тал нь 10 зураг)
           </p>
         </div>
       </div>
 
-      {/* Previews Grid */}
+      {/* Шинэ файлын урьдчилан харах */}
       {previews.length > 0 && (
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
-          {previews.map((url, index) => (
-            <div
-              key={url}
-              className="group relative aspect-square overflow-hidden rounded-2xl border-2 border-[#ece3ff]"
-            >
-              <img
-                src={url}
-                alt="Preview"
-                className="h-full w-full object-cover transition-transform group-hover:scale-110"
-              />
-              <button
-                type="button"
-                onClick={() => removeImage(index)}
-                className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-lg transition-transform hover:scale-110"
+        <div className="space-y-2">
+          <p className="ml-2 text-[10px] font-semibold text-slate-500">
+            Шинээр нэмэгдэх зургууд
+          </p>
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
+            {previews.map((url, index) => (
+              <div
+                key={url}
+                className="group relative aspect-square overflow-hidden rounded-2xl border-2 border-[#2a00ff]/25"
               >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
+                <img
+                  src={url}
+                  alt=""
+                  className="h-full w-full object-cover transition-transform group-hover:scale-110"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeNewImage(index)}
+                  className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-lg transition-transform hover:scale-110"
+                  aria-label="Зургийг хасах"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

@@ -14,7 +14,11 @@ const postBodySchema = z.object({
 
 agentSalingRouter.get("/", requireAuth, requireAgentRole, async (_req, res) => {
   const auth = res.locals.auth;
-  const agentId = await resolveAgentIdForAuth(auth);
+  const preResolved = res.locals.resolvedAgentId;
+  const agentId =
+    typeof preResolved === "string" && preResolved.trim().length > 0
+      ? preResolved
+      : await resolveAgentIdForAuth(auth);
   if (!agentId) {
     return res.status(403).json({
       success: false,
@@ -69,7 +73,11 @@ agentSalingRouter.post("/", requireAuth, requireAgentRole, async (req, res) => {
   }
 
   const auth = res.locals.auth;
-  const agentId = await resolveAgentIdForAuth(auth);
+  const preResolved = res.locals.resolvedAgentId;
+  const agentId =
+    typeof preResolved === "string" && preResolved.trim().length > 0
+      ? preResolved
+      : await resolveAgentIdForAuth(auth);
   if (!agentId) {
     return res.status(403).json({
       success: false,

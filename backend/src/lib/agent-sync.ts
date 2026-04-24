@@ -37,7 +37,12 @@ function primaryPhone(user: User): string {
   const fromPrimary = user.phoneNumbers?.find((p) => p.id === primaryId)
     ?.phoneNumber;
   const first = user.phoneNumbers?.[0]?.phoneNumber;
-  return (fromPrimary ?? first ?? "").trim();
+  const fromMetadata = (
+    (user.publicMetadata as Record<string, unknown> | null)?.phone ?? ""
+  )
+    .toString()
+    .trim();
+  return (fromPrimary ?? first ?? fromMetadata ?? "").trim();
 }
 
 function avatarUrl(user: User, name: string): string {
@@ -45,7 +50,15 @@ function avatarUrl(user: User, name: string): string {
   if (url) {
     return url;
   }
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name.slice(0, 24))}&size=128&background=eef2ff&color=312e81`;
+  const fromMetadata = (
+    (user.publicMetadata as Record<string, unknown> | null)?.avatar ?? ""
+  )
+    .toString()
+    .trim();
+  if (fromMetadata) {
+    return fromMetadata;
+  }
+  return "";
 }
 
 /**
@@ -64,6 +77,11 @@ export async function ensureAgentRowForAuth(
   const name = displayName(clerkUser, auth);
   const avatar = avatarUrl(clerkUser, name);
   const phone = primaryPhone(clerkUser);
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("id")
+    .eq("clerk_user_id", auth.clerkUserId)
+    .maybeSingle();
 
   const { data: byClerk } = await supabaseAdmin
     .from("agents")
@@ -72,6 +90,7 @@ export async function ensureAgentRowForAuth(
     .maybeSingle();
 
   const rowPayload = {
+    profile_id: profile?.id ?? null,
     clerk_user_id: auth.clerkUserId,
     email: resolvedEmail,
     name,
@@ -89,11 +108,8 @@ export async function ensureAgentRowForAuth(
     const { error } = await supabaseAdmin
       .from("agents")
       .update({
+        profile_id: rowPayload.profile_id,
         email: rowPayload.email,
-        name: rowPayload.name,
-        avatar: rowPayload.avatar,
-        phone: rowPayload.phone,
-        company: rowPayload.company,
       })
       .eq("id", byClerk.id);
     if (error) {

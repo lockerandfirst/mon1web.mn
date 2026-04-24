@@ -6,6 +6,8 @@ type SyncProfileInput = {
   clerkUserId: string;
   email: string | null;
   fullName: string | null;
+  /** Тодорхойлогдсон үед `profiles.phone`-д бичнэ (зарын формын утас). */
+  phone?: string | null;
 };
 
 function readClerkPublicRole(
@@ -16,6 +18,10 @@ function readClerkPublicRole(
   }
   const r = (publicMetadata as Record<string, unknown>).role;
   return typeof r === "string" ? r : null;
+}
+
+function isAgentRole(role: string | null): boolean {
+  return role === "agent";
 }
 
 /** JWT / form-аас ирсэн талбарууд — Clerk бүтэн sync-ээс өмнөх phone/avatar/role хадгална. */
@@ -38,7 +44,10 @@ export async function syncProfile(input: SyncProfileInput) {
     role,
   };
 
-  if (existing?.phone != null && String(existing.phone).length > 0) {
+  if (input.phone !== undefined) {
+    const next = (input.phone ?? "").trim();
+    row.phone = next.length > 0 ? next : null;
+  } else if (existing?.phone != null && String(existing.phone).length > 0) {
     row.phone = existing.phone;
   }
   if (existing?.avatar_url != null && String(existing.avatar_url).length > 0) {
@@ -62,7 +71,7 @@ export async function syncProfile(input: SyncProfileInput) {
 export async function upsertProfileFromClerkUser(
   clerkUserId: string,
   clerkUser: User,
-): Promise<{ id: string; clerk_user_id: string }> {
+): Promise<{ id: string; clerk_user_id: string } | null> {
   const primaryEmailId = clerkUser.primaryEmailAddressId;
   const email =
     clerkUser.emailAddresses
@@ -82,6 +91,15 @@ export async function upsertProfileFromClerkUser(
 
   const fullName = clerkUser.fullName?.trim() || null;
   const avatarUrl = clerkUser.imageUrl?.trim() || null;
+  const clerkRole = readClerkPublicRole(clerkUser.publicMetadata);
+
+  /**
+   * `profiles` хүснэгтэд зөвхөн агент БИШ хэрэглэгчдийг mirror хийнэ.
+   * Агентын мэдээлэл `agents` хүснэгтээр тусдаа явна.
+   */
+  if (isAgentRole(clerkRole)) {
+    return null;
+  }
 
   const { data: existing } = await supabaseAdmin
     .from("profiles")
@@ -89,15 +107,9 @@ export async function upsertProfileFromClerkUser(
     .eq("clerk_user_id", clerkUserId)
     .maybeSingle();
 
-  const clerkRole = readClerkPublicRole(clerkUser.publicMetadata);
-
   let role: "buyer" | "agent" | "admin" = "buyer";
   if (existing?.role === "admin") {
     role = "admin";
-  } else if (existing?.role === "agent") {
-    role = "agent";
-  } else if (clerkRole === "agent") {
-    role = "agent";
   }
 
   const { data, error } = await supabaseAdmin

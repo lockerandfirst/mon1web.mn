@@ -9,8 +9,73 @@ import { supabaseAdmin } from "../lib/supabase-admin";
 
 const buyRequestsRouter = Router();
 
-const recommendationBodySchema = z.object({
+/** Нээлттэй жагсаалт болон `/mine` хоёуланд ижил nested select. */
+const BUY_REQUESTS_SELECT_WITH_RECS = `
+  *,
+  buy_request_recommendations (
+    id,
+    listing_id,
+    agent_id,
+    recommended_at,
+    listings ( title ),
+    agents ( id, name, phone, email, avatar )
+  )
+`;
+
+const recommendationSingleSchema = z.object({
   listingId: z.string().min(1),
+});
+
+const recommendationBulkSchema = z.object({
+  listingIds: z.array(z.string().min(1)).min(1).max(40),
+});
+
+function parseRecommendationListingIds(
+  body: unknown,
+): { ok: true; ids: string[] } | { ok: false; error: string } {
+  const raw = (body ?? {}) as Record<string, unknown>;
+  if (Array.isArray(raw.listingIds) && raw.listingIds.length > 0) {
+    const parsed = recommendationBulkSchema.safeParse(raw);
+    if (!parsed.success) {
+      return { ok: false, error: "listingIds буруу байна (1–40)." };
+    }
+    return { ok: true, ids: [...new Set(parsed.data.listingIds)] };
+  }
+  const parsed = recommendationSingleSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { ok: false, error: "listingId эсвэл listingIds заавал." };
+  }
+  return { ok: true, ids: [parsed.data.listingId] };
+}
+
+/** Нэвтэрсэн хэрэглэгчийн оруулсан «авна» хүсэлтүүд (агентын санал багтсан nested). */
+buyRequestsRouter.get("/mine", requireAuth, async (req, res) => {
+  const auth = res.locals.auth;
+
+  const profile = await syncProfile({
+    clerkUserId: auth.clerkUserId,
+    email: auth.email,
+    fullName: auth.fullName,
+  });
+
+  const limit = Math.min(50, Math.max(1, Number(req.query.limit ?? 30)));
+
+  const { data, error } = await supabaseAdmin
+    .from("buy_requests")
+    .select(BUY_REQUESTS_SELECT_WITH_RECS)
+    .eq("submitted_by_profile_id", profile.id)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+
+  return res.json({
+    success: true,
+    data: data ?? [],
+    meta: { limit, count: data?.length ?? 0 },
+  });
 });
 
 buyRequestsRouter.get("/", async (req, res) => {
@@ -20,20 +85,9 @@ buyRequestsRouter.get("/", async (req, res) => {
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
-  const selectWithRecs = `
-    *,
-    buy_request_recommendations (
-      id,
-      listing_id,
-      agent_id,
-      recommended_at,
-      listings ( title )
-    )
-  `;
-
   let query = supabaseAdmin
     .from("buy_requests")
-    .select(selectWithRecs, { count: "exact" })
+    .select(BUY_REQUESTS_SELECT_WITH_RECS, { count: "exact" })
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -114,11 +168,11 @@ buyRequestsRouter.post(
       return res.status(400).json({ success: false, error: "ID буруу байна." });
     }
 
-    const parsed = recommendationBodySchema.safeParse(req.body);
-    if (!parsed.success) {
+    const parsedIds = parseRecommendationListingIds(req.body);
+    if (!parsedIds.ok) {
       return res.status(400).json({
         success: false,
-        error: "listingId буруу байна.",
+        error: parsedIds.error,
       });
     }
 
@@ -148,25 +202,29 @@ buyRequestsRouter.post(
       });
     }
 
-    const { error: insErr } = await supabaseAdmin
-      .from("buy_request_recommendations")
-      .insert({
-        buy_request_id: buyRequestId,
-        listing_id: parsed.data.listingId,
-        agent_id: agentId,
-      });
-
-    if (insErr) {
-      if (insErr.code === "23505") {
-        return res.status(409).json({
-          success: false,
-          error: "Энэ зарыг аль хэдийн санал болгосон байна.",
+    let inserted = 0;
+    for (const listing_id of parsedIds.ids) {
+      const { error: insErr } = await supabaseAdmin
+        .from("buy_request_recommendations")
+        .insert({
+          buy_request_id: buyRequestId,
+          listing_id,
+          agent_id: agentId,
         });
+
+      if (insErr) {
+        if (insErr.code === "23505") {
+          continue;
+        }
+        return res.status(500).json({ success: false, error: insErr.message });
       }
-      return res.status(500).json({ success: false, error: insErr.message });
+      inserted += 1;
     }
 
-    return res.status(201).json({ success: true });
+    return res.status(201).json({
+      success: true,
+      data: { inserted, requested: parsedIds.ids.length },
+    });
   },
 );
 

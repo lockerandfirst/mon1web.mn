@@ -70,7 +70,7 @@ export function MetricCard({
   suffix: string;
 }) {
   return (
-    <div className="rounded-3xl bg-[linear-gradient(135deg,rgba(42,0,255,0.06),rgba(255,43,173,0.12))] px-4 py-3.5 md:rounded-4xl md:px-6 md:py-5">
+    <div className="rounded-3xl bg-[linear-gradient(135deg,rgba(42, 0, 255,0.06),rgba(255,43,173,0.12))] px-4 py-3.5 md:rounded-4xl md:px-6 md:py-5">
       <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#ff3bad]">
         {label}
       </p>

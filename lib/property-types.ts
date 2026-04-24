@@ -1,3 +1,5 @@
+import { LISTING_IMAGE_FALLBACK } from "@/lib/image-fallbacks";
+
 export const PROPERTY_CATEGORIES = [
   { value: "all", label: "Бүх" },
   { value: "apartment", label: "Орон сууц" },
@@ -68,21 +70,9 @@ export function getPropertyTypeLabel(propertyType?: string) {
   }
 }
 
-export function getPlaceholderImage(propertyType?: string) {
-  switch (propertyType) {
-    case "house":
-      return "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
-    case "office":
-      return "https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
-    case "land":
-      return "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
-    case "garage":
-      return "https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
-    case "industrial":
-      return "https://images.unsplash.com/photo-1513828583688-c52646db42da?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
-    default:
-      return "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
-  }
+/** Зураггүй эсвэл алдаатай URL-д — төслийн нэгтгэсэн local fallback. */
+export function getPlaceholderImage(_propertyType?: string) {
+  return LISTING_IMAGE_FALLBACK;
 }
 
 export function inferPropertyCategory(listing: {

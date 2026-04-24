@@ -155,7 +155,10 @@ export function ListingsFiltersForm({
         <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff2bad] max-lg:text-[9px]">
           <Navigation className="h-3 w-3 shrink-0 lg:h-3.5 lg:w-3.5" /> Байршил
         </label>
-        <Select value={district || "any"} onValueChange={setDistrict}>
+        <Select
+          value={district || "any"}
+          onValueChange={(v) => setDistrict(v === "any" ? "" : v)}
+        >
           <SelectTrigger className={cn("h-10 lg:h-12", triggerBase)}>
             <SelectValue placeholder="Бүгд" />
           </SelectTrigger>

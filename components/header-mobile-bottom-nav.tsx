@@ -12,7 +12,7 @@ import {
   User,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { SignInButton, useUser } from "@clerk/nextjs";
+import { SignInButton, useAuth, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { clerkAppearance } from "@/lib/clerk-theme";
 import { isAgent } from "@/lib/auth";
@@ -47,16 +47,17 @@ export function HeaderMobileBottomNav({
 }: HeaderMobileBottomNavProps) {
   const pathname = usePathname();
   const { user, isLoaded } = useUser();
+  const { sessionClaims } = useAuth();
   const isAgentPortalRoute = pathname.startsWith("/agent-portal");
 
   if (isAgentPortalRoute) {
     return null;
   }
 
-  const hasAgentRole =
-    isSignedIn &&
-    isLoaded &&
-    isAgent({ publicMetadata: user?.publicMetadata ?? null });
+  const hasAgentRole = isSignedIn
+    ? isAgent({ sessionClaims }) ||
+      (isLoaded && isAgent({ publicMetadata: user?.publicMetadata ?? null }))
+    : false;
 
   const baseLinks: NavLinkItem[] = [
     { kind: "link", name: "Нүүр", href: "/home", icon: Home },

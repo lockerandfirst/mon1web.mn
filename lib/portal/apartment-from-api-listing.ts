@@ -1,16 +1,41 @@
 import type { Agent, Apartment, NearbyService } from "@/lib/data";
+import { ensureListingImageUrls } from "@/lib/image-fallbacks";
 
 type SupabaseListingRow = Record<string, unknown>;
 
-function readSubmittedBy(listing: SupabaseListingRow) {
+export type OwnerContact = {
+  name: string;
+  email: string;
+  phone: string;
+};
+
+function readContactPhoneColumn(listing: SupabaseListingRow): string {
+  const v = listing.contact_phone;
+  return typeof v === "string" ? v.trim() : "";
+}
+
+/**
+ * `submitted_by` + `contact_phone` баганаас зар оруулагчийн холбоо.
+ * (Агенттай зар дээр `ownerContact` null байж болох тул засах форм эндээс уншина.)
+ */
+export function listingSubmittedByFromApiRow(
+  listing: SupabaseListingRow,
+): OwnerContact {
+  const colPhone = readContactPhoneColumn(listing);
   const raw = listing.submitted_by;
   if (raw && typeof raw === "object" && !Array.isArray(raw)) {
     const o = raw as Record<string, unknown>;
+    const jsonPhone =
+      typeof o.phone === "string" ? o.phone.trim() : "";
+    const phone = jsonPhone || colPhone;
     return {
       name: String(o.name ?? "Хэрэглэгч"),
       email: String(o.email ?? ""),
-      phone: typeof o.phone === "string" ? o.phone : "",
+      phone,
     };
+  }
+  if (colPhone) {
+    return { name: "Хэрэглэгч", email: "", phone: colPhone };
   }
   return { name: "Хэрэглэгч", email: "", phone: "" };
 }
@@ -52,11 +77,9 @@ function ownerPlaceholderAgent(submitted: {
 /**
  * GET /api/listings/:id хариу (listings + optional listing_agent) → Apartment.
  */
-export type OwnerContact = {
-  name: string;
-  email: string;
-  phone: string;
-};
+function readSubmittedBy(listing: SupabaseListingRow): OwnerContact {
+  return listingSubmittedByFromApiRow(listing);
+}
 
 export function apartmentFromApiListing(row: SupabaseListingRow): {
   apartment: Apartment;
@@ -102,7 +125,7 @@ export function apartmentFromApiListing(row: SupabaseListingRow): {
     address: String(row.address ?? ""),
     description: String(row.description ?? ""),
     features: Array.isArray(row.features) ? (row.features as string[]) : [],
-    images: Array.isArray(row.images) ? (row.images as string[]) : [],
+    images: ensureListingImageUrls(row.images),
     verified: Boolean(row.verified ?? false),
     featured: Boolean(row.featured ?? false),
     agent,
@@ -113,6 +136,7 @@ export function apartmentFromApiListing(row: SupabaseListingRow): {
     },
     createdAt: String(row.created_at ?? ""),
     viewCount: Number(row.view_count ?? 0),
+    contactPhone: submitted.phone.trim() ? submitted.phone.trim() : undefined,
   };
 
   return {

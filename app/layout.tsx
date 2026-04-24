@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { clerkAppearance } from "@/lib/clerk-theme";
 import { ClerkProfileSync } from "@/components/clerk-profile-sync";
 import { Header } from "@/components/header";
+import { FavoritesProvider } from "@/lib/favorites/favorites-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -50,9 +51,11 @@ export default function RootLayout({
     <ClerkProvider appearance={clerkAppearance}>
       <html lang="en" className={`${inter.variable} ${geistMono.variable}`}>
         <body className="font-sans antialiased">
-          <ClerkProfileSync />
-          <Header />
-          {children}
+          <FavoritesProvider>
+            <ClerkProfileSync />
+            <Header />
+            {children}
+          </FavoritesProvider>
           <Analytics />
         </body>
       </html>

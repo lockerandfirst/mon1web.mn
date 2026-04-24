@@ -1,353 +1,379 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 
 import type { AgentPortalPickListing } from "@/components/portal/portal-types";
+import {
+  clearAgentPortalSessionCache,
+  readAgentPortalSessionCache,
+  writeAgentPortalSessionCache,
+} from "@/lib/agent-portal-session-cache";
 import { apiFetch } from "@/lib/backend-api";
-import type { Agent } from "@/lib/data";
-import { apartments } from "@/lib/data";
+import type { Agent, Apartment } from "@/lib/data";
 import type { BuyRequest } from "@/lib/buy-requests";
-import { readBuyRequests } from "@/lib/buy-requests";
+import { debug } from "@/lib/debug";
 import type { MarketplaceListing } from "@/lib/marketplace";
-import { readMarketplaceListings } from "@/lib/marketplace";
+import { apartmentFromApiListing } from "@/lib/portal/apartment-from-api-listing";
 import { buyRequestFromSupabaseRow } from "@/lib/portal/map-supabase-buy-request";
 import { marketplaceListingFromSupabaseListing } from "@/lib/portal/supabase-listing-to-marketplace";
 
-function normalizeEmail(value: string | undefined) {
-  return value?.trim().toLowerCase() ?? "";
-}
-const CONNECTED_AGENT_CACHE_KEY = "portal-connected-agent-v1";
-const CONNECTED_AGENT_CACHE_TTL_MS = 5 * 60 * 1000;
-const CLAIMED_LISTINGS_CACHE_KEY = "portal-claimed-listings-v1";
-const CLAIMED_LISTINGS_CACHE_TTL_MS = 3 * 60 * 1000;
+const FALLBACK_AGENT: Agent = {
+  id: "agent-claim-fallback",
+  name: "Agent",
+  avatar: "",
+  phone: "",
+  email: "",
+  company: "",
+  rating: 0,
+  reviewCount: 0,
+  listingsCount: 0,
+  verified: false,
+};
 
-function readConnectedAgentCache(): Agent | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
+async function fetchConnectedAgent(
+  token: string,
+  signal?: AbortSignal,
+): Promise<Agent | null> {
   try {
-    const raw = window.sessionStorage.getItem(CONNECTED_AGENT_CACHE_KEY);
-    if (!raw) {
-      return null;
-    }
-    const parsed = JSON.parse(raw) as { ts?: number; data?: Agent };
-    if (!parsed?.data || typeof parsed.ts !== "number") {
-      return null;
-    }
-    if (Date.now() - parsed.ts > CONNECTED_AGENT_CACHE_TTL_MS) {
-      return null;
-    }
-    return parsed.data;
-  } catch {
+    const res = await apiFetch<{ success: boolean; data: Agent }>(
+      "/api/agents/me",
+      { token, signal },
+    );
+    return res.data ?? null;
+  } catch (e) {
+    if ((e as Error)?.name === "AbortError") throw e;
+    debug.warn("useAgentPortalData", "fetchConnectedAgent failed", {
+      message: e instanceof Error ? e.message : "unknown",
+    });
     return null;
   }
 }
 
-function writeConnectedAgentCache(agent: Agent | null) {
-  if (typeof window === "undefined") {
-    return;
+async function fetchBuyRequests(
+  token: string | null,
+  signal?: AbortSignal,
+): Promise<BuyRequest[]> {
+  try {
+    const response = await apiFetch<{
+      success: boolean;
+      data: Record<string, unknown>[];
+    }>("/api/buy-requests?status=open&limit=50", {
+      token: token ?? null,
+      signal,
+    });
+
+    return (response.data ?? [])
+      .map((row) => buyRequestFromSupabaseRow(row))
+      .filter(
+        (r) => r.workflowStatus === "open" && r.assignedAgentId == null,
+      )
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  } catch (e) {
+    if ((e as Error)?.name === "AbortError") throw e;
+    debug.warn("useAgentPortalData", "fetchBuyRequests failed", {
+      message: e instanceof Error ? e.message : "unknown",
+    });
+    return [];
   }
-  if (!agent) {
-    window.sessionStorage.removeItem(CONNECTED_AGENT_CACHE_KEY);
-    return;
+}
+
+async function fetchMyBuyRequests(
+  token: string,
+  signal?: AbortSignal,
+): Promise<BuyRequest[]> {
+  try {
+    const response = await apiFetch<{
+      success: boolean;
+      data: Record<string, unknown>[];
+    }>("/api/buy-requests/mine?limit=50", { token, signal });
+
+    return (response.data ?? [])
+      .map((row) => buyRequestFromSupabaseRow(row))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  } catch (e) {
+    if ((e as Error)?.name === "AbortError") throw e;
+    debug.warn("useAgentPortalData", "fetchMyBuyRequests failed", {
+      message: e instanceof Error ? e.message : "unknown",
+    });
+    return [];
   }
-  window.sessionStorage.setItem(
-    CONNECTED_AGENT_CACHE_KEY,
-    JSON.stringify({ ts: Date.now(), data: agent }),
+}
+
+function mergePoolAndMyBuyRequests(
+  pool: BuyRequest[],
+  mine: BuyRequest[],
+): BuyRequest[] {
+  const byId = new Map<string, BuyRequest>();
+  for (const r of mine) {
+    byId.set(r.id, r);
+  }
+  for (const r of pool) {
+    if (!byId.has(r.id)) {
+      byId.set(r.id, r);
+    }
+  }
+  return Array.from(byId.values()).sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt),
   );
 }
 
-function readClaimedListingsCache() {
-  if (typeof window === "undefined") {
-    return null;
-  }
+async function fetchAgentSalingListings(
+  token: string,
+  displayAgent: Agent,
+  signal?: AbortSignal,
+): Promise<MarketplaceListing[]> {
   try {
-    const raw = window.sessionStorage.getItem(CLAIMED_LISTINGS_CACHE_KEY);
-    if (!raw) {
-      return null;
-    }
-    const parsed = JSON.parse(raw) as {
-      ts?: number;
-      data?: MarketplaceListing[];
-    };
-    if (
-      typeof parsed.ts !== "number" ||
-      !Array.isArray(parsed.data)
-    ) {
-      return null;
-    }
-    if (Date.now() - parsed.ts > CLAIMED_LISTINGS_CACHE_TTL_MS) {
-      return null;
-    }
-    return parsed.data;
-  } catch {
-    return null;
+    const response = await apiFetch<{
+      success: boolean;
+      data: Array<{ listings: Record<string, unknown> | null }>;
+    }>("/api/agent-saling", { token, signal });
+
+    return (response.data ?? [])
+      .map((row) =>
+        marketplaceListingFromSupabaseListing(row.listings, {
+          connectedAgent: displayAgent,
+        }),
+      )
+      .filter((item): item is MarketplaceListing => Boolean(item));
+  } catch (e) {
+    if ((e as Error)?.name === "AbortError") throw e;
+    debug.warn("useAgentPortalData", "fetchAgentSalingListings failed", {
+      message: e instanceof Error ? e.message : "unknown",
+    });
+    return [];
   }
 }
 
-function writeClaimedListingsCache(data: MarketplaceListing[]) {
-  if (typeof window === "undefined") {
-    return;
+async function fetchAgentCatalog(
+  agentId: string,
+  token: string | null,
+  signal?: AbortSignal,
+): Promise<Apartment[]> {
+  try {
+    const response = await apiFetch<{
+      success: boolean;
+      data: Record<string, unknown>[];
+    }>(
+      `/api/listings?status=published&agentId=${encodeURIComponent(agentId)}&limit=100`,
+      { token: token ?? null, signal },
+    );
+    return (response.data ?? []).map(
+      (row) => apartmentFromApiListing(row).apartment,
+    );
+  } catch (e) {
+    if ((e as Error)?.name === "AbortError") throw e;
+    debug.warn("useAgentPortalData", "fetchAgentCatalog failed", {
+      message: e instanceof Error ? e.message : "unknown",
+    });
+    return [];
   }
-  window.sessionStorage.setItem(
-    CLAIMED_LISTINGS_CACHE_KEY,
-    JSON.stringify({ ts: Date.now(), data }),
-  );
 }
 
-function reloadOpenBuyRequests(): BuyRequest[] {
-  return readBuyRequests()
-    .filter((r) => r.workflowStatus === "open" && r.assignedAgentId == null)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-}
+export type UseAgentPortalDataOptions = {
+  /** Dashboard «Хүсэлтүүд» — өөрийн оруулсан хүсэлт + агентын саналуудыг нэгтгэнэ. */
+  mergeMyBuyRequests?: boolean;
+};
 
-function listingInSaleAgentFeed(
-  listing: MarketplaceListing,
-  connectedAgent: Agent | null,
-) {
-  const wantsAgent =
-    listing.serviceType === "agent" ||
-    (listing.serviceType == null &&
-      Boolean(listing.selectedAgentId?.length));
-  if (!wantsAgent || listing.workflowStatus !== "pending") {
-    return false;
-  }
-  if (listing.takingAgentId) {
-    return false;
-  }
-  if (listing.selectedAgentId) {
-    if (!connectedAgent) {
-      return false;
-    }
-    return listing.selectedAgentId === connectedAgent.id;
-  }
-  return true;
-}
-
-export function useAgentPortalData() {
+export function useAgentPortalData(options?: UseAgentPortalDataOptions) {
+  const mergeMyBuyRequests = options?.mergeMyBuyRequests ?? false;
   const { user, isLoaded: userLoaded } = useUser();
   const { getToken } = useAuth();
-  const [marketplaceRaw, setMarketplaceRaw] = useState<MarketplaceListing[]>(
-    [],
-  );
+
   const [buyRequestsRaw, setBuyRequestsRaw] = useState<BuyRequest[]>([]);
+  const [myBuyRequestsRaw, setMyBuyRequestsRaw] = useState<BuyRequest[]>([]);
   const [claimedSaleListings, setClaimedSaleListings] = useState<
     MarketplaceListing[]
   >([]);
-  const [mounted, setMounted] = useState(typeof window !== "undefined");
-  const [connectedAgent, setConnectedAgent] = useState<Agent | null>(
-    readConnectedAgentCache(),
-  );
+  const [agentCatalog, setAgentCatalog] = useState<Apartment[]>([]);
+  const [connectedAgent, setConnectedAgent] = useState<Agent | null>(null);
+  const [portalInitialLoading, setPortalInitialLoading] = useState(true);
 
-  const loadConnectedAgent = useCallback(async (): Promise<Agent | null> => {
-    if (!userLoaded || !user) {
-      setConnectedAgent(null);
-      return null;
+  const userIdRef = useRef<string | null>(null);
+  userIdRef.current = user?.id ?? null;
+
+  /** Session snapshot — давтан ороход tab skeleton багасна. */
+  useLayoutEffect(() => {
+    if (!userLoaded || !user?.id) return;
+    const snap = readAgentPortalSessionCache(user.id);
+    if (!snap) return;
+    setConnectedAgent(snap.connectedAgent);
+    setBuyRequestsRaw(snap.buyRequests);
+    if (mergeMyBuyRequests) {
+      setMyBuyRequestsRaw(snap.myBuyRequests ?? []);
     }
-    try {
-      const token = await getToken();
-      if (!token) {
-        setConnectedAgent(null);
-        return null;
+    setClaimedSaleListings(snap.claimedSaleListings);
+    setAgentCatalog(snap.agentCatalog);
+    setPortalInitialLoading(false);
+  }, [userLoaded, user?.id, mergeMyBuyRequests]);
+
+  useEffect(() => {
+    if (!userLoaded) return;
+
+    let cancelled = false;
+    const ac = new AbortController();
+
+    const run = async () => {
+      const uid = user?.id ?? null;
+      const hadCache =
+        typeof window !== "undefined" &&
+        Boolean(uid && readAgentPortalSessionCache(uid));
+
+      if (!hadCache) {
+        setPortalInitialLoading(true);
       }
-      const res = await apiFetch<{ success: boolean; data: Agent }>(
-        "/api/agents/me",
-        { token },
-      );
-      const next = res.data ?? null;
-      setConnectedAgent(next);
-      writeConnectedAgentCache(next);
-      return next;
-    } catch {
-      setConnectedAgent(null);
-      writeConnectedAgentCache(null);
-      return null;
-    }
-  }, [getToken, userLoaded, user]);
 
-  const loadBuyRequestsFromApi = useCallback(async () => {
-    try {
-      const token = await getToken();
-      if (!token) {
-        setBuyRequestsRaw(reloadOpenBuyRequests());
+      if (!user) {
+        setConnectedAgent(null);
+        setBuyRequestsRaw([]);
+        setMyBuyRequestsRaw([]);
+        setClaimedSaleListings([]);
+        setAgentCatalog([]);
+        if (!cancelled) setPortalInitialLoading(false);
         return;
       }
 
-      const response = await apiFetch<{
-        success: boolean;
-        data: Record<string, unknown>[];
-      }>("/api/buy-requests?status=open&limit=100", { token });
-
-      const mapped = (response.data ?? []).map((row) =>
-        buyRequestFromSupabaseRow(row),
-      );
-      const openPool = mapped
-        .filter((r) => r.workflowStatus === "open" && r.assignedAgentId == null)
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-
-      setBuyRequestsRaw(openPool);
-    } catch {
-      setBuyRequestsRaw(reloadOpenBuyRequests());
-    }
-  }, [getToken]);
-
-  const loadAgentSaling = useCallback(
-    async () => {
       try {
         const token = await getToken();
+        if (cancelled) return;
         if (!token) {
+          setConnectedAgent(null);
+          setBuyRequestsRaw([]);
+          setMyBuyRequestsRaw([]);
           setClaimedSaleListings([]);
+          setAgentCatalog([]);
+          setPortalInitialLoading(false);
           return;
         }
 
-        const response = await apiFetch<{
-          success: boolean;
-          data: Array<{ listings: Record<string, unknown> | null }>;
-        }>("/api/agent-saling", { token });
-        const fallbackAgent: Agent = {
-          id: "agent-claim-fallback",
-          name: "Agent",
-          avatar: "",
-          phone: "",
-          email: "",
-          company: "",
-          rating: 0,
-          reviewCount: 0,
-          listingsCount: 0,
-          verified: false,
-        };
-        const displayAgent = connectedAgent ?? fallbackAgent;
+        const agent = await fetchConnectedAgent(token, ac.signal);
+        if (cancelled) return;
 
-        const mapped = (response.data ?? [])
-          .map((row) =>
-            marketplaceListingFromSupabaseListing(row.listings, {
-              connectedAgent: displayAgent,
-            }),
-          )
-          .filter((item): item is MarketplaceListing => Boolean(item));
+        const nextAgent = agent;
+        setConnectedAgent(nextAgent);
 
-        setClaimedSaleListings(mapped);
-        writeClaimedListingsCache(mapped);
-      } catch {
-        setClaimedSaleListings([]);
+        const agentId = nextAgent?.id?.trim() ? nextAgent.id : null;
+        const mappingAgent = nextAgent ?? FALLBACK_AGENT;
+        const minePromise = mergeMyBuyRequests
+          ? fetchMyBuyRequests(token, ac.signal)
+          : Promise.resolve([] as BuyRequest[]);
+        const [buys, mineRows, salingRemapped, catalog] = await Promise.all([
+          fetchBuyRequests(token, ac.signal),
+          minePromise,
+          fetchAgentSalingListings(token, mappingAgent, ac.signal),
+          agentId
+            ? fetchAgentCatalog(agentId, token, ac.signal)
+            : Promise.resolve([] as Apartment[]),
+        ]);
+        if (cancelled) return;
+
+        setBuyRequestsRaw(buys);
+        setMyBuyRequestsRaw(mineRows);
+        setClaimedSaleListings(salingRemapped);
+        setAgentCatalog(catalog);
+
+        writeAgentPortalSessionCache(user.id, {
+          connectedAgent: nextAgent,
+          buyRequests: buys,
+          ...(mergeMyBuyRequests ? { myBuyRequests: mineRows } : {}),
+          claimedSaleListings: salingRemapped,
+          agentCatalog: catalog,
+        });
+      } catch (e) {
+        if ((e as Error)?.name === "AbortError") return;
+        debug.error("useAgentPortalData", "portal bootstrap failed", {
+          message: e instanceof Error ? e.message : "unknown",
+        });
+      } finally {
+        if (!cancelled) setPortalInitialLoading(false);
       }
-    },
-    [getToken, connectedAgent],
-  );
+    };
 
-  const refreshLocal = useCallback(() => {
-    const liveListings = readMarketplaceListings();
-    setMarketplaceRaw(liveListings);
-  }, []);
+    void run();
 
-  const refresh = useCallback(() => {
-    refreshLocal();
-    void (async () => {
-      await Promise.all([
-        loadConnectedAgent(),
-        loadBuyRequestsFromApi(),
-        loadAgentSaling(),
+    return () => {
+      cancelled = true;
+      ac.abort();
+    };
+  }, [userLoaded, user?.id, getToken, mergeMyBuyRequests]);
+
+  const refresh = useCallback(async () => {
+    const uid = userIdRef.current;
+    if (!uid || !userLoaded) return;
+    clearAgentPortalSessionCache(uid);
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      const nextAgent = await fetchConnectedAgent(token);
+      const mappingAgent = nextAgent ?? FALLBACK_AGENT;
+      const agentId = nextAgent?.id?.trim() ? nextAgent.id : null;
+
+      const minePromise = mergeMyBuyRequests
+        ? fetchMyBuyRequests(token)
+        : Promise.resolve([] as BuyRequest[]);
+      const [buys, mineRows, saling, catalog] = await Promise.all([
+        fetchBuyRequests(token),
+        minePromise,
+        fetchAgentSalingListings(token, mappingAgent),
+        agentId
+          ? fetchAgentCatalog(agentId, token)
+          : Promise.resolve([] as Apartment[]),
       ]);
-    })();
-  }, [
-    refreshLocal,
-    loadConnectedAgent,
-    loadBuyRequestsFromApi,
-    loadAgentSaling,
-  ]);
 
-  useEffect(() => {
-    setMounted(true);
-    refreshLocal();
-  }, [refreshLocal]);
+      setConnectedAgent(nextAgent);
+      setBuyRequestsRaw(buys);
+      setMyBuyRequestsRaw(mineRows);
+      setClaimedSaleListings(saling);
+      setAgentCatalog(catalog);
 
-  useEffect(() => {
-    void loadConnectedAgent();
-  }, [loadConnectedAgent]);
-
-  useEffect(() => {
-    const cached = readClaimedListingsCache();
-    if (cached && cached.length > 0) {
-      setClaimedSaleListings(cached);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) {
-      return;
-    }
-    void loadBuyRequestsFromApi();
-    void loadAgentSaling();
-  }, [mounted, connectedAgent, loadBuyRequestsFromApi, loadAgentSaling]);
-
-  const email = normalizeEmail(user?.primaryEmailAddress?.emailAddress);
-
-  const { marketplace, catalog } = useMemo(() => {
-    if (!mounted) {
-      return { marketplace: [] as MarketplaceListing[], catalog: [] };
-    }
-    const mp = marketplaceRaw.filter((listing) => {
-      if (email && normalizeEmail(listing.submittedBy.email) === email) {
-        return true;
-      }
-      if (connectedAgent && listing.selectedAgentId === connectedAgent.id) {
-        return true;
-      }
-      return false;
-    });
-    const cat = connectedAgent
-      ? apartments.filter((a) => a.agent.id === connectedAgent.id)
-      : [];
-    return { marketplace: mp, catalog: cat };
-  }, [mounted, marketplaceRaw, email, connectedAgent]);
-
-  const buyRequestsSeekingAgent = useMemo(
-    () =>
-      buyRequestsRaw.filter(
-        (r) => r.workflowStatus === "open" && r.assignedAgentId == null,
-      ),
-    [buyRequestsRaw],
-  );
-
-  const saleFeedListings = useMemo(() => {
-    if (!mounted) {
-      return [] as MarketplaceListing[];
-    }
-    return marketplaceRaw.filter((l) =>
-      listingInSaleAgentFeed(l, connectedAgent),
-    );
-  }, [mounted, marketplaceRaw, connectedAgent]);
-
-  const agentPickListings = useMemo((): AgentPortalPickListing[] => {
-    if (!mounted || !connectedAgent) {
-      return [];
-    }
-    // «Худалдан авах хүсэлтүүд» дээр зөвхөн «Миний зарууд» (claimed) сонголт өгнө.
-    const rows: AgentPortalPickListing[] = [];
-    for (const l of claimedSaleListings) {
-      rows.push({
-        id: l.id,
-        title: l.title,
-        district: l.district,
-        price: l.price,
-        imageUrl: l.images?.[0] || undefined,
-        source: "claimed",
+      writeAgentPortalSessionCache(uid, {
+        connectedAgent: nextAgent,
+        buyRequests: buys,
+        ...(mergeMyBuyRequests ? { myBuyRequests: mineRows } : {}),
+        claimedSaleListings: saling,
+        agentCatalog: catalog,
+      });
+    } catch (e) {
+      debug.warn("useAgentPortalData", "refresh failed", {
+        message: e instanceof Error ? e.message : "unknown",
       });
     }
-    return rows;
-  }, [mounted, connectedAgent, claimedSaleListings]);
+  }, [getToken, userLoaded, mergeMyBuyRequests]);
+
+  const buyRequestsSeekingAgent = useMemo(() => {
+    if (!mergeMyBuyRequests) {
+      return buyRequestsRaw;
+    }
+    return mergePoolAndMyBuyRequests(buyRequestsRaw, myBuyRequestsRaw);
+  }, [mergeMyBuyRequests, buyRequestsRaw, myBuyRequestsRaw]);
+
+  const agentPickListings = useMemo((): AgentPortalPickListing[] => {
+    if (!connectedAgent) return [];
+    return claimedSaleListings.map((l) => ({
+      id: l.id,
+      title: l.title,
+      district: l.district,
+      price: l.price,
+      imageUrl: l.images?.[0] || undefined,
+      source: "claimed",
+    }));
+  }, [connectedAgent, claimedSaleListings]);
 
   return {
     userLoaded,
-    mounted,
-    marketplace,
-    catalog,
     claimedSaleListings,
     buyRequestsSeekingAgent,
-    saleFeedListings,
     agentPickListings,
     connectedAgent,
     refresh,
+    portalInitialLoading: !userLoaded || portalInitialLoading,
   };
 }

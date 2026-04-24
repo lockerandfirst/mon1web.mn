@@ -214,6 +214,7 @@ export const RECOMMENDED_BACKEND_ENDPOINTS = {
   listAgents: "/api/agents",
   getAgent: "/api/agents/:id",
   listBuyRequests: "/api/buy-requests",
+  listMyBuyRequests: "/api/buy-requests/mine",
   createBuyRequest: "/api/buy-requests",
 } as const;
 

@@ -3,12 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import type { MapBoundsLiteral } from "@/app/map/map-bounds";
 import { formatPrice, type Apartment } from "@/lib/data";
 
 type MapViewProps = {
   apartments: Apartment[];
   selectedId: string | null;
   onSelectApartment: (id: string) => void;
+  /** Газар чирэх/зум хийхэд bbox-оор зарууд дахин ачаална. */
+  onBoundsChange?: (bounds: MapBoundsLiteral) => void;
 };
 
 const DEFAULT_CENTER: [number, number] = [47.9188, 106.9176];
@@ -53,11 +59,17 @@ export function MapView({
   apartments,
   selectedId,
   onSelectApartment,
+  onBoundsChange,
 }: MapViewProps) {
   const [isMounted, setIsMounted] = useState(false);
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
-  const markerLayerRef = useRef<L.LayerGroup | null>(null);
+  const markerLayerRef = useRef<L.MarkerClusterGroup | null>(null);
+  const hasAutoFitRef = useRef(false);
+  /** Зөвхөн sidebar/pin-ээс шинээр сонгоход төвлөрнө — bbox шинэчлэл бүрт буцаад очихгүй. */
+  const prevSelectedIdRef = useRef<string | null>(null);
+  const onBoundsChangeRef = useRef(onBoundsChange);
+  onBoundsChangeRef.current = onBoundsChange;
 
   useEffect(() => {
     setIsMounted(true);
@@ -84,13 +96,37 @@ export function MapView({
 
     L.control.zoom({ position: "topright" }).addTo(map);
 
-    markerLayerRef.current = L.layerGroup().addTo(map);
+    const cluster = L.markerClusterGroup({
+      maxClusterRadius: 52,
+      disableClusteringAtZoom: 16,
+      /** Ойрхон 2 pin дээр spiderfy шугам буруу цэг рүү харагдахыг унтраана. */
+      spiderfyOnMaxZoom: false,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true,
+    }).addTo(map);
+    markerLayerRef.current = cluster;
     mapRef.current = map;
+
+    const publishBounds = () => {
+      const b = map.getBounds();
+      onBoundsChangeRef.current?.({
+        south: b.getSouth(),
+        north: b.getNorth(),
+        west: b.getWest(),
+        east: b.getEast(),
+      });
+    };
+    map.on("moveend", publishBounds);
+    map.on("zoomend", publishBounds);
+
     requestAnimationFrame(() => {
       map.invalidateSize();
+      publishBounds();
     });
 
     return () => {
+      map.off("moveend", publishBounds);
+      map.off("zoomend", publishBounds);
       markerLayerRef.current?.clearLayers();
       markerLayerRef.current = null;
       map.remove();
@@ -110,7 +146,10 @@ export function MapView({
       (apartment) => apartment.id === selectedId,
     );
 
-    if (activeApt) {
+    const selectionChanged = selectedId !== prevSelectedIdRef.current;
+    prevSelectedIdRef.current = selectedId;
+
+    if (activeApt && selectionChanged) {
       map.setView(
         [activeApt.coordinates.lat, activeApt.coordinates.lng],
         SELECTED_ZOOM,
@@ -118,8 +157,9 @@ export function MapView({
           animate: true,
         },
       );
-    } else {
+    } else if (!activeApt && !hasAutoFitRef.current && apartments.length > 0) {
       fitMapToApartments(map, apartments);
+      hasAutoFitRef.current = true;
     }
 
     markerLayer.clearLayers();
@@ -137,11 +177,10 @@ export function MapView({
         `,
       });
 
-      L.marker([apt.coordinates.lat, apt.coordinates.lng], {
+      const marker = L.marker([apt.coordinates.lat, apt.coordinates.lng], {
         icon: customIcon,
-      })
-        .on("click", () => onSelectApartment(apt.id))
-        .addTo(markerLayer);
+      }).on("click", () => onSelectApartment(apt.id));
+      markerLayer.addLayer(marker);
     });
   }, [apartments, isMounted, onSelectApartment, selectedId]);
 
@@ -182,7 +221,7 @@ export function MapView({
         }
 
         .marker-wrapper:hover .marker-bubble {
-          border-color: #93c5fd;
+          border-color: #2a00ff;
           transform: translateY(-1px);
         }
 
@@ -238,6 +277,21 @@ export function MapView({
           border-radius: 0 0 18px 18px !important;
         }
 
+        .marker-cluster-small,
+        .marker-cluster-medium,
+        .marker-cluster-large {
+          background: rgba(42, 0, 255, 0.12) !important;
+        }
+
+        .marker-cluster-small div,
+        .marker-cluster-medium div,
+        .marker-cluster-large div {
+          background: #2a00ff !important;
+          color: #fff !important;
+          font-weight: 800 !important;
+          font-size: 11px !important;
+        }
+
         @media (max-width: 767px) {
           .leaflet-control-zoom {
             display: none !important;
@@ -245,14 +299,14 @@ export function MapView({
         }
       `}</style>
       {/* Зөвхөн desktop дээр "байр харагдаж байна" харуулав */}
-      <div className="pointer-events-none -mb-5 absolute bottom-[max(7rem,env(safe-area-inset-bottom,0px)+5rem)] left-3 right-3 z-400 rounded-3xl bg-white/92 px-4 py-3 shadow-2xl backdrop-blur-xl md:bottom-4 md:left-4 md:right-auto md:max-w-72 max-md:hidden">
+      <div className="pointer-events-none -mb-2 absolute bottom-[max(7rem,env(safe-area-inset-bottom,0px)+5rem)] left-3 right-3 z-400 rounded-4xl border border-white/70 bg-white/92 px-4 py-3 shadow-[0_22px_48px_-24px_rgba(15,23,42,0.6)] backdrop-blur-xl md:bottom-4 md:left-4 md:right-auto md:max-w-72 max-md:hidden">
         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">
-          {apartments.length} байр харагдаж байна
+          {apartments.length} байр (харагдаж буй бүс)
         </p>
         <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
           {selectedId
             ? "Сонгосон pin дээр төвлөрлөө. Карт эсвэл pin дарж өөр байр сонгоно."
-            : "Үнэ харагдаж байгаа pin эсвэл зүүн талын карт дээр дарж дэлгэрэнгүй үзээрэй."}
+            : "Газрын зураг дээр таны vision хэсэгт байгаа зарууд харагдана."}
         </p>
       </div>
     </div>

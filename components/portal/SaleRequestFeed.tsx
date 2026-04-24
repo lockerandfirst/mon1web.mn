@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 
 import { ApartmentCard } from "@/components/apartment-card";
+import { ListingsGridSkeleton } from "@/components/skeletons";
 import { apiFetch } from "@/lib/backend-api";
 import type { Agent, Apartment } from "@/lib/data";
 import type { MarketplaceListing } from "@/lib/marketplace";
@@ -13,28 +14,28 @@ import {
 } from "@/lib/portal/supabase-listing-to-marketplace";
 
 export function SaleRequestFeed({
-  listings,
   connectedAgent,
   onRefresh,
 }: {
-  listings: MarketplaceListing[];
   connectedAgent: Agent | null;
   onRefresh: () => void;
 }) {
-  const { getToken } = useAuth();
+  const { getToken, isLoaded: authLoaded, userId, sessionId } = useAuth();
   const canAct = Boolean(connectedAgent);
-  const [remoteListings, setRemoteListings] = useState<MarketplaceListing[]>(listings);
-  const [claimingListingId, setClaimingListingId] = useState<string | null>(null);
+  const [remoteListings, setRemoteListings] = useState<MarketplaceListing[]>([]);
+  const [claimingListingId, setClaimingListingId] = useState<string | null>(
+    null,
+  );
   const [claimError, setClaimError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(listings.length === 0);
   const [hasFetchedOnce, setHasFetchedOnce] = useState<boolean>(false);
 
   const loadSearchingAgent = useCallback(async () => {
-    setIsLoading(true);
+    if (!authLoaded) {
+      return;
+    }
     try {
       const token = await getToken();
       if (!token) {
-        // Token хараахан бэлэн болоогүй үед empty-state рүү унагахгүй.
         return;
       }
 
@@ -45,7 +46,12 @@ export function SaleRequestFeed({
           created_at: string;
           listings: Record<string, unknown> | null;
           profiles:
-            | { full_name?: string | null; email?: string | null; phone?: string | null }
+            | {
+                full_name?: string | null;
+                email?: string | null;
+                phone?: string | null;
+                avatar_url?: string | null;
+              }
             | null;
         }>;
       }>("/api/searching-agent?limit=100", { token });
@@ -66,8 +72,12 @@ export function SaleRequestFeed({
       const mapped = response.data
         .map((row): MarketplaceListing | null => {
           const listing = row.listings as Record<string, unknown> | null;
+          const profileName =
+            row.profiles?.full_name?.trim() ||
+            row.profiles?.email?.split("@")[0]?.trim() ||
+            "";
           const submittedByOverride = {
-            name: row.profiles?.full_name || "Хэрэглэгч",
+            name: profileName || "Хэрэглэгч",
             email: row.profiles?.email || "user@mon1.local",
             phone: row.profiles?.phone || undefined,
           };
@@ -75,6 +85,7 @@ export function SaleRequestFeed({
             submittedByOverride.name,
             submittedByOverride.email,
             submittedByOverride.phone,
+            row.profiles?.avatar_url ?? undefined,
           );
           return marketplaceListingFromSupabaseListing(listing, {
             connectedAgent: connectedAgent ?? fallbackAgent,
@@ -90,22 +101,15 @@ export function SaleRequestFeed({
     } catch {
       console.log("[SaleRequestFeed] /api/searching-agent failed");
       setHasFetchedOnce(true);
-    } finally {
-      setIsLoading(false);
     }
-  }, [getToken]);
+  }, [authLoaded, getToken, connectedAgent?.id]);
 
   useEffect(() => {
-    if (listings.length > 0) {
-      setRemoteListings(listings);
-      setIsLoading(false);
-      setHasFetchedOnce(true);
+    if (!authLoaded) {
+      return;
     }
-  }, [listings]);
-
-  useEffect(() => {
     void loadSearchingAgent();
-  }, [loadSearchingAgent]);
+  }, [authLoaded, userId, sessionId, loadSearchingAgent]);
 
   const sorted = useMemo(
     () => [...remoteListings].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
@@ -160,7 +164,9 @@ export function SaleRequestFeed({
           {claimError}
         </p>
       ) : null}
-      {!hasFetchedOnce ? null : sorted.length === 0 ? (
+      {!hasFetchedOnce ? (
+        <ListingsGridSkeleton className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 md:gap-6" />
+      ) : sorted.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-6 text-center shadow-sm md:p-12">
           <p className="text-base font-black text-[#1a0b3b] md:text-lg">
             Одоогоор агент хайж буй зар алга

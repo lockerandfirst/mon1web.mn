@@ -181,6 +181,53 @@
     display: none;
   }
 
+  /* Skeleton shimmer — high-end left→right sweep overlaid on pulsing base. */
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.55) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s linear infinite;
+    pointer-events: none;
+  }
+  /* Brand tinted shimmer — ягаан-цэнхэр бренд сүүлрэлт (зураг placeholder дээр). */
+  .skeleton-shimmer-brand::after {
+    background: linear-gradient(
+      90deg,
+      rgba(42, 0, 255, 0) 0%,
+      rgba(255, 59, 173, 0.22) 45%,
+      rgba(42, 0, 255, 0.18) 55%,
+      rgba(42, 0, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+  }
+  @keyframes skeleton-shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+  /* Reduce-motion: disable sweep, keep pulsing base only. */
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton-shimmer::after {
+      animation: none;
+      opacity: 0;
+    }
+  }
+
   .bg-brand-gradient {
     background-image: var(--brand-gradient);
     background-color: var(--brand-start);

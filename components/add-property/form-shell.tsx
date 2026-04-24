@@ -136,7 +136,7 @@ export function FormSection({
   children: ReactNode;
 }) {
   return (
-    <Card className="mt-0 w-full overflow-hidden rounded-3xl border border-slate-50 bg-white shadow-[0_50px_100px_-55px_rgba(42,0,255,0.5)] md:rounded-[3.5rem]">
+    <Card className="mt-0 w-full overflow-hidden rounded-3xl border border-slate-50 bg-white shadow-[0_50px_100px_-55px_rgba(42, 0, 255,0.5)] md:rounded-[3.5rem]">
       <div className="bg-[linear-gradient(135deg,#1a0b3b_0%,#2a00ff_110%)] p-4 text-white md:p-8">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#ff9ce0]">
           {eyebrow}

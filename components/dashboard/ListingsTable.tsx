@@ -6,18 +6,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Clock, CalendarX, Pencil } from "lucide-react";
+import { Clock, CalendarX, Pencil, Trash2, Loader2 } from "lucide-react";
+import { SafeImage } from "@/components/ui/safe-image";
 import { formatPrice } from "@/lib/data";
 
 interface ListingTableProps {
   listings: any[];
   onView: (id: string) => void;
   onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void | Promise<void>;
+  deletingId?: string | null;
 }
 
-export function ListingTable({ listings, onView, onEdit }: ListingTableProps) {
+export function ListingTable({
+  listings,
+  onView,
+  onEdit,
+  onDelete,
+  deletingId,
+}: ListingTableProps) {
   const formatDate = (date: Date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -28,12 +36,18 @@ export function ListingTable({ listings, onView, onEdit }: ListingTableProps) {
   return (
     <>
       <div className="space-y-2 p-2 md:hidden lg:mb-0 -mb-6  lg:mt-0 -mt-9">
-        {listings.map((listing) => {
+        {listings.map((listing, index) => {
           const createdAt = listing.createdAt
             ? new Date(listing.createdAt)
             : null;
           const removedAt = createdAt ? new Date(createdAt) : null;
           if (removedAt) removedAt.setMonth(removedAt.getMonth() + 3);
+          const isBusy = deletingId === listing.id;
+          const rowNo = index + 1;
+          const phone =
+            listing.contactPhone?.trim() ||
+            listing.agent?.phone?.trim() ||
+            "";
 
           return (
             <div
@@ -41,12 +55,25 @@ export function ListingTable({ listings, onView, onEdit }: ListingTableProps) {
               onClick={() => onView(listing.id)}
               className="rounded-2xl border border-[#fff1f9] bg-[#fff9fd] p-2.5"
             >
+              <div className="mb-1 flex items-center justify-between gap-2 text-[10px] font-black text-slate-400">
+                <span>№ {rowNo}</span>
+                {phone ? (
+                  <span className="truncate font-bold text-[#1a0b3b]">
+                    {phone}
+                  </span>
+                ) : (
+                  <span className="text-slate-300">—</span>
+                )}
+              </div>
               <div className="flex gap-2.5">
-                <img
-                  src={listing.images[0]}
-                  className="h-16 w-20 rounded-xl object-cover shadow-sm"
-                  alt=""
-                />
+                <div className="relative h-16 w-20 max-h-16 max-w-20 shrink-0 overflow-hidden rounded-xl bg-[#fff1f9]/40 shadow-sm ring-1 ring-inset ring-[#fff1f9]/50">
+                  <SafeImage
+                    src={listing.images?.[0]}
+                    variant="listingThumb"
+                    className="absolute inset-0 size-full max-h-full max-w-full object-cover"
+                    alt=""
+                  />
+                </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[12px] font-black uppercase italic tracking-tight text-[#1a0b3b]">
                     {listing.title}
@@ -71,72 +98,81 @@ export function ListingTable({ listings, onView, onEdit }: ListingTableProps) {
                 </div>
               </div>
 
-              <div className="mt-2 flex items-center justify-between gap-1.5">
-                <Badge className="rounded-lg border-none bg-[#eeebff] px-2.5 py-1 text-[9px] font-black tracking-wide text-[#2a00ff]">
-                  ИДЭВХТЭЙ
-                </Badge>
-                <div className="flex items-center gap-1">
-                  {onEdit && String(listing.id).startsWith("user-") ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 rounded-lg px-2 text-[9px] font-black uppercase tracking-wide text-[#2a00ff] hover:bg-white"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onEdit(listing.id);
-                      }}
-                    >
-                      <Pencil className="mr-1 h-3 w-3" />
-                      Засах
-                    </Button>
-                  ) : null}
+              <div className="mt-2 flex flex-wrap items-center justify-end gap-1">
+                {onEdit ? (
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-7 rounded-lg px-2 text-[9px] font-black uppercase tracking-wide text-[#ff3bad] hover:bg-white hover:text-[#2a00ff]"
+                    disabled={isBusy}
+                    className="h-8 shrink-0 rounded-lg px-2.5 text-[9px] font-black uppercase tracking-wide text-[#2a00ff] hover:bg-white"
                     onClick={(event) => {
                       event.stopPropagation();
-                      onView(listing.id);
+                      onEdit(listing.id);
                     }}
                   >
-                    <Eye className="mr-1 h-3 w-3" />
-                    Үзэх
+                    <Pencil className="mr-1 h-3 w-3" />
+                    Засах
                   </Button>
-                </div>
+                ) : null}
+                {onDelete ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={isBusy}
+                    className="h-8 shrink-0 rounded-lg px-2.5 text-[9px] font-black uppercase tracking-wide text-red-600 hover:bg-white hover:text-red-700"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void onDelete(listing.id);
+                    }}
+                  >
+                    {isBusy ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Trash2 className="mr-1 h-3 w-3" />
+                    )}
+                    Устгах
+                  </Button>
+                ) : null}
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="hidden md:block">
-        <Table>
+      <div className="hidden min-w-0 md:block">
+        <Table
+          className="table-fixed"
+          containerClassName="min-w-0 w-full overflow-x-auto"
+        >
           <TableHeader className="bg-[#fff9fd]">
             <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="pl-8 font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
+              <TableHead className="w-9 px-1 text-center font-black uppercase text-[10px] tracking-widest text-[#ff3bad] lg:w-10">
+                №
+              </TableHead>
+              <TableHead className="w-[26%] pl-1 font-black uppercase text-[10px] tracking-widest text-[#ff3bad] lg:pl-2">
                 Байршил / Нэр
               </TableHead>
-              <TableHead className="font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
+              <TableHead className="w-[12%] font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
                 Үнэ
               </TableHead>
-              <TableHead className="font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
+              <TableHead className="w-[14%] font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
+                Утас
+              </TableHead>
+              <TableHead className="w-[14%] font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
                 Нийтэлсэн
               </TableHead>
-              <TableHead className="font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
-                Дуусах хугацаа
+              <TableHead className="w-[14%] font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
+                Дуусах
               </TableHead>
-              <TableHead className="font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
-                Төлөв
-              </TableHead>
-              <TableHead className="text-right pr-8 font-black uppercase text-[10px] tracking-widest text-[#ff3bad]">
+              <TableHead className="w-[15%] pr-4 text-right font-black uppercase text-[10px] tracking-widest text-[#ff3bad] lg:pr-6">
                 Үйлдэл
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {listings.map((listing) => {
+            {listings.map((listing, index) => {
               const createdAt = listing.createdAt
                 ? new Date(listing.createdAt)
                 : null;
@@ -144,85 +180,107 @@ export function ListingTable({ listings, onView, onEdit }: ListingTableProps) {
               if (removedAt) {
                 removedAt.setMonth(removedAt.getMonth() + 3);
               }
+              const isBusy = deletingId === listing.id;
+              const rowNo = index + 1;
+              const phone =
+                listing.contactPhone?.trim() ||
+                listing.agent?.phone?.trim() ||
+                "";
 
               return (
                 <TableRow
                   key={listing.id}
-                  onClick={() => onView(listing.id)}
+                  onClick={() => !isBusy && onView(listing.id)}
                   className="group cursor-pointer border-b border-[#fff1f9]/70 transition-colors hover:bg-[#fff9fd]"
                 >
-                  <TableCell className="pl-8 py-3.5">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={listing.images[0]}
-                        className="w-16 h-12 rounded-xl object-cover shadow-sm"
-                        alt=""
-                      />
-                      <div>
-                        <p className="font-black text-[#1a0b3b] uppercase italic tracking-tighter text-sm">
+                  <TableCell className="px-1 py-3 text-center align-middle text-[11px] font-black text-slate-500 lg:text-xs">
+                    {rowNo}
+                  </TableCell>
+                  <TableCell className="min-w-0 whitespace-normal py-3 pl-1 align-middle lg:pl-2">
+                    <div className="flex min-w-0 items-center gap-2 lg:gap-3">
+                      <div className="relative h-11 w-14 max-h-11 max-w-14 shrink-0 overflow-hidden rounded-lg bg-[#fff1f9]/40 shadow-sm ring-1 ring-inset ring-[#fff1f9]/50 lg:h-12 lg:w-16 lg:max-h-12 lg:max-w-16 lg:rounded-xl">
+                        <SafeImage
+                          src={listing.images?.[0]}
+                          variant="listingThumb"
+                          className="absolute inset-0 size-full max-h-full max-w-full object-cover"
+                          alt=""
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-2 font-black text-[11px] uppercase italic leading-tight tracking-tighter text-[#1a0b3b] lg:text-sm">
                           {listing.title}
                         </p>
-                        <p className="text-xs text-[#ff3bad] font-bold uppercase">
+                        <p className="truncate text-[10px] font-bold uppercase text-[#ff3bad] lg:text-xs">
                           {listing.location || listing.district}
                         </p>
                       </div>
                     </div>
                   </TableCell>
 
-                  <TableCell className="font-black text-[#2a00ff] italic text-lg">
+                  <TableCell className="align-middle text-[13px] font-black italic leading-tight text-[#2a00ff] lg:text-base">
                     {formatPrice(listing.price)}
                   </TableCell>
 
-                  <TableCell>
-                    <div className="flex items-center gap-2 text-slate-500 font-bold text-xs">
-                      <Clock className="h-3.5 w-3.5 text-slate-400" />
-                      {createdAt ? formatDate(createdAt) : "-"}
+                  <TableCell className="min-w-0 align-middle whitespace-normal break-all text-[10px] font-bold text-[#1a0b3b] lg:text-xs">
+                    {phone || "—"}
+                  </TableCell>
+
+                  <TableCell className="align-middle whitespace-normal">
+                    <div className="flex flex-wrap items-center gap-1 text-[10px] font-bold text-slate-500 lg:gap-2 lg:text-xs">
+                      <Clock className="h-3 w-3 shrink-0 text-slate-400 lg:h-3.5 lg:w-3.5" />
+                      <span className="min-w-0 break-all">
+                        {createdAt ? formatDate(createdAt) : "-"}
+                      </span>
                     </div>
                   </TableCell>
 
-                  <TableCell>
-                    <div className="flex items-center gap-2 text-[#ff3bad] font-black text-xs italic">
-                      <CalendarX className="h-3.5 w-3.5" />
-                      {removedAt ? formatDate(removedAt) : "-"}
+                  <TableCell className="align-middle whitespace-normal">
+                    <div className="flex flex-wrap items-center gap-1 text-[10px] font-black italic text-[#ff3bad] lg:gap-2 lg:text-xs">
+                      <CalendarX className="h-3 w-3 shrink-0 lg:h-3.5 lg:w-3.5" />
+                      <span className="min-w-0 break-all">
+                        {removedAt ? formatDate(removedAt) : "-"}
+                      </span>
                     </div>
                   </TableCell>
 
-                  <TableCell>
-                    <Badge className="bg-[#eeebff] text-[#2a00ff] border-none rounded-lg px-3 py-1 font-black text-[10px] tracking-widest">
-                      ИДЭВХТЭЙ
-                    </Badge>
-                  </TableCell>
-
-                  <TableCell className="text-right pr-8">
-                    <div className="flex items-center justify-end gap-1.5">
-                      {onEdit && String(listing.id).startsWith("user-") ? (
+                  <TableCell className="pr-4 text-right align-middle lg:pr-6">
+                    <div className="flex flex-wrap items-center justify-end gap-1">
+                      {onEdit ? (
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="rounded-xl px-3 font-black text-[10px] uppercase tracking-wide text-[#2a00ff] hover:bg-white hover:shadow-md"
+                          disabled={isBusy}
+                          className="h-8 shrink-0 rounded-lg px-2 text-[9px] font-black uppercase tracking-wide text-[#2a00ff] hover:bg-white lg:h-9 lg:rounded-xl lg:px-2.5 lg:text-[10px]"
                           onClick={(event) => {
                             event.stopPropagation();
                             onEdit(listing.id);
                           }}
                         >
-                          <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                          <Pencil className="mr-1 h-3 w-3 lg:mr-1.5 lg:h-3.5 lg:w-3.5" />
                           Засах
                         </Button>
                       ) : null}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="rounded-xl px-3 font-black text-[10px] uppercase tracking-wide text-[#ff3bad] hover:text-[#2a00ff] hover:bg-white hover:shadow-md"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onView(listing.id);
-                        }}
-                      >
-                        <Eye className="mr-1.5 h-3.5 w-3.5" />
-                        Үзэх
-                      </Button>
+                      {onDelete ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={isBusy}
+                          className="h-8 shrink-0 rounded-lg px-2 text-[9px] font-black uppercase tracking-wide text-red-600 hover:bg-white hover:text-red-700 lg:h-9 lg:rounded-xl lg:px-2.5 lg:text-[10px]"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void onDelete(listing.id);
+                          }}
+                        >
+                          {isBusy ? (
+                            <Loader2 className="h-3 w-3 animate-spin lg:h-3.5 lg:w-3.5" />
+                          ) : (
+                            <Trash2 className="mr-1 h-3 w-3 lg:mr-1.5 lg:h-3.5 lg:w-3.5" />
+                          )}
+                          Устгах
+                        </Button>
+                      ) : null}
                     </div>
                   </TableCell>
                 </TableRow>

@@ -109,7 +109,7 @@ export function ApplicationForm() {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#2a00ff] text-sm font-black tracking-tight text-white shadow-lg shadow-[#2a00ff]/25 transition-all active:scale-[0.98] hover:bg-[#2300d9] md:h-20 md:gap-3 md:rounded-2xl md:text-xl md:tracking-tighter md:shadow-2xl"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#2a00ff] text-sm font-black tracking-tight text-white shadow-lg shadow-[#2a00ff]/25 transition-all active:scale-[0.98] hover:bg-[#2400d9] md:h-20 md:gap-3 md:rounded-2xl md:text-xl md:tracking-tighter md:shadow-2xl"
                 >
                   {isLoading ? (
                     <>

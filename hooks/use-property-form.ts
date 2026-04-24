@@ -181,6 +181,20 @@ export function usePropertyForm() {
     [resolveLocationDetails, resolveNearbyServices],
   );
 
+  /** Засах горимд DB-ийн `latitude`/`longitude`-ийг газрын зураг дээр шууд тавина (Nominatim дахин дуудахгүй). */
+  const hydrateMapFromListing = useCallback((coords: Coordinates) => {
+    const lat = Number(coords.lat);
+    const lng = Number(coords.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return;
+    }
+    const next = { lat, lng };
+    setCoordinates(next);
+    setCurrentCoordinates(next);
+    setLocationMode("pin");
+    setLocationHint("Өгөгдлийн сангийн байршил ачаалагдлаа.");
+  }, []);
+
   return {
     currentStep,
     setCurrentStep,
@@ -203,6 +217,7 @@ export function usePropertyForm() {
       handleUsePinMode,
       handleUseManualMode,
       handleMapPinChange,
+      hydrateMapFromListing,
     },
     handleAiOptimize,
   };

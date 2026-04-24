@@ -31,7 +31,8 @@ export function AgentLoginForm() {
     return null;
   }
 
-  if (!isSignedIn) {
+  // Нэвтэрсэн ч агентын role-гүй байгаа хэрэглэгч → хүсэлт бөглөх CTA-г харуул.
+  if (isSignedIn && !hasAgentRole) {
     return (
       <motion.div
         initial={{ opacity: 0, x: 30 }}
@@ -39,7 +40,7 @@ export function AgentLoginForm() {
         className="relative"
       >
         <div className="pointer-events-none absolute inset-0 rounded-full bg-[#2a00ff]/15 blur-[100px] opacity-40" />
-        <Card className="relative overflow-hidden rounded-4xl border border-white bg-white/70 p-1.5 text-[#2a00ff] shadow-[0_32px_64px_-12px_rgba(42,0,255,0.1)] backdrop-blur-3xl md:rounded-[3rem] md:p-2">
+        <Card className="relative overflow-hidden rounded-4xl border border-white bg-white/70 p-1.5 text-[#2a00ff] shadow-[0_32px_64px_-12px_rgba(42, 0, 255,0.1)] backdrop-blur-3xl md:rounded-[3rem] md:p-2">
           <CardHeader className="px-4 pt-4 md:px-10 md:pt-10">
             <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#2a00ff] shadow-lg shadow-[#2a00ff]/25 md:mb-6 md:h-14 md:w-14 md:rounded-[1.2rem]">
               <Lock className="h-6 w-6 text-white" />
@@ -65,6 +66,7 @@ export function AgentLoginForm() {
     );
   }
 
+  // Нэвтрээгүй хэрэглэгч → sign-in CTA.
   return (
     <motion.div
       initial={{ opacity: 0, x: 30 }}
@@ -73,7 +75,7 @@ export function AgentLoginForm() {
     >
       <div className="pointer-events-none absolute inset-0 rounded-full bg-[#2a00ff]/15 blur-[100px] opacity-40" />
 
-      <Card className="relative overflow-hidden rounded-4xl border border-white bg-white/70 p-1.5 text-[#2a00ff] shadow-[0_32px_64px_-12px_rgba(42,0,255,0.1)] backdrop-blur-3xl md:rounded-[3rem] md:p-2">
+      <Card className="relative overflow-hidden rounded-4xl border border-white bg-white/70 p-1.5 text-[#2a00ff] shadow-[0_32px_64px_-12px_rgba(42, 0, 255,0.1)] backdrop-blur-3xl md:rounded-[3rem] md:p-2">
         <CardHeader className="px-4 pt-4 md:px-10 md:pt-10">
           <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#2a00ff] shadow-lg shadow-[#2a00ff]/25 md:mb-6 md:h-14 md:w-14 md:rounded-[1.2rem]">
             <Lock className="h-6 w-6 text-white" />

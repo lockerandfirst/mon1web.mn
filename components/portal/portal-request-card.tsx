@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
@@ -17,6 +17,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { BuyRequest } from "@/lib/buy-requests";
+import {
+  LISTING_IMAGE_FALLBACK,
+  coalesceImageSrc,
+  fallbackLogoClassName,
+  isAppLogoFallbackUrl,
+} from "@/lib/image-fallbacks";
 import { getPlaceholderImage, getPropertyTypeLabel } from "@/lib/property-types";
 import { cn } from "@/lib/utils";
 
@@ -32,12 +38,26 @@ export const PortalRequestCard = memo(
   }) => {
     const router = useRouter();
     const [isFavorite, setIsFavorite] = useState(false);
+    const [requestImageFailed, setRequestImageFailed] = useState(false);
     const typeLabel = getPropertyTypeLabel(request.propertyType);
     const budgetLabel =
       request.propertyType === "barter" && request.budget <= 0
         ? "Бартер"
         : `${request.budget.toLocaleString("mn-MN")}₮`;
-    const requestImage = request.image || getPlaceholderImage(request.propertyType);
+    const baseRequestImage = useMemo(
+      () =>
+        coalesceImageSrc(
+          request.image || getPlaceholderImage(request.propertyType),
+          "listing",
+        ),
+      [request.image, request.propertyType],
+    );
+    useEffect(() => {
+      setRequestImageFailed(false);
+    }, [baseRequestImage]);
+    const requestImage = requestImageFailed
+      ? LISTING_IMAGE_FALLBACK
+      : baseRequestImage;
 
     const handleCardClick = () => {
       router.push("/buy-request");
@@ -64,10 +84,16 @@ export const PortalRequestCard = memo(
                 key={requestImage}
                 src={requestImage}
                 alt=""
+                onError={() => setRequestImageFailed(true)}
                 initial={{ opacity: 0.9 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0.9 }}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className={cn(
+                  "h-full w-full transition-transform duration-500 group-hover:scale-105",
+                  isAppLogoFallbackUrl(requestImage)
+                    ? fallbackLogoClassName("listing")
+                    : "object-cover",
+                )}
               />
             </AnimatePresence>
 

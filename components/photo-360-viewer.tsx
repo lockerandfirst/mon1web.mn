@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { SafeImage } from "@/components/ui/safe-image";
+import { coalesceImageSrc } from "@/lib/image-fallbacks";
 import {
   RotateCcw,
   ZoomIn,
@@ -104,10 +106,9 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
   // Get current image based on frame
   const getCurrentImage = () => {
     if (images.length > 1) {
-      return images[currentFrame % images.length];
+      return coalesceImageSrc(images[currentFrame % images.length], "listing");
     }
-    // If only one image, we'll simulate rotation with CSS transform
-    return images[0];
+    return coalesceImageSrc(images[0], "listing");
   };
 
   return (
@@ -136,10 +137,11 @@ export function Photo360Viewer({ images, title }: Photo360ViewerProps) {
             perspective: "1000px",
           }}
         >
-          <img
+          <SafeImage
             src={getCurrentImage()}
+            variant="listing"
             alt={title || "360 View"}
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
             draggable={false}
           />
         </div>

@@ -9,6 +9,23 @@ import { FEATURE_GUIDE, PAYMENT_METHOD_OPTIONS } from "../constants";
 import type { PaymentMethodOption } from "../types";
 import { ImageUpload } from "../image/ImageUpload";
 
+function parseHttpUrlsFromLines(raw: string): string[] {
+  const out: string[] = [];
+  for (const line of raw.split("\n")) {
+    const s = line.trim();
+    if (!s) continue;
+    try {
+      const u = new URL(s);
+      if (u.protocol === "http:" || u.protocol === "https:") {
+        out.push(s);
+      }
+    } catch {
+      /* skip */
+    }
+  }
+  return out;
+}
+
 export function FinalStep({ formData, updateField }: any) {
   return (
     <div className="w-full">
@@ -175,11 +192,11 @@ export function FinalStep({ formData, updateField }: any) {
         {/* Image Links */}
         {/* Instead of the Textarea */}
         <ImageUpload
-          onImagesChange={(files) => {
-            // You can store the actual File objects in your state
-            // To upload them later to your server or Supabase/Firebase
-            updateField("images", files);
-          }}
+          existingImageUrls={parseHttpUrlsFromLines(formData.imageUrls)}
+          onExistingImageUrlsChange={(urls) =>
+            updateField("imageUrls", urls.join("\n"))
+          }
+          onImagesChange={(files) => updateField("images", files)}
         />
 
         <div className="rounded-2xl border border-[#ebe3ff] bg-[#f8f6ff] p-4 md:rounded-3xl md:p-5">

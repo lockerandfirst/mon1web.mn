@@ -28,7 +28,7 @@ export default function ProfilePage() {
   return (
     <div className="flex min-h-screen flex-col bg-[#fafafa]">
       <main className="container mx-auto flex flex-1 flex-col px-4 py-16">
-        <div className="mx-auto w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-8 shadow-[0_24px_60px_-28px_rgba(42,0,255,0.12)]">
+        <div className="mx-auto w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-8 shadow-[0_24px_60px_-28px_rgba(42, 0, 255,0.12)]">
           <p className="text-[10px] font-black uppercase tracking-widest text-[#ff3bad]">
             Миний профайл
           </p>

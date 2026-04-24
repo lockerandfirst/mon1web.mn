@@ -18,7 +18,6 @@ import {
   Utensils,
 } from "lucide-react";
 
-import { agents } from "@/lib/data";
 import { PROPERTY_CATEGORIES } from "@/lib/property-types";
 
 import type { FormData } from "./types";
@@ -142,10 +141,6 @@ export const FEATURE_GUIDE = [
   "Сургууль, үйлчилгээний төвийн ойр байдал",
 ];
 
-export const AGENT_OPTIONS = agents
-  .filter((agent) => agent.verified)
-  .slice(0, 3);
-
 export const DEFAULT_FORM: FormData = {
   title: "",
   propertyType: "apartment",
@@ -164,7 +159,7 @@ export const DEFAULT_FORM: FormData = {
   description: "",
   contactPhone: "",
   serviceType: "agent",
-  selectedAgentId: AGENT_OPTIONS[0]?.id ?? null,
+  selectedAgentId: null,
   surroundings: [],
   nearbyServices: [],
   features: [],

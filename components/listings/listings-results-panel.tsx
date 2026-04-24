@@ -10,9 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SearchX, Grid3X3, List } from "lucide-react";
+import { ChevronLeft, ChevronRight, SearchX, Grid3X3, List } from "lucide-react";
+import { ListingsGridSkeleton } from "@/components/skeletons";
 import type { Apartment } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import {
+  listingsSkeletonExitTransition,
+  listingsStaggerContainerVariants as containerVariants,
+  listingsStaggerItemVariants as itemVariants,
+} from "@/components/listings/listings-stagger-variants";
 
 type ListingsResultsPanelProps = {
   category: string;
@@ -20,7 +26,12 @@ type ListingsResultsPanelProps = {
   setViewMode: (m: "grid" | "list") => void;
   sortBy: string;
   setSortBy: (s: string) => void;
-  filteredItems: Apartment[];
+  listItems: Apartment[];
+  totalCount: number;
+  page: number;
+  totalPages: number;
+  goToPage: (page: number) => void;
+  isLoading: boolean;
   clearFilters: () => void;
 };
 
@@ -30,9 +41,19 @@ export function ListingsResultsPanel({
   setViewMode,
   sortBy,
   setSortBy,
-  filteredItems,
+  listItems,
+  totalCount,
+  page,
+  totalPages,
+  goToPage,
+  isLoading,
   clearFilters,
 }: ListingsResultsPanelProps) {
+  const resultsShellClass =
+    viewMode === "grid"
+      ? "grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 md:gap-8 xl:grid-cols-3 xl:gap-8"
+      : "min-w-0 space-y-4 max-lg:space-y-4 lg:space-y-6";
+
   return (
     <div className="mt-8 min-w-0 space-y-6 lg:row-start-2 lg:mt-10">
       <div className="flex flex-col gap-3 pt-4 max-lg:pt-2 lg:flex-row lg:items-center lg:justify-between lg:gap-2">
@@ -43,7 +64,7 @@ export function ListingsResultsPanel({
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ff2bad] max-lg:text-[9px]">
             Нийт{" "}
             <span className="italic text-[#2a00ff]">
-              {filteredItems.length}
+              {isLoading ? "…" : totalCount}
             </span>{" "}
             илэрц
           </p>
@@ -96,68 +117,115 @@ export function ListingsResultsPanel({
         </div>
       ) : null}
 
-      <AnimatePresence mode="wait">
-        {filteredItems.length === 0 ? (
-          <motion.div
-            key="empty-state"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
-            className="mx-auto w-full max-w-2xl"
-          >
-            <div className="flex flex-col items-center rounded-4xl border border-[#eeebff] bg-white px-6 py-12 text-center shadow-xl shadow-[#2a00ff]/5 max-lg:py-10 max-lg:px-4 sm:px-12">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[1.75rem] bg-[#eeebff] text-[#2a00ff] max-lg:h-14 max-lg:w-14 lg:mb-6 lg:h-20 lg:w-20">
-                <SearchX className="h-8 w-8 max-lg:h-7 max-lg:w-7 lg:h-10 lg:w-10" />
+      <div className={resultsShellClass}>
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <motion.div
+              key="loading-state"
+              className="contents"
+              initial={false}
+              exit={{ opacity: 0 }}
+              transition={listingsSkeletonExitTransition}
+            >
+              <ListingsGridSkeleton
+                count={viewMode === "list" ? 4 : 6}
+                variant={viewMode === "list" ? "compact" : "default"}
+                className="contents"
+              />
+            </motion.div>
+          ) : listItems.length === 0 ? (
+            <motion.div
+              key="empty-state"
+              className={cn(
+                "mx-auto w-full max-w-2xl",
+                viewMode === "grid" && "col-span-full max-w-none",
+              )}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
+              <div className="flex flex-col items-center rounded-4xl border border-[#eeebff] bg-white px-6 py-12 text-center shadow-xl shadow-[#2a00ff]/5 max-lg:py-10 max-lg:px-4 sm:px-12">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[1.75rem] bg-[#eeebff] text-[#2a00ff] max-lg:h-14 max-lg:w-14 lg:mb-6 lg:h-20 lg:w-20">
+                  <SearchX className="h-8 w-8 max-lg:h-7 max-lg:w-7 lg:h-10 lg:w-10" />
+                </div>
+                <h3 className="text-xl font-black tracking-tight text-[#2a00ff] max-lg:text-lg lg:text-2xl">
+                  Илэрц олдсонгүй
+                </h3>
+                <p className="mt-2 max-w-md text-xs font-medium leading-relaxed text-[#ff2bad] max-lg:text-[11px] lg:mt-3 lg:text-sm lg:leading-6">
+                  Таны хайлт болон сонгосон шүүлтүүрт тохирох зар одоогоор алга
+                  байна. Шүүлтүүрээ цэвэрлээд дахин оролдоно уу.
+                </p>
+                <Button
+                  type="button"
+                  onClick={clearFilters}
+                  variant="outline"
+                  className="mt-6 h-11 rounded-2xl border-[#eeebff] px-5 font-bold text-[#2a00ff] hover:bg-[#fff9fd] max-lg:mt-5 max-lg:h-10 max-lg:text-sm lg:mt-8 lg:h-12 lg:px-6"
+                >
+                  Шүүлтүүр цэвэрлэх
+                </Button>
               </div>
-              <h3 className="text-xl font-black tracking-tight text-[#2a00ff] max-lg:text-lg lg:text-2xl">
-                Илэрц олдсонгүй
-              </h3>
-              <p className="mt-2 max-w-md text-xs font-medium leading-relaxed text-[#ff2bad] max-lg:text-[11px] lg:mt-3 lg:text-sm lg:leading-6">
-                Таны хайлт болон сонгосон шүүлтүүрт тохирох зар одоогоор алга
-                байна. Шүүлтүүрээ цэвэрлээд дахин оролдоно уу.
-              </p>
-              <Button
-                type="button"
-                onClick={clearFilters}
-                variant="outline"
-                className="mt-6 h-11 rounded-2xl border-[#eeebff] px-5 font-bold text-[#2a00ff] hover:bg-[#fff9fd] max-lg:mt-5 max-lg:h-10 max-lg:text-sm lg:mt-8 lg:h-12 lg:px-6"
-              >
-                Шүүлтүүр цэвэрлэх
-              </Button>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key={`results-${viewMode}`}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
-            className={
-              viewMode === "grid"
-                ? "grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8 xl:grid-cols-3 xl:gap-8"
-                : "space-y-4 max-lg:space-y-4 lg:space-y-6"
-            }
+            </motion.div>
+          ) : (
+            <motion.div
+              key={`results-${viewMode}`}
+              className="contents"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+            >
+              {listItems.map((apt) => (
+                <motion.div
+                  key={apt.id}
+                  className="h-full min-h-0 min-w-0"
+                  variants={itemVariants}
+                >
+                  <ApartmentCard
+                    apartment={apt}
+                    variant={viewMode === "list" ? "compact" : "default"}
+                    skipEntranceMotion
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {!isLoading && totalCount > 0 && totalPages > 1 ? (
+        <nav
+          className="flex flex-wrap items-center justify-center gap-2 pt-2 max-lg:pt-1"
+          aria-label="Хуудаслалт"
+        >
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => goToPage(page - 1)}
+            className="h-9 gap-1 rounded-xl border-[#eeebff] font-bold text-[#2a00ff] disabled:opacity-40"
           >
-            {filteredItems.map((apt, idx) => (
-              <motion.div
-                key={apt.id}
-                className="h-full"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.2, delay: idx * 0.03 }}
-              >
-                <ApartmentCard
-                  apartment={apt}
-                  variant={viewMode === "list" ? "compact" : "default"}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <ChevronLeft className="h-4 w-4" />
+            Өмнөх
+          </Button>
+          <span className="px-2 text-xs font-black text-[#2a00ff] max-lg:text-[11px]">
+            {page} / {totalPages}
+          </span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={page >= totalPages}
+            onClick={() => goToPage(page + 1)}
+            className="h-9 gap-1 rounded-xl border-[#eeebff] font-bold text-[#2a00ff] disabled:opacity-40"
+          >
+            Дараах
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </nav>
+      ) : null}
     </div>
   );
 }

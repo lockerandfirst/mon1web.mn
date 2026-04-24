@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 export function AgentSearchHero() {
   return (
     <section className="relative overflow-hidden bg-[#fff9fd] px-4 pb-16 pt-28 md:pb-24 md:pt-32">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(42,0,255,0.08),_transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(42, 0, 255,0.08),_transparent_55%)]" />
       <div className="container relative z-10 mx-auto max-w-4xl text-center">
         <motion.div
           initial={{ opacity: 0, y: 12 }}

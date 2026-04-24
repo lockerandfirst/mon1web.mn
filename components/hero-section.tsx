@@ -183,7 +183,7 @@ export function HeroSection() {
           transition={{ delay: 0.3 }}
           className="relative mx-auto max-w-5xl border-t border-slate-100 pt-7 md:pt-4 max-md:pt-5"
         >
-          <div className="rounded-[2.5rem] border-2 border-[#ff2bad] bg-white p-3 shadow-[0_32px_64px_-16px_rgba(42,0,255,0.1)] md:p-4 max-md:rounded-4xl max-md:p-2.5">
+          <div className="rounded-[2.5rem] border-2 border-[#ff2bad] bg-white p-3 shadow-[0_32px_64px_-16px_rgba(42, 0, 255,0.1)] md:p-4 max-md:rounded-4xl max-md:p-2.5">
             <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3 max-sm:gap-2">
               {LISTING_PROPERTY_CATEGORIES.map((item, index) => {
                 const Icon = categoryIcons[item.value];

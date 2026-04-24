@@ -48,9 +48,9 @@ propertyImagesRouter.post(
 
     const { data: property, error: propertyError } = await supabaseAdmin
       .from("listings")
-      .select("id, submitted_by_profile_id")
+      .select("id, submitted_by_profile_id, agent_id, images")
       .eq("id", propertyId)
-      .single();
+      .maybeSingle();
 
     if (propertyError || !property) {
       return res.status(404).json({
@@ -59,7 +59,22 @@ propertyImagesRouter.post(
       });
     }
 
-    if (property.submitted_by_profile_id && property.submitted_by_profile_id !== profile.id) {
+    const isSubmitter =
+      property.submitted_by_profile_id != null &&
+      property.submitted_by_profile_id === profile.id;
+    let isListingAgent = false;
+    if (property.agent_id && auth.clerkUserId) {
+      const { data: me } = await supabaseAdmin
+        .from("agents")
+        .select("id")
+        .eq("clerk_user_id", auth.clerkUserId)
+        .maybeSingle();
+      if (me?.id) {
+        isListingAgent = me.id === property.agent_id;
+      }
+    }
+
+    if (!isSubmitter && !isListingAgent) {
       return res.status(403).json({
         success: false,
         error: "Энэ property дээр зураг оруулах эрхгүй байна.",
@@ -93,6 +108,12 @@ propertyImagesRouter.post(
       });
     }
 
+    const prevImages: string[] = Array.isArray(property?.images)
+      ? (property.images as unknown[]).filter(
+          (u): u is string => typeof u === "string" && u.length > 0,
+        )
+      : [];
+
     const { data, error } = await supabaseAdmin
       .from("property_images")
       .insert(rows)
@@ -114,30 +135,21 @@ propertyImagesRouter.post(
       inserted: data?.length ?? 0,
     });
 
-    const { data: uploadedImages, error: uploadedImagesError } = await supabaseAdmin
-      .from("property_images")
-      .select("image_url, sort_order")
-      .eq("property_id", propertyId)
-      .order("sort_order", { ascending: true });
-
-    if (uploadedImagesError) {
-      console.log("[property-images] readback failed", {
-        propertyId,
-        error: uploadedImagesError.message,
-      });
-      return res.status(500).json({
-        success: false,
-        error: uploadedImagesError.message,
-      });
-    }
-
-    const orderedUrls = (uploadedImages ?? [])
-      .map((row) => row.image_url)
+    const newUrls = rows
+      .map((r) => r.image_url)
       .filter((url): url is string => Boolean(url));
+
+    const seen = new Set<string>();
+    const mergedImages: string[] = [];
+    for (const u of [...prevImages, ...newUrls]) {
+      if (seen.has(u)) continue;
+      seen.add(u);
+      mergedImages.push(u);
+    }
 
     const { error: listingUpdateError } = await supabaseAdmin
       .from("listings")
-      .update({ images: orderedUrls })
+      .update({ images: mergedImages })
       .eq("id", propertyId);
 
     if (listingUpdateError) {
@@ -152,7 +164,7 @@ propertyImagesRouter.post(
     }
     console.log("[property-images] listings.images synced", {
       propertyId,
-      imageCount: orderedUrls.length,
+      imageCount: mergedImages.length,
     });
 
     return res.status(201).json({

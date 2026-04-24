@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 function AddPropertyPageContent() {
   const searchParams = useSearchParams();
   const [listingSaved, setListingSaved] = useState(false);
-  const editListingId = searchParams.get("edit");
+  const editListingId = searchParams.get("edit")?.trim() || null;
 
   return (
     <div className="flex min-h-svh flex-col bg-background">
@@ -24,6 +24,7 @@ function AddPropertyPageContent() {
       >
         <div className={cn(!listingSaved && "mx-auto max-w-7xl")}>
           <AddPropertyForm
+            key={editListingId ?? "create"}
             onSuccess={() => setListingSaved(true)}
             editListingId={editListingId}
           />

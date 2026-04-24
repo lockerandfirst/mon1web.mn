@@ -5,9 +5,21 @@ import { env } from "../config/env";
 
 export type AuthContext = {
   clerkUserId: string;
-  email: string | null;
-  fullName: string | null;
+  email?: string | null;
+  fullName?: string | null;
+  role?: "agent" | "user" | null;
 };
+
+function readRoleFromPayload(
+  payload: Record<string, unknown>,
+): "agent" | "user" | null {
+  const meta =
+    (payload.metadata as Record<string, unknown> | undefined) ??
+    (payload.public_metadata as Record<string, unknown> | undefined) ??
+    (payload.publicMetadata as Record<string, unknown> | undefined);
+  const role = meta?.role;
+  return role === "agent" || role === "user" ? role : null;
+}
 
 function readBearerToken(req: Request) {
   const value = req.headers.authorization;
@@ -63,6 +75,7 @@ export async function requireAuth(
           : payload.name === null
             ? null
             : null,
+      role: readRoleFromPayload(payload as Record<string, unknown>),
     };
 
     res.locals.auth = auth;

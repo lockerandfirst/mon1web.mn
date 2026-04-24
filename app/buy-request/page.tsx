@@ -16,13 +16,9 @@ import {
   PropertyTypeGrid,
 } from "@/components/add-property/selection-grids";
 import { LISTING_PROPERTY_CATEGORIES } from "@/lib/property-types";
-import {
-  createBuyRequestFromPayload,
-  readBuyRequests,
-  writeBuyRequests,
-} from "@/lib/buy-requests";
 import { buildCreateBuyRequestPayload } from "@/lib/backend-contract";
 import { apiFetch } from "@/lib/backend-api";
+import { debug } from "@/lib/debug";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +32,8 @@ export default function BuyRequestPage() {
   const { getToken } = useAuth();
   const [step, setStep] = useState(1);
   const [isPending, startTransition] = useTransition();
-  const [status, setStatus] = useState<"idle" | "success">("idle");
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -86,17 +83,32 @@ export default function BuyRequestPage() {
           body: requestPayload,
         });
         setStatus("success");
-      } catch {
-        const nextRequest = createBuyRequestFromPayload(requestPayload);
-        const currentRequests = readBuyRequests();
-        writeBuyRequests([nextRequest, ...currentRequests]);
-        setStatus("success");
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Сервертэй холбогдоход алдаа гарлаа.";
+        debug.error("buy-request", "submit failed", { message });
+        setErrorMessage(message);
+        setStatus("error");
       }
     });
   };
 
   if (status === "success") {
     return <SuccessUI onHome={() => router.push("/home")} />;
+  }
+
+  if (status === "error") {
+    return (
+      <ErrorUI
+        message={errorMessage}
+        onRetry={() => {
+          setStatus("idle");
+          setErrorMessage("");
+        }}
+      />
+    );
   }
 
   return (
@@ -376,6 +388,36 @@ export default function BuyRequestPage() {
         </div>
       </main>
       <Footer />
+    </div>
+  );
+}
+
+function ErrorUI({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 py-8 text-center sm:px-6">
+      <div className="w-full max-w-sm sm:max-w-md">
+        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-4xl bg-rose-50 text-[#ff3bad] sm:h-32 sm:w-32 sm:rounded-[3rem]">
+          <Phone className="h-10 w-10 sm:h-14 sm:w-14" />
+        </div>
+        <h2 className="mt-8 text-2xl font-black uppercase leading-tight tracking-tight italic sm:mt-10 sm:text-4xl sm:leading-none sm:tracking-tighter">
+          Алдаа гарлаа
+        </h2>
+        <p className="mt-3 text-sm font-semibold text-slate-500">
+          {message || "Хүсэлтийг илгээхэд асуудал гарлаа. Дахин оролдоно уу."}
+        </p>
+        <Button
+          onClick={onRetry}
+          className="mt-6 h-12 w-full rounded-2xl bg-[#2a00ff] text-sm font-black uppercase tracking-wider text-white shadow-lg sm:mt-8 sm:h-14"
+        >
+          Дахин оролдох
+        </Button>
+      </div>
     </div>
   );
 }

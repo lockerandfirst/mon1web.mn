@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 export function SuccessState({ onGoHome }: { onGoHome: () => void }) {
   return (
     <div className="flex w-full max-w-lg flex-col items-center justify-center px-4 py-16 text-center">
-      <div className="mb-8 flex h-32 w-32 items-center justify-center rounded-4xl border border-slate-100 bg-white shadow-[0_24px_60px_-28px_rgba(42,0,255,0.18)]">
+      <div className="mb-8 flex h-32 w-32 items-center justify-center rounded-4xl border border-slate-100 bg-white shadow-[0_24px_60px_-28px_rgba(42, 0, 255,0.18)]">
         <CheckCircle2 className="h-16 w-16 text-[#2a00ff]" strokeWidth={2.5} />
       </div>
       <p className="rounded-full border border-[#ebe3ff] bg-[#f8f6ff] px-5 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-[#2a00ff]">

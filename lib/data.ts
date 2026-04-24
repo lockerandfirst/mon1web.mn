@@ -25,6 +25,8 @@ export interface Apartment {
   createdAt: string;
   /** Нийтийн зарын дэлгэрэнгүй үзэлт (backend `view_count`) */
   viewCount?: number;
+  /** Зарын мэдээлэлд оруулсан утас (`submitted_by.phone`) */
+  contactPhone?: string;
 }
 
 export interface Agent {

@@ -1,11 +1,32 @@
 import type { BuyRequest, BuyRequestAgentRecommendation } from "@/lib/buy-requests";
 
+type AgentEmbed = {
+  id?: string;
+  name?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  avatar?: string | null;
+};
+
 type RecRow = {
   listing_id?: string;
   agent_id?: string | null;
   recommended_at?: string;
-  listings?: { title?: string | null } | null;
+  listings?: { title?: string | null } | null | Array<{ title?: string | null }>;
+  agents?: AgentEmbed | AgentEmbed[] | null;
 };
+
+function parseNestedAgent(raw: unknown): AgentEmbed | null {
+  if (raw == null) return null;
+  if (Array.isArray(raw)) {
+    const first = raw[0];
+    return first && typeof first === "object" ? (first as AgentEmbed) : null;
+  }
+  if (typeof raw === "object") {
+    return raw as AgentEmbed;
+  }
+  return null;
+}
 
 function normalizeWorkflow(
   workflowStatus: string | undefined,
@@ -34,15 +55,23 @@ export function buyRequestFromSupabaseRow(
     (r) => {
       const embedded = r.listings;
       const listingTitle =
-        Array.isArray(embedded) && embedded[0]
-          ? String(embedded[0].title ?? "Зар")
-          : embedded && typeof embedded === "object" && "title" in embedded
+        Array.isArray(embedded) && embedded[0] && "title" in embedded[0]
+          ? String((embedded[0] as { title?: string }).title ?? "Зар")
+          : embedded &&
+              typeof embedded === "object" &&
+              embedded !== null &&
+              "title" in embedded
             ? String((embedded as { title?: string }).title ?? "Зар")
             : "Зар";
+      const ag = parseNestedAgent(r.agents);
       return {
         listingId: String(r.listing_id ?? ""),
         listingTitle,
         agentId: r.agent_id == null ? null : String(r.agent_id),
+        agentName: ag?.name != null ? String(ag.name) : undefined,
+        agentPhone: ag?.phone != null ? String(ag.phone) : undefined,
+        agentEmail: ag?.email != null ? String(ag.email) : undefined,
+        agentAvatar: ag?.avatar != null ? String(ag.avatar) : undefined,
         recommendedAt: String(r.recommended_at ?? ""),
       };
     },

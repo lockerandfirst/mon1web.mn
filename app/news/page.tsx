@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Newspaper, Sparkles, ArrowLeft } from "lucide-react";
 import { Footer } from "@/components/footer";
+import { fetchNewsItems } from "@/lib/news";
 
 export const metadata: Metadata = {
   title: "Mon1.mn - Мэдээ мэдээлэл",
@@ -9,58 +10,17 @@ export const metadata: Metadata = {
     "Үл хөдлөх хөрөнгө, зах зээл, санхүүтэй холбоотой хамгийн сүүлийн үеийн мэдээ мэдээлэл.",
 };
 
-const newsItems = [
-  {
-    title: "News.mn дээрх сүүлийн үеийн мэдээнүүд",
-    description:
-      "Ерөнхий мэдээ, эдийн засаг, үл хөдлөхийн холбоотой нийтлэлүүдийг эндээс үзээрэй.",
-    href: "https://news.mn/",
-    source: "News.mn",
-  },
-  {
-    title: "SAK.mn дээрх сүүлийн үеийн мэдээнүүд",
-    description:
-      "Үл хөдлөх хөрөнгө, зах зээл, санхүүтэй холбоотой хамгийн сүүлийн үеийн мэдээ мэдээлэл.",
-    href: "https://sak.mn/",
-    source: "SAK.mn",
-  },
-  {
-    title: "News.mn дээрх сүүлийн үеийн мэдээнүд",
-    description:
-      "Ерөнхий мэдээ, эдийн засаг, үл хөдлөхийн холбоотой нийтлэлүүдийг эндээс үзээрэй.",
-    href: "https://news.mn/",
-    source: "News.mn",
-  },
-  {
-    title: "Ikon.mn эдийн засгийн булан",
-    description:
-      "Зах зээлийн хөдөлгөөн, санхүү, барилгын салбарын мэдээллийг унших холбоос.",
-    href: "https://ikon.mn/l/2",
-    source: "Ikon.mn",
-  },
-  {
-    title: "Unread Today бизнесийн тойм",
-    description:
-      "Тренд, бизнес, хөрөнгө оруулалтын агуулгатай нийтлэлүүдийн хуудас.",
-    href: "https://unread.today/",
-    source: "Unread Today",
-  },
-  {
-    title: "Montsame эдийн засгийн мэдээ",
-    description:
-      "Албан эх сурвалжийн эдийн засаг, бүтээн байгуулалтын мэдээллийг харах холбоос.",
-    href: "https://montsame.mn/mn/economy",
-    source: "Montsame",
-  },
-] as const;
+export const revalidate = 120;
 
-export default function MedeeePage() {
+export default async function MedeeePage() {
+  const newsItems = await fetchNewsItems();
+
   return (
     <div className="min-h-screen bg-[#fff9fd]">
       <main>
         <section className="relative overflow-hidden px-4 pb-28 pt-24 md:py-32">
           {/* --- BRAND BACKGROUND --- */}
-          <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(42,0,255,0.11),transparent_52%),radial-gradient(circle_at_bottom_left,rgba(255,0,200,0.22),transparent_56%)]" />
+          <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(42, 0, 255,0.11),transparent_52%),radial-gradient(circle_at_bottom_left,rgba(255,0,200,0.22),transparent_56%)]" />
 
           <div className="relative z-10 container mx-auto">
             <div className="mx-auto max-w-3xl text-center">
@@ -84,13 +44,23 @@ export default function MedeeePage() {
 
             {/* --- NEWS GRID --- */}
             <div className="mx-auto mt-10 grid max-w-5xl gap-4 md:mt-16 md:gap-6 md:grid-cols-2">
+              {newsItems.length === 0 ? (
+                <div className="col-span-full rounded-4xl border border-dashed border-[#2a00ff]/20 bg-white/60 px-6 py-16 text-center text-sm font-medium text-slate-600 backdrop-blur-md md:rounded-[2.5rem] md:px-10 md:text-base">
+                  Мэдээний жагсаалт одоогоор хоосон байна эсвэл тохиргоо дутуу
+                  байна. Админ Supabase дээрх{" "}
+                  <code className="rounded-md bg-slate-100 px-1.5 py-0.5 text-xs text-slate-800">
+                    news
+                  </code>{" "}
+                  хүснэгт болон орчны хувьсагчийг шалгана уу.
+                </div>
+              ) : null}
               {newsItems.map((item) => (
                 <a
-                  key={item.title}
+                  key={item.id}
                   href={item.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-4xl border border-white bg-white/70 p-5 shadow-[0_20px_40px_-16px_rgba(42,0,255,0.12)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff00c8]/30 hover:shadow-[0_40px_80px_-20px_rgba(255,0,200,0.15)] md:rounded-[2.5rem] md:p-8 md:shadow-[0_32px_64px_-16px_rgba(42,0,255,0.1)]"
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-4xl border border-white bg-white/70 p-5 shadow-[0_20px_40px_-16px_rgba(42, 0, 255,0.12)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff00c8]/30 hover:shadow-[0_40px_80px_-20px_rgba(255,0,200,0.15)] md:rounded-[2.5rem] md:p-8 md:shadow-[0_32px_64px_-16px_rgba(42, 0, 255,0.1)]"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-3 md:gap-4">

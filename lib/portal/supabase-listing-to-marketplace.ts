@@ -1,4 +1,5 @@
 import type { Agent } from "@/lib/data";
+import { AVATAR_IMAGE_FALLBACK } from "@/lib/image-fallbacks";
 import type { MarketplaceListing } from "@/lib/marketplace";
 
 type SupabaseListingRow = Record<string, unknown>;
@@ -8,9 +9,14 @@ export function listerDisplayAgentFromProfile(
   name: string,
   email: string,
   phone?: string | null,
+  avatarUrl?: string | null,
 ): Agent {
   const safeName = name.trim() || "Хэрэглэгч";
-  const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(safeName.slice(0, 24))}&size=128&background=eef2ff&color=312e81`;
+  const trimmedAvatar = avatarUrl?.trim();
+  const avatar =
+    trimmedAvatar && trimmedAvatar.length > 0
+      ? trimmedAvatar
+      : AVATAR_IMAGE_FALLBACK;
   return {
     id: "lister",
     name: safeName,
@@ -29,13 +35,27 @@ function readSubmittedBy(
   listing: SupabaseListingRow,
   fallback?: MarketplaceListing["submittedBy"],
 ): MarketplaceListing["submittedBy"] {
+  const colPhone =
+    typeof listing.contact_phone === "string"
+      ? listing.contact_phone.trim()
+      : "";
   const raw = listing.submitted_by;
   if (raw && typeof raw === "object" && !Array.isArray(raw)) {
     const o = raw as Record<string, unknown>;
+    const jsonPhone =
+      typeof o.phone === "string" ? o.phone.trim() : "";
+    const mergedPhone = jsonPhone || colPhone;
     return {
       name: String(o.name ?? "Хэрэглэгч"),
       email: String(o.email ?? "user@mon1.local"),
-      phone: typeof o.phone === "string" ? o.phone : undefined,
+      ...(mergedPhone ? { phone: mergedPhone } : {}),
+    };
+  }
+  if (colPhone) {
+    return {
+      name: "Хэрэглэгч",
+      email: "user@mon1.local",
+      phone: colPhone,
     };
   }
   return (
@@ -115,10 +135,7 @@ export function marketplaceListingFromSupabaseListing(
         ? null
         : String(listing.selected_agent_id),
     serviceType,
-    takingAgentId:
-      listing.taking_agent_id == null
-        ? null
-        : String(listing.taking_agent_id),
+    takingAgentId: null,
     submittedBy: readSubmittedBy(listing, submittedByOverride),
   };
 }

@@ -59,7 +59,7 @@ export function SidebarPanel({
         </div>
       </Card>
 
-      <Card className="rounded-[2.5rem] border border-[#f0e8ff] bg-white p-7 shadow-[0_35px_80px_-55px_rgba(42,0,255,0.45)]">
+      <Card className="rounded-[2.5rem] border border-[#f0e8ff] bg-white p-7 shadow-[0_35px_80px_-55px_rgba(42, 0, 255,0.45)]">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#ff3bad]">
           Live Preview
         </p>

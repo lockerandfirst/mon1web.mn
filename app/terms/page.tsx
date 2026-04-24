@@ -9,7 +9,7 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen bg-[#fff9fd]">
       <main className="container mx-auto px-4 py-16">
-        <div className="mx-auto max-w-4xl rounded-[2rem] border border-[#eeebff] bg-white p-6 shadow-[0_30px_70px_-30px_rgba(42,0,255,0.25)] md:p-10">
+        <div className="mx-auto max-w-4xl rounded-[2rem] border border-[#eeebff] bg-white p-6 shadow-[0_30px_70px_-30px_rgba(42, 0, 255,0.25)] md:p-10">
           <p className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff3bad]">
             Terms
           </p>

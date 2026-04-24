@@ -2,8 +2,14 @@ import type { FormData } from "@/components/add-property/types";
 import type { MarketplaceListing } from "@/lib/marketplace";
 import { stripGpsPrefixFromLocationText } from "@/lib/strip-gps-location-text";
 
-type UpdateField = <K extends keyof FormData>(field: K, value: FormData[K]) => void;
+type UpdateField = <K extends keyof FormData>(
+  field: K,
+  value: FormData[K],
+) => void;
 
+/**
+ * `/edit-listing/[id]` эсвэл `/add-property?edit=ID` горимд зарыг API-аас татаад формыг урьдчилан бөглөнө.
+ */
 export function applyListingToForm(
   listing: MarketplaceListing,
   updateField: UpdateField,
@@ -17,9 +23,7 @@ export function applyListingToForm(
   );
   updateField(
     "address",
-    stripGpsPrefixFromLocationText(
-      listing.address || listing.location || "",
-    ),
+    stripGpsPrefixFromLocationText(listing.address || listing.location || ""),
   );
   updateField("price", `${listing.price || ""}`);
   updateField("sqm", `${listing.sqm || ""}`);
@@ -41,40 +45,4 @@ export function applyListingToForm(
     "paymentMethods",
     listing.paymentMethod === "any" ? [] : [listing.paymentMethod],
   );
-}
-
-export function upsertEditedListing(
-  editListingId: string | null | undefined,
-  nextListing: MarketplaceListing,
-  currentListings: MarketplaceListing[],
-) {
-  if (!editListingId) {
-    return {
-      didEdit: false,
-      listings: [nextListing, ...currentListings],
-    };
-  }
-
-  const target = currentListings.find((listing) => listing.id === editListingId);
-  if (!target) {
-    return {
-      didEdit: false,
-      listings: [nextListing, ...currentListings],
-    };
-  }
-
-  const updatedListing: MarketplaceListing = {
-    ...nextListing,
-    id: target.id,
-    createdAt: target.createdAt,
-    workflowStatus: target.workflowStatus,
-    takingAgentId: target.takingAgentId ?? null,
-  };
-
-  return {
-    didEdit: true,
-    listings: currentListings.map((listing) =>
-      listing.id === editListingId ? updatedListing : listing,
-    ),
-  };
 }

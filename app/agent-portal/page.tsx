@@ -2,12 +2,11 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
-
 import { AgentHero } from "@/components/agent-portal/agent-hero";
 import { AgentLoginForm } from "@/components/agent-portal/agent-login-form";
 import { PortalAgentSignupSection } from "@/components/portal/portal-agent-signup-section";
 import { AgentPortalDashboard } from "@/components/portal/agent-portal-dashboard";
+import { AgentPortalPageSkeleton } from "@/components/portal/agent-portal-page-skeleton";
 import { apiFetch } from "@/lib/backend-api";
 
 function PortalShell({ children }: { children: React.ReactNode }) {
@@ -104,12 +103,9 @@ export default function AgentPortalPage() {
   if (!authLoaded) {
     return (
       <PortalShell>
-        <div className="flex flex-1 items-center justify-center px-4 py-24">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#2a00ff]/20 bg-white px-4 py-2 text-sm font-bold text-[#2a00ff]/80 shadow-sm">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Түр хүлээнэ үү...
-          </div>
-        </div>
+        <main className="flex flex-1 flex-col">
+          <AgentPortalPageSkeleton />
+        </main>
       </PortalShell>
     );
   }
@@ -117,12 +113,9 @@ export default function AgentPortalPage() {
   if (isSignedIn && gate === "loading") {
     return (
       <PortalShell>
-        <div className="flex flex-1 items-center justify-center px-4 py-24">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#2a00ff]/20 bg-white px-4 py-2 text-sm font-bold text-[#2a00ff]/80 shadow-sm">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Түр хүлээнэ үү...
-          </div>
-        </div>
+        <main className="flex flex-1 flex-col">
+          <AgentPortalPageSkeleton />
+        </main>
       </PortalShell>
     );
   }

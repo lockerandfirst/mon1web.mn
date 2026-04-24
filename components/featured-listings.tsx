@@ -1,12 +1,17 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ApartmentCard } from "./apartment-card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, Building2 } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ListingCardSkeleton } from "@/components/skeletons";
 import { useFeaturedApartments } from "@/hooks/use-features-apartments";
+import {
+  listingsSkeletonExitTransition,
+  listingsStaggerContainerVariants as containerVariants,
+  listingsStaggerItemVariants as itemVariants,
+} from "@/components/listings/listings-stagger-variants";
 
 export function FeaturedListings() {
   const { data, isLoading } = useFeaturedApartments(3);
@@ -40,23 +45,46 @@ export function FeaturedListings() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">
-          {isLoading
-            ? Array(3)
-                .fill(0)
-                .map((_, i) => (
-                  <div key={i} className="space-y-4">
-                    <Skeleton className="aspect-16/10 w-full rounded-2xl md:rounded-[2.5rem] bg-slate-100" />
-                    <Skeleton className="h-6 w-3/4 mx-2 bg-slate-100" />
-                  </div>
-                ))
-            : data?.map((apartment, i) => (
-                <ApartmentCard
-                  key={apartment.id}
-                  apartment={apartment}
-                  index={i}
-                />
-              ))}
+        <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2 md:gap-10 lg:grid-cols-3">
+          <AnimatePresence mode="wait">
+            {isLoading ? (
+              <motion.div
+                key="featured-loading"
+                className="contents"
+                initial={false}
+                exit={{ opacity: 0 }}
+                transition={listingsSkeletonExitTransition}
+              >
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <ListingCardSkeleton key={i} />
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="featured-data"
+                className="contents"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+              >
+                {data.map((apartment, i) => (
+                  <motion.div
+                    key={apartment.id}
+                    className="h-full min-h-0 min-w-0"
+                    variants={itemVariants}
+                  >
+                    <ApartmentCard
+                      apartment={apartment}
+                      index={i}
+                      skipEntranceMotion
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </section>

@@ -37,14 +37,14 @@ export default function MapPage() {
 
         <aside
           className={cn(
-            "absolute bottom-0 left-0  bg-white top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-30 flex w-[min(94vw,22rem)] max-w-sm flex-col overflow-hidden border-r border-slate-100 bg-white shadow-2xl transition-transform duration-300 ease-in-out md:relative md:top-0 md:h-full md:w-105 md:max-w-none",
+            "absolute bottom-0 left-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-30 flex w-[min(94vw,22rem)] max-w-sm flex-col overflow-hidden border-r border-slate-100 bg-white shadow-[0_32px_64px_-28px_rgba(15,23,42,0.5)] transition-transform duration-300 ease-in-out md:relative md:top-0 md:h-full md:w-105 md:max-w-none",
             filters.showListings
               ? "translate-x-0"
               : "pointer-events-none -translate-x-[105%]",
           )}
         >
           <div className="flex h-full min-w-0 flex-col bg-white md:min-w-105">
-            <div className="border-b border-slate-100 bg-white p-2 md:hidden">
+            <div className="border-b border-slate-100 bg-white p-2.5 md:hidden">
               <button
                 type="button"
                 aria-label="Хажуу самбарыг хаах"
@@ -53,12 +53,12 @@ export default function MapPage() {
               >
                 <X className="h-5 w-5" />
               </button>
-              <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+              <div className="grid grid-cols-2 gap-2 rounded-4xl border border-[#2a00ff]/10 bg-[#f6f4ff] p-1.5">
                 <Button
                   type="button"
                   variant={mobilePanelTab === "filters" ? "default" : "ghost"}
                   onClick={() => setMobilePanelTab("filters")}
-                  className="h-9 rounded-xl text-[11px] font-black uppercase tracking-wide"
+                  className="h-9 rounded-3xl text-[11px] font-black uppercase tracking-wide"
                 >
                   Шүүлтүүр
                 </Button>
@@ -66,9 +66,11 @@ export default function MapPage() {
                   type="button"
                   variant={mobilePanelTab === "list" ? "default" : "ghost"}
                   onClick={() => setMobilePanelTab("list")}
-                  className="h-9 rounded-xl text-[11px] font-black uppercase tracking-wide"
+                  className="h-9 rounded-3xl text-[11px] font-black uppercase tracking-wide"
                 >
-                  Жагсаалт ({filters.filteredApartments.length})
+                  Жагсаалт (
+                  {filters.isLoadingListings ? "…" : filters.filteredApartments.length}
+                  )
                 </Button>
               </div>
             </div>
@@ -79,6 +81,7 @@ export default function MapPage() {
               districtFilter={filters.districtFilter}
               floorRange={filters.floorRange}
               hasElevator={filters.hasElevator}
+              isLoadingResults={filters.isLoadingListings}
               isCommissioned={filters.isCommissioned}
               onCategoryChange={filters.setCategory}
               onDistrictChange={filters.setDistrictFilter}
@@ -108,6 +111,7 @@ export default function MapPage() {
             <MapListingsPanel
               favorites={filters.favorites}
               filteredApartments={filters.filteredApartments}
+              isLoading={filters.isLoadingListings}
               onResetFilters={filters.resetFilters}
               onSelectApartment={filters.setSelectedId}
               onToggleFavorite={toggleFavorite}
@@ -128,7 +132,7 @@ export default function MapPage() {
                   filters.setShowListings(next);
                   if (next) setMobilePanelTab("filters");
                 }}
-                className="h-9 gap-2 rounded-xl border-none bg-white px-3 text-slate-700 shadow-xl transition-all hover:scale-[1.02] hover:bg-slate-50 active:scale-95 max-md:shadow-lg md:h-12 md:w-12 md:gap-0 md:px-0 md:shadow-xl"
+                className="h-9 gap-2 rounded-3xl border border-white/30 bg-white/95 px-3 text-slate-700 shadow-[0_20px_45px_-22px_rgba(15,23,42,0.55)] transition-all hover:scale-[1.02] hover:bg-slate-50 active:scale-95 max-md:shadow-lg md:h-12 md:w-12 md:gap-0 md:px-0"
               >
                 {filters.showListings ? (
                   <X className="h-4 w-4 shrink-0 md:h-5 md:w-5" />
@@ -147,6 +151,8 @@ export default function MapPage() {
 
           <MapCanvas
             apartments={filters.filteredApartments}
+            isLoadingListings={filters.isLoadingListings}
+            onMapBoundsChange={filters.onMapBoundsChange}
             selectedId={filters.selectedId}
             onSelectApartment={filters.setSelectedId}
           />

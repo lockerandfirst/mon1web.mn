@@ -68,7 +68,12 @@ export function ListingsPageContent() {
             setViewMode={p.setViewMode}
             sortBy={p.sortBy}
             setSortBy={p.setSortBy}
-            filteredItems={p.filteredItems}
+            listItems={p.listItems}
+            totalCount={p.totalCount}
+            page={p.page}
+            totalPages={p.totalPages}
+            goToPage={p.goToPage}
+            isLoading={p.isLoadingListings}
             clearFilters={handleClearFilters}
           />
         </div>
@@ -79,7 +84,7 @@ export function ListingsPageContent() {
         variant="default"
         onClick={() => setFiltersOpen(true)}
         className={cn(
-          "fixed left-1/2 z-[10100] h-12 -translate-x-1/2 touch-manipulation gap-2 rounded-full bg-[#2a00ff] px-6 font-black text-white shadow-xl",
+          "fixed left-1/2 z-10100 h-12 -translate-x-1/2 touch-manipulation gap-2 rounded-full bg-[#2a00ff] px-6 font-black text-white shadow-xl",
           "bottom-[max(5.5rem,env(safe-area-inset-bottom,0px)+4.25rem)] lg:hidden",
         )}
       >

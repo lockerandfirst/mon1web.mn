@@ -1,33 +1,56 @@
 "use client";
-import { useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Camera, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  LISTING_IMAGE_FALLBACK,
+  coalesceImageSrc,
+  fallbackLogoClassName,
+  isAppLogoFallbackUrl,
+} from "@/lib/image-fallbacks";
 import { cn } from "@/lib/utils";
 
 export function GallerySection({ images }: { images: string[] }) {
+  const slides = useMemo(
+    () => (images.length > 0 ? images : [LISTING_IMAGE_FALLBACK]),
+    [images],
+  );
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
+  const [slideFailed, setSlideFailed] = useState(false);
 
-  const next = () => setCurrentIdx((prev) => (prev + 1) % images.length);
+  useEffect(() => {
+    setSlideFailed(false);
+  }, [currentIdx, slides]);
+
+  const next = () => setCurrentIdx((prev) => (prev + 1) % slides.length);
   const prev = () =>
-    setCurrentIdx((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    setCurrentIdx((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+
+  const activeSrc = slideFailed
+    ? LISTING_IMAGE_FALLBACK
+    : coalesceImageSrc(slides[currentIdx], "listing");
 
   return (
-    <section className="mx-auto max-w-[1400px] px-3 pt-3 sm:px-4 md:px-6 md:pt-5">
+    <section className="mx-auto max-w-[1400px] px-3 pt-2 sm:px-4 md:px-6 md:pt-4">
       <div
-        onClick={() => setIsOpen(true)}
-        className="group relative h-[280px] cursor-zoom-in overflow-hidden rounded-4xl bg-slate-100 shadow-xl shadow-blue-900/5 md:h-[650px] md:rounded-[3rem] md:shadow-2xl"
+        className="group relative h-[280px] overflow-hidden rounded-4xl bg-slate-100 shadow-xl shadow-blue-900/5 md:h-[650px] md:rounded-[3rem] md:shadow-2xl"
       >
         <AnimatePresence mode="wait">
           <motion.img
             key={currentIdx}
-            src={images[currentIdx]}
+            src={activeSrc}
+            onError={() => setSlideFailed(true)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="w-full h-full object-cover"
+            className={cn(
+              "h-full w-full",
+              isAppLogoFallbackUrl(activeSrc)
+                ? fallbackLogoClassName("listing")
+                : "object-cover",
+            )}
           />
         </AnimatePresence>
 
@@ -55,7 +78,7 @@ export function GallerySection({ images }: { images: string[] }) {
         </div>
 
         <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-[#2a00ff]/25 p-1.5 backdrop-blur-md md:bottom-7 md:gap-2 md:p-2.5">
-          {images.map((_, i) => (
+          {slides.map((_, i) => (
             <div
               key={i}
               className={cn(

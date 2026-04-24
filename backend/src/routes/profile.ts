@@ -25,7 +25,13 @@ profileRouter.post("/sync", requireAuth, async (_req, res) => {
     if (role === "agent") {
       await ensureAgentRowForAuth(auth, user);
     }
-    return res.json({ success: true, data: row });
+    return res.json({
+      success: true,
+      data: row,
+      meta: {
+        skippedProfileSync: row == null && role === "agent",
+      },
+    });
   } catch (e) {
     console.log("[profile/sync] failed", {
       clerkUserId: auth.clerkUserId,

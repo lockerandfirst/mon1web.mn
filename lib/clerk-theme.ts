@@ -50,8 +50,8 @@ const clerkLayout = {
 const sharedElements = {
   modalBackdrop: "bg-[#2a00ff]/20 backdrop-blur-md",
   modalContent:
-    "overflow-hidden rounded-[2rem] border border-white/70 bg-white/92 shadow-[0_36px_80px_-28px_rgba(42,0,255,0.38)] backdrop-blur-xl",
-  card: "rounded-[1.5rem] border border-[#f4ddea] bg-white/95 shadow-[0_28px_70px_-30px_rgba(42,0,255,0.28)]",
+    "overflow-hidden rounded-[2rem] border border-white/70 bg-white/92 shadow-[0_36px_80px_-28px_rgba(42, 0, 255,0.38)] backdrop-blur-xl",
+  card: "rounded-[1.5rem] border border-[#f4ddea] bg-white/95 shadow-[0_28px_70px_-30px_rgba(42, 0, 255,0.28)]",
   rootBox: "font-sans",
   main: "gap-6",
   scrollBox: "rounded-[inherit]",
@@ -72,10 +72,10 @@ const sharedElements = {
   formFieldLabel: "text-[13px] font-bold tracking-wide text-[#2a00ff]",
   formFieldHintText: "text-xs font-medium text-[#2a00ff]/55",
   formFieldInput:
-    "h-12 rounded-4xl border border-[#eadcf3] bg-white/95 text-[#2a00ff] shadow-[0_16px_30px_-24px_rgba(42,0,255,0.45)] placeholder:text-[#b8a0c4] focus:border-[#2a00ff] focus:ring-4 focus:ring-[#2a00ff]/10",
+    "h-12 rounded-4xl border border-[#eadcf3] bg-white/95 text-[#2a00ff] shadow-[0_16px_30px_-24px_rgba(42, 0, 255,0.45)] placeholder:text-[#b8a0c4] focus:border-[#2a00ff] focus:ring-4 focus:ring-[#2a00ff]/10",
   formFieldInputShowPasswordButton: "text-[#ff3bad] hover:text-[#2a00ff]",
   formButtonPrimary:
-    "h-12 rounded-4xl border-0 bg-brand-gradient text-sm font-black text-white shadow-[0_22px_40px_-20px_rgba(42,0,255,0.58)] transition-transform hover:-translate-y-0.5 hover:opacity-95",
+    "h-12 rounded-4xl border-0 bg-brand-gradient text-sm font-black text-white shadow-[0_22px_40px_-20px_rgba(42, 0, 255,0.58)] transition-transform hover:-translate-y-0.5 hover:opacity-95",
   formButtonSecondary:
     "h-12 rounded-4xl border border-[#dcd3ff] bg-white font-bold text-[#2a00ff] hover:border-[#ff9cd5] hover:bg-[#fff8fc]",
   footerActionLink: "font-black text-[#ff3bad] hover:text-[#2a00ff]",
@@ -95,17 +95,17 @@ const sharedElements = {
   badge:
     "rounded-full border border-[#ebe3ff] bg-[#f5f2ff] text-[10px] font-black uppercase tracking-widest text-[#2a00ff]",
   userButtonAvatarBox:
-    "h-10 w-10 rounded-4xl ring-2 ring-[#2a00ff]/50 shadow-[0_14px_30px_-18px_rgba(42,0,255,0.45)]",
+    "h-10 w-10 rounded-4xl ring-2 ring-[#2a00ff]/50 shadow-[0_14px_30px_-18px_rgba(42, 0, 255,0.45)]",
   /** Account menu — white card, Mon1 blue accents */
   userButtonPopoverCard:
-    "overflow-hidden rounded-4xl border border-[#eadcf3] bg-white shadow-[0_24px_50px_-20px_rgba(42,0,255,0.22)] backdrop-blur-xl",
+    "overflow-hidden rounded-4xl border border-[#eadcf3] bg-white shadow-[0_24px_50px_-20px_rgba(42, 0, 255,0.22)] backdrop-blur-xl",
   userButtonPopoverMain: "gap-1 bg-white",
   userButtonPopoverActions: "border-t border-[#eadcf3] bg-white",
   userButtonPopoverScrollBox: "bg-white",
   userButtonPopoverActionButton:
-    "rounded-2xl font-semibold !text-[#2a00ff] text-[#2a00ff] hover:bg-[#f5f3ff] hover:!text-[#2300d9] focus:bg-[#f5f3ff]",
+    "rounded-2xl font-semibold !text-[#2a00ff] text-[#2a00ff] hover:bg-[#f5f3ff] hover:!text-[#2400d9] focus:bg-[#f5f3ff]",
   userButtonPopoverActionButtonText:
-    "font-semibold !text-[#2a00ff] group-hover:!text-[#2300d9]",
+    "font-semibold !text-[#2a00ff] group-hover:!text-[#2400d9]",
   userButtonPopoverFooter: "hidden",
   userPreview: "gap-3 border-b border-[#eadcf3] bg-white px-4 py-3",
   userPreviewTextContainer: "gap-0.5",
@@ -129,7 +129,7 @@ export const clerkAuthPageAppearance = {
     ...clerkAppearance.elements,
     rootBox: "w-full mx-auto",
     cardBox: "w-full shadow-none",
-    card: `rounded-4xl border border-[#eadcf3] bg-white/95 shadow-[0_32px_80px_-32px_rgba(42,0,255,0.22)] backdrop-blur-sm`,
+    card: `rounded-4xl border border-[#eadcf3] bg-white/95 shadow-[0_32px_80px_-32px_rgba(42, 0, 255,0.22)] backdrop-blur-sm`,
     navbar: "hidden",
     footer: "pb-0 pt-2",
   },
