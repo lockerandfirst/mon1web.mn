@@ -329,8 +329,7 @@ export function AddPropertyForm({
         );
         hydrateMapFromListing(apartment.coordinates);
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "unknown";
+        const message = error instanceof Error ? error.message : "unknown";
         debug.warn("add-property", "edit hydration failed", { message });
         if (editId) {
           toast.error(
@@ -402,7 +401,10 @@ export function AddPropertyForm({
     updateField("floor", "12");
     updateField("totalFloors", "16");
     updateField("commissionYear", "2021");
-    updateField("description", "Debug тест зар: орчин, төлбөрийн нөхцөл, байршил бөглөгдсөн.");
+    updateField(
+      "description",
+      "Debug тест зар: орчин, төлбөрийн нөхцөл, байршил бөглөгдсөн.",
+    );
     updateField("contactPhone", "99112233");
     updateField("serviceType", "agent");
     updateField("selectedAgentId", verifiedAgents[0]?.id ?? null);
