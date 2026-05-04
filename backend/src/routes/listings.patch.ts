@@ -96,20 +96,25 @@ async function prunePropertyImagesNotInListing(args: {
     return;
   }
 
-  for (const row of rows ?? []) {
-    const url = row.image_url as string;
-    if (!allowed.has(url)) {
-      const { error: delErr } = await supabaseAdmin
-        .from("property_images")
-        .delete()
-        .eq("id", row.id);
-      if (delErr) {
-        debug.warn(SCOPE, "property_images delete failed", {
-          id: row.id,
-          message: delErr.message,
-        });
-      }
-    }
+  const idsToRemove = (rows ?? [])
+    .filter((row) => !allowed.has(row.image_url as string))
+    .map((row) => row.id as string)
+    .filter(Boolean);
+
+  if (idsToRemove.length === 0) {
+    return;
+  }
+
+  const { error: delErr } = await supabaseAdmin
+    .from("property_images")
+    .delete()
+    .in("id", idsToRemove);
+
+  if (delErr) {
+    debug.warn(SCOPE, "property_images batch delete failed", {
+      message: delErr.message,
+      ids: idsToRemove.length,
+    });
   }
 }
 

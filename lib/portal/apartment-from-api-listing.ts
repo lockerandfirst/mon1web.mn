@@ -117,9 +117,10 @@ export function apartmentFromApiListing(row: SupabaseListingRow): {
     bathrooms: Number(row.bathrooms ?? 0),
     floor: Number(row.floor ?? 0),
     totalFloors: Number(row.total_floors ?? 0),
-    commissionYear: Number(
-      row.commission_year ?? new Date().getFullYear(),
-    ),
+    commissionYear:
+      row.commission_year == null || row.commission_year === ""
+        ? 0
+        : Number(row.commission_year),
     location: String(row.location ?? ""),
     district: String(row.district ?? ""),
     address: String(row.address ?? ""),

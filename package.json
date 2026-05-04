@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "start:api": "tsx backend/src/server.ts",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "db:link": "npx --yes supabase@latest link --project-ref toerckwkbgdlntzywrkh",
+    "db:dump-public-schema": "bash scripts/db-dump-public-schema.sh"
   },
   "dependencies": {
     "@clerk/backend": "^3.2.13",
@@ -55,7 +57,9 @@
     "dotenv": "^17.4.2",
     "embla-carousel-react": "8.6.0",
     "express": "^5.2.1",
+    "express-rate-limit": "^7.5.1",
     "framer-motion": "^11.15.0",
+    "helmet": "^8.1.0",
     "input-otp": "1.4.2",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",

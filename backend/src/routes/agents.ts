@@ -408,7 +408,8 @@ agentsRouter.get("/:id", async (req, res) => {
     .from("listings")
     .select("*")
     .eq("agent_id", req.params.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(100);
 
   return res.json({
     success: true,

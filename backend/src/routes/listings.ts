@@ -1,4 +1,5 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 
 import { sendFail, sendOk, sendZodFail, paginationMeta } from "../lib/api-response";
 import { debug } from "../lib/debug";
@@ -27,6 +28,19 @@ import {
 const listingsRouter = Router();
 const SCOPE = "listings";
 const LISTINGS_CACHE_TTL_MS = 12_000;
+
+const recordViewLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_req, res) => {
+    res.status(429).json({
+      success: false,
+      error: "Үзэлт бүртгэх хүсэлт хэт олон байна. Түр хүлээнэ үү.",
+    });
+  },
+});
 
 /**
  * `submitted_by.phone`, `contact_phone` багана, `profiles.phone`-ийг API хариунд
@@ -82,43 +96,35 @@ async function listingRowWithMergedProfilePhone(
   };
 }
 
-/** Нийтийн зарын дэлгэрэнгүй — үзэлт +1 (auth шаардлагагүй). */
-listingsRouter.post("/:id/record-view", async (req, res) => {
+/** Нийтийн зарын дэлгэрэнгүй — үзэлт +1 (auth шаардлагагүй), DB atom increment. */
+listingsRouter.post("/:id/record-view", recordViewLimiter, async (req, res) => {
   const id = String(req.params.id ?? "").trim();
   if (!id) {
     return sendFail(res, { scope: SCOPE, status: 400, error: "ID буруу байна." });
   }
 
-  const { data: row, error: readErr } = await supabaseAdmin
-    .from("listings")
-    .select("id, view_count")
-    .eq("id", id)
-    .maybeSingle();
+  const { data: next, error: rpcErr } = await supabaseAdmin.rpc(
+    "increment_listing_view",
+    { p_id: id },
+  );
 
-  if (readErr || !row) {
+  if (rpcErr) {
+    return sendFail(res, {
+      scope: SCOPE,
+      status: 500,
+      error: rpcErr.message,
+    });
+  }
+
+  if (next == null) {
     return sendFail(res, {
       scope: SCOPE,
       status: 404,
       error: "Зар олдсонгүй.",
-      cause: readErr?.message,
     });
   }
 
-  const next = Number(row.view_count ?? 0) + 1;
-  const { error: upErr } = await supabaseAdmin
-    .from("listings")
-    .update({ view_count: next, updated_at: new Date().toISOString() })
-    .eq("id", id);
-
-  if (upErr) {
-    return sendFail(res, {
-      scope: SCOPE,
-      status: 500,
-      error: upErr.message,
-    });
-  }
-
-  return sendOk(res, { viewCount: next });
+  return sendOk(res, { viewCount: Number(next) });
 });
 
 listingsRouter.get("/", async (req, res) => {

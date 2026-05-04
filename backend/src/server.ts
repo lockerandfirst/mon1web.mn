@@ -1,5 +1,7 @@
 import cors from "cors";
 import express, { type NextFunction, type Request, type Response } from "express";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 import { env } from "./config/env";
 import { debug } from "./lib/debug";
@@ -15,16 +17,42 @@ import { agentSalingRouter } from "./routes/agent-saling";
 import { profileRouter } from "./routes/profile";
 
 const app = express();
+app.set("trust proxy", 1);
+
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
+
+const corsOrigin =
+  env.FRONTEND_ORIGIN ??
+  (process.env.NODE_ENV === "production" ? false : true);
 
 app.use(
   cors({
-    origin: env.FRONTEND_ORIGIN ?? true,
+    origin: corsOrigin,
     credentials: true,
   }),
 );
 /** «Зар нэмэх» зэрэгт `nearbyServices` + урт тайлбар 100kb-аас давж болно — default-оор HTML [object Object] алдаа гардаг. */
 app.use(express.json({ limit: "8mb" }));
 app.use(express.urlencoded({ limit: "8mb", extended: true }));
+
+const apiLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 240,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_req, res) => {
+    res.status(429).json({
+      success: false,
+      error: "Хэт олон хүсэлт. Хэдэн секундын дараа дахин оролдоно уу.",
+    });
+  },
+});
+app.use("/api", apiLimiter);
+
 app.use(requestLogger);
 
 app.get("/", (_req, res) => {
